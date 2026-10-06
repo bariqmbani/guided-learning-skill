@@ -22,6 +22,7 @@ ASSETS = [
     "scripts/install_vault.sh",
     "SKILLS/guided-learning/scripts/profile.py",
     "SKILLS/guided-learning/references/onboarding.md",
+    "SKILLS/guided-learning/references/onboarding-example.md",
     "SKILLS/guided-learning/references/onboarding-evidence.md",
     "SKILLS/guided-learning/references/topic-intake.md",
     "SKILLS/guided-learning/SKILL.md",
@@ -179,6 +180,7 @@ def make_files(source, name):
         if not path.is_file() or path.is_symlink():
             raise ValueError(f"Reusable asset missing or symlinked: {relative}")
         files[relative] = path.read_bytes()
+    onboarding_example = files["SKILLS/guided-learning/references/onboarding-example.md"].decode("utf-8")
     upstream = json.loads((source / "SKILLS/guided-learning/UPSTREAM.json").read_text(encoding="utf-8"))
     metadata = {key: upstream[key] for key in ["repository", "commit", "version"]}
     metadata["local_version"] = upstream.get("local_version", upstream["version"])
@@ -201,7 +203,7 @@ def make_files(source, name):
         ".agents/skills/guided-learning/SKILL.md": SKILL_ENTRY,
         ".claude/skills/guided-learning/SKILL.md": SKILL_ENTRY,
         "SKILLS/guided-learning/UPSTREAM.json": json_text(metadata),
-        "SKILLS/guided-learning/README.md": """# Guided Learning
+        "SKILLS/guided-learning/README.md": f"""# Guided Learning
 
 Read [[Home|Home]] to start, or [[topics/README|Learning Topics]] to navigate.
 The method uses a spiral curriculum, comprehension checks, and spaced recall.
@@ -216,6 +218,8 @@ explains the method. This setup builds on the MIT-licensed
 constraints. [Topic intake](references/topic-intake.md) sets a useful outcome and
 starting point for each subject. [Research rationale](references/onboarding-evidence.md)
 explains the evidence and limits of these design choices.
+
+{onboarding_example}
 """,
         "SKILLS/guided-learning/CHANGELOG.md": """# Guided Learning — Changelog
 
@@ -253,7 +257,7 @@ roadmaps, recall, and journals are created inside each topic's folder.
 
 Run the skill's **onboard** command again whenever you want to update your preferences.
 """,
-        "README.md": """# Empty Learning Vault
+        "README.md": f"""# Empty Learning Vault
 
 Open this folder as a vault in Obsidian, then run Claude Code or Codex from the
 same folder. Say **I want to learn about [your topic]**. Read [Home.md](Home.md)
@@ -282,6 +286,8 @@ stay in that topic's learning plan. Practice, feedback, and later recall are
 part of lessons; you do not need to select them from an extras menu. Presentation
 preferences can change and are not a test of ability. See the skill's
 [research rationale](SKILLS/guided-learning/references/onboarding-evidence.md).
+
+{onboarding_example}
 
 To create another empty vault from this setup:
 
