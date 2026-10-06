@@ -22,6 +22,12 @@ Run structured learning sessions through a literature-backed concept collection 
 
 **Dispatch `onboard` before selecting a topic or starting a session.** For `$guided-learning onboard`, `/guided-learning onboard`, or a request to set up learning preferences, read `references/onboarding.md` and follow its conversational flow. Actively offer all nine editable profile fields, one question at a time; every answer is optional. Begin with the first unanswered question and wait. Do not save defaults or end onboarding merely because language and time are known. Respect skips, early finish, and targeted updates. Onboarding requires no subject and updates only the vault-level learner profile; it must not bootstrap or reset a course.
 
+During onboarding, prefer the harness's available interactive question tool. Keep
+one question outstanding, consume its answer, then continue to the next field;
+reserve the final reply for completion or a requested stop. Use chat questions when the host or
+current mode does not provide a usable question tool. Follow the delivery rules
+in `references/onboarding.md`.
+
 The skill uses the following vault structure. **All of these are created automatically** by the bootstrapper if they don't exist — you don't need to set anything up manually.
 
 | Path | Purpose | Created by |

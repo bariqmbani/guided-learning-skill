@@ -62,6 +62,8 @@ its readable note; do not create a subject or change learning progress.
 Offer each editable profile field one question at a time, accepting skips or
 an early finish. Optional fields still deserve an invitation; do not complete
 onboarding by silently saving defaults or asking only language and time.
+Use the harness's interactive question tool when available in the current mode.
+Keep one question outstanding and continue after its answer; use chat as fallback.
 
 Read the learner profile using the skill's profile helper. Use its configured
 language, session budget, and access constraints to tailor teaching. Its
@@ -117,6 +119,8 @@ For the `onboard` subcommand, follow the canonical skill's conversational
 onboarding flow before topic selection. Onboarding does not require a subject.
 Guide every editable profile field one question at a time; every answer is
 optional. Ask and wait rather than silently saving the default profile.
+Prefer the host's available interactive question tool over ending each question
+with a final chat reply. Fall back to chat if the tool is unavailable or restricted.
 """
 
 CONCEPT = """---

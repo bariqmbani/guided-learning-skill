@@ -1,5 +1,11 @@
 # Guided Learning — Changelog
 
+## Harness questions during onboarding — 2026-10-06
+
+- Prefer the host's available interactive question tool, continuing after each answer with one question outstanding at a time.
+- Keep free-text answers, skips, and early completion available; UI preselection does not count as an answer.
+- Fall back to chat questions when the current host or mode cannot provide the needed interaction.
+
 ## Approved personalization from feedback — 2026-10-06
 
 - Propose concrete teaching adjustments and ask for topic, vault, both, or no saved change before adopting an inferred ongoing preference.

@@ -45,6 +45,10 @@ name, background, broad goals, learning context, session time, explanation style
 preferred activities, and other preferences. Every answer is optional: say
 **skip**, **you choose**, or **finish**. You never need to edit JSON yourself.
 
+When the host supports it, questions appear in its interactive question UI and
+the tutor continues after each answer. Hosts without a usable question tool use
+regular chat messages. The example below shows the wording of that conversation.
+
 For example, the beginning of a guided conversation might be:
 
 > **Tutor:** Which language would you like us to use? A bilingual mix is welcome.

@@ -20,9 +20,47 @@ For a bare `onboard` request, briefly acknowledge saved choices, then guide the 
 
 Open briefly: "Let's shape these lessons around you. I'll ask one small question at a time; every answer is optional. You can say 'skip', 'you choose', or 'finish' whenever you like. Your preferences are saved in this vault; the chat uses your chosen AI service."
 
-**Ask one question per turn and wait for the learner's answer.** Two closely related questions are acceptable if the learner requests a faster flow. Use natural language, not a JSON form or a long questionnaire. A request to onboard is enough to begin; do not add an initial permission question. Ask the first unanswered question in your opening response, rather than only explaining onboarding or saving defaults.
+**Keep one question outstanding at a time and wait for its answer.** Two closely related questions are acceptable if the learner requests a faster flow. Use natural language, not a JSON form or a long questionnaire. A request to onboard is enough to begin; do not add an initial permission question. Briefly introduce the flow, then ask the first unanswered question using the host's interactive question tool as described below.
 
 Keep a conversation checklist of fields that are answered, explicitly skipped, or still pending. Information explicitly supplied in the request or saved profile can answer a question already; acknowledge it and move on. Unconfigured defaults are placeholders, not learner answers. Do not finish after asking only language and time, or after one broad "anything else?" question. Offer each pending field below unless the learner says to finish or skip the rest. Do not persist this checklist as extra JSON fields.
+
+### Use the harness question UI
+
+Prefer the current agent harness's native user-question tool when it is available
+and permitted in the current mode. Depending on the host, this may be named
+`request_user_input`, `request_user_input_async`, or `AskUserQuestion`. Follow the
+actual exposed tool schema and restrictions; these names are examples, not a
+guarantee that a particular client provides them.
+
+- **Ask through the tool, then continue.** With a blocking tool, read the returned
+  answer, acknowledge it briefly, and call the tool for the next pending field in
+  the same ongoing interaction. Do not end with a final chat question between
+  tool calls. Finish with a saved-profile summary only when onboarding completes.
+- **For an asynchronous tool, keep one question pending.** Use the host's waiting
+  or yielding mechanism until the response arrives. Do not repeat the question in
+  a final reply or queue more questions while that answer is pending.
+- **Use free text for personal context.** Name, background, goals, and open-ended
+  preferences should accept the learner's own words. For language, time, context,
+  explanation style, and activities, short choice suggestions may help, but keep
+  a custom-answer path. Use multi-select for activity priorities if supported.
+- **Keep every field optional.** Offer a Skip choice or explain how to type
+  "skip", "you choose", or "finish". Follow the tool's limits on options; use its
+  built-in custom-answer control instead of adding a duplicate Other choice.
+  If a choice is initially selected by the UI, wait for the learner to submit it.
+  A preselection, timeout, or missing response is not an answer or approval to save.
+- **Fall back when needed.** If the host lacks a usable question tool, the tool
+  is restricted to another mode, or it cannot accept the needed free-text answer,
+  ask that question in chat and wait for the next learner message. Do not switch
+  modes merely to unlock a tool or launch a separate CLI to collect answers.
+  Continue with the same optional-field checklist; the delivery method does not
+  change what is saved or authorize defaults on the learner's behalf.
+
+The question belongs in the tool's question field; introductory commentary should
+be brief and should not duplicate it. Follow the learner's chosen language in
+question text, labels, and suggested answers. Pausing or cancelling remains valid
+regardless of which UI delivers the question.
+
+### Optional profile questions
 
 Use these prompts as a guide, adapting the wording to earlier answers:
 
