@@ -13,42 +13,37 @@ Three ways to start: name a topic and the skill **bootstraps a full roadmap** fr
 
 ## Install with an agent
 
-Copy this prompt into Codex, Claude Code, or another agent that can run terminal
-commands. Replace `<vault-path>` with your new vault's location, such as
-`~/Documents/my-learning`.
+Copy this prompt into an agent with terminal access. Replace `<vault-path>` with
+a new folder, such as `~/Documents/my-learning`. Its folder name becomes the vault title.
 
 ```text
-Create a fresh, empty Obsidian learning vault at <vault-path>, named "My Learning".
+Install a fresh Obsidian guided-learning vault at "<vault-path>".
 
-1. Check that Git and Python 3.9 or newer are available. Report any missing
-   prerequisite. If the destination already exists, keep it intact and ask me
-   for a different path.
-2. Choose a new temporary directory for <temporary-template-directory>, then
-   clone the setup repository from main there:
+1. Resolve the destination to an absolute path before changing directories.
+   If it already exists, preserve it and ask for a new path. Check Git and
+   Python 3.9+; on Windows, use py -3 if python3 is unavailable.
+2. Clone the setup into a new temporary directory outside the destination:
 
-   git clone --branch main --single-branch --depth 1 https://github.com/bariqmbani/guided-learning-skill.git <temporary-template-directory>
+   git clone --branch main --single-branch --depth 1 https://github.com/bariqmbani/guided-learning-skill.git "<temp>/setup"
 
-3. Read the cloned README and installer. Create my vault with:
+   Choose <temp> yourself. Read the checkout's AGENTS.md and README.md, then
+   use its installer to create the separate vault:
 
-   python3 "<temporary-template-directory>/scripts/create_vault.py" "<vault-path>" --name "My Learning"
+   python3 "<temp>/setup/scripts/create_vault.py" "<absolute-vault-path>"
 
-   On Windows, use py -3 if python3 is unavailable. Keep the template checkout
-   separate from my learning vault.
-4. Verify that the vault has Obsidian settings and guided-learning skill entries
-   for Codex and Claude Code. Confirm topics/registry.json has active_topic: null
-   and topics: [], and learner-profile.json has configured: false. Confirm there
-   are no course notes, learning history, or copied Git repository in the vault.
-5. Report the completed vault path and tell me how to open it in Obsidian.
-   Tell me to run Codex or Claude Code from that folder and start with
-   $guided-learning onboard in Codex or /guided-learning onboard in Claude Code.
-
-Leave the learner profile unconfigured until onboarding. Do not create a topic,
-generate a roadmap, or start a lesson during installation.
+3. Verify the new vault contains Home.md, .obsidian/, the canonical skill at
+   SKILLS/guided-learning/SKILL.md, and both agent entries at
+   .agents/skills/guided-learning/SKILL.md and
+   .claude/skills/guided-learning/SKILL.md. Confirm topics/registry.json has
+   active_topic: null and topics: [], learner-profile.json has configured: false,
+   and the vault has no .git directory. Report any installation or verification
+   failure before claiming success.
+4. Report the vault's absolute path, explain how to open it as a vault in
+   Obsidian, and give the exact command to launch Codex or Claude Code there.
+   Tell me to run $guided-learning onboard in Codex or /guided-learning onboard
+   in Claude Code. Onboarding and lessons happen afterward; leave the installed
+   vault empty and the learner profile unconfigured.
 ```
-
-The clone command selects main, which contains the setup files. The installer
-creates a separate vault with fresh learning data; onboarding happens in your
-learning chat afterward.
 
 ## Onboarding example
 
