@@ -91,3 +91,20 @@ The question design and evidence limits are documented in
 The research supports teaching principles, not a guarantee that this LLM tutor
 improves learning. Initial user evaluation should check whether answers affect
 teaching and whether learners can later explain or apply their target skill.
+
+## Updating the skill from the fork
+
+In this source repository, `guided-learning-fork` points to the fork recorded in
+`SKILLS/guided-learning/UPSTREAM.json`. Its history is merged under
+`SKILLS/guided-learning/`, so future merges should use the same subtree mapping:
+
+```sh
+git fetch guided-learning-fork
+git merge -s recursive -Xsubtree=SKILLS/guided-learning guided-learning-fork/main
+```
+
+Review conflicts against local onboarding and topic-routing changes before
+committing. The upstream files under `SKILLS/guided-learning/interactives/` are
+original examples; sessions use the selected topic's registered interactive
+paths, created from the customized shared templates under `learning/interactives/`.
+The generated public starter omits the source repository's remotes and history.

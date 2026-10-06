@@ -11,7 +11,11 @@
     "Topic registry, per-topic routing, and non-overwriting creation/selection helper; tokenization course registered in place without modifying learning data.",
     "Empty-vault generator and ZIP export, portable native skill entries, generalized course instructions, and Windows/POSIX topic locks with UTF-8 metadata.",
     "Conversational guided-learning onboard with a validated global learner profile, preferred learning extras, and fresh unconfigured profiles in exported vaults.",
-    "Evidence-informed onboarding for language, session budget, and optional constraints; per-topic outcome and prior-knowledge intake, adaptive presentation defaults, and cited research limits."
+    "Evidence-informed onboarding for language, session budget, and optional constraints; per-topic outcome and prior-knowledge intake, adaptive presentation defaults, and cited research limits.",
+    "Merged fork history under SKILLS/guided-learning with recursive subtree mapping; retained customized skill files and added original upstream interactive examples."
   ],
-  "local_version": "3.1.0-local"
+  "local_version": "3.1.0-local",
+  "fork_repository": "https://github.com/bariqmbani/guided-learning-skill",
+  "subtree_remote": "guided-learning-fork",
+  "subtree_prefix": "SKILLS/guided-learning"
 }
