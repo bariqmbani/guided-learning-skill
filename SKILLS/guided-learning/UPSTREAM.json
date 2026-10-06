@@ -2,14 +2,5 @@
   "repository": "https://github.com/WSE-research/guided-learning-skill",
   "commit": "39108c8bdf3fb7481ad9559e78c3356bc8727c95",
   "version": "3.0.0",
-  "local_changes": [
-    "Independent topic routing and non-overwriting course helpers for installed vaults.",
-    "Conversational learner onboarding and per-topic intake informed by learning research.",
-    "Empty-vault generator with portable Codex and Claude Code skill entries.",
-    "Custom interactive source assets stored with the skill; fresh vaults receive shared template copies.",
-    "Setup repository contains no learner profiles, topics, roadmaps, recall records, or session journals.",
-    "Agent installation prompt and Russian-language onboarding example; public setup distributed from main."
-  ],
-  "local_version": "3.1.0-local",
-  "fork_repository": "https://github.com/bariqmbani/guided-learning-skill"
+  "local_version": "3.1.0-local"
 }
