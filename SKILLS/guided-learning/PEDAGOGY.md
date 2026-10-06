@@ -311,7 +311,11 @@ When a pattern emerges, do two things:
 
 1. **Surface it to the learner.** "I have noticed a pattern: in three of our last five sessions, you have understood the mechanism but missed the implication for your own work." This is not criticism; it is diagnostic information. Most learners appreciate knowing their blind spots.
 
-2. **Adapt your teaching.** Specific adaptations for each pattern:
+2. **Propose a teaching adjustment.** In this vault, follow
+   [personalization.md](references/personalization.md): explain the suggested
+   ongoing change, ask whether to save it for this topic or the whole vault, and
+   wait for approval. Immediate clarification and ordinary corrective teaching
+   can continue. Possible adaptations for each pattern:
 
    - **implication-gap:** Always end explanations with an explicit "What this means for your system" paragraph. Make implications a standing section, not an afterthought.
    - **terminology-confusion:** Add a glossary check at the start of each session. When introducing terms, explicitly distinguish them from similar-sounding terms.
@@ -404,4 +408,6 @@ Total session time ranges from 20 minutes (single light concept) to 60 minutes (
 
 The framework includes a built-in review cycle. Every five sessions, review your session notes: Which archetypes worked best for which concept types? Which concepts needed re-explanation, and what went wrong the first time? Is the cluster ordering effective? Are sessions the right length? What do the struggle pattern frequencies reveal?
 
-Use these reviews to adjust your approach. The framework is a starting point, not a fixed protocol. The best version of it is the one you have adapted to your specific learner over dozens of sessions.
+Use these reviews to propose adjustments to the learner. Save approved preferences
+at the chosen topic or vault scope, then revisit whether they help. A tutor's own
+omission is a teaching issue to repair, not evidence of a learner knowledge gap.

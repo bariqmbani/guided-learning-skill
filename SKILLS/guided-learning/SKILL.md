@@ -61,6 +61,18 @@ Choose teaching methods by the task, observed responses, and access constraints.
 
 If absent or unconfigured, offer `$guided-learning onboard` or `/guided-learning onboard` without blocking learning; ask about teaching language and immediate time constraints when needed. Use `references/topic-intake.md` for missing goals and starting knowledge in a new track. In an existing course, use its plan and recent protocol without rerunning intake. After an early lesson, invite one actionable adjustment to pace, difficulty, or examples if feedback has not already been given. Changing preferences never resets or marks progress.
 
+### Personalization from feedback
+
+Read the selected roadmap's **Teaching preferences** section alongside the vault
+profile before teaching. Current requests take priority, then approved topic
+preferences, then vault defaults; topic overrides also apply when the global
+profile is unconfigured. When feedback suggests an ongoing adjustment, read
+`references/personalization.md`. Repair the current explanation, propose concrete
+wording for the topic, the vault, or both, and wait for approval before saving or
+adopting the new ongoing rule. A direct request with explicit scope already
+authorizes that change. Personal adaptations belong in the profile or selected
+roadmap, never the shared skill source.
+
 ### Topic domain mode
 
 The skill supports three domain modes that adapt session framing — comprehension checks, connection mapping prompts, and application context — to the learner's situation. The core explanation approach (Phase 1) stays the same across all modes; what changes is the *lens* through which the learner is asked to demonstrate and apply understanding.
@@ -213,7 +225,7 @@ First establish the intended topic using the topic-routing rules. Never silently
 ### Phase 0: Orient (1 min)
 
 1. **Resolve and pin the topic** using `references/topic-routing.md`, announce its title, then check for bootstrapper or teach-from-source triggers (see sections above). If triggered, follow that flow instead of the standard session flow.
-2. Read the learning roadmap to find the next unchecked concept(s)
+2. Read the learning roadmap to find the next unchecked concept(s), and apply its approved Teaching preferences alongside the vault profile.
 3. Determine which pass we're in (1 = Overview, 2 = Working Understanding, 3 = Fluency)
 4. **Detect or recall domain mode** (see Domain Modes section). On the first session, infer from content or ask. On subsequent sessions, read the stored preference.
 5. Tell the learner: "We're in **Pass X**, Cluster Y: *cluster name*. Next up: *concept name*."
@@ -572,21 +584,21 @@ Track recurring correction types to adapt explanations preemptively.
 
 **Every 5 sessions in the selected topic**, review only its logs and count tag frequencies. If any tag appears in >=3 of the last 5 sessions:
 - **Surface it to the learner**: "I've noticed a pattern — [tag] has come up in X of our last 5 sessions."
-- **Adapt explanations**: For `implication-gap`, always end explanations with an explicit "What this means for your system" paragraph. For `math-gap`, extend the prerequisite probe. For `terminology-confusion`, add a glossary sidebar to the session. And so on.
-- **Log the adaptation** in the CHANGELOG if it becomes a permanent skill change.
+- **Propose an ongoing adjustment**: For `implication-gap`, suggest an explicit "What this means for your system" paragraph. For `math-gap`, suggest a longer prerequisite probe. For `terminology-confusion`, suggest a glossary sidebar. Show the concrete change and ask which scope to save it in, following `references/personalization.md`.
+- **Save approved adaptations** in the vault profile or selected topic's Teaching preferences. Record actual feedback and the approval in the topic journal; do not write learner-specific changes into the shared CHANGELOG.
 
 ---
 
 ## Adaptation & Self-Improvement
 
-This skill self-improves. After every 5 sessions in the selected topic, briefly review only its logs:
+Use feedback to propose better lesson preferences. After every 5 sessions in the selected topic, briefly review only its logs:
 
 - Which application methods worked best for which concept types?
 - Which concepts needed re-explanation?
 - Is the cluster ordering effective or should it be adjusted?
 - Are sessions the right length?
 - **Check struggle pattern frequencies** (see above)
-- Note improvements in CHANGELOG.md
+- Ask before adopting new ongoing preferences; apply only approved changes at the chosen scope. Ordinary corrective teaching remains part of the current lesson.
 
 ---
 

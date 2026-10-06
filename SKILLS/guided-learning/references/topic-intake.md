@@ -16,6 +16,12 @@ If the learner asks to start immediately, use a provisional exploratory goal and
 
 During bootstrap, include a short **Learning plan** section in `{roadmap}`. Use plain prose or bullets for the outcome, initial demonstration of success, starting knowledge (self-report versus observed evidence), practice opportunities, optional deadline/materials, and domain mode. Unknowns stay unknown. No new global profile or registry fields are needed. Update the plan when the learner changes the goal; preserve all checklist entries and recall history.
 
+Keep approved topic-specific lesson preferences in a separate **Teaching
+preferences** section of the same roadmap. Read these alongside the vault profile;
+follow [personalization.md](personalization.md) before saving new ongoing rules
+inferred from feedback. An intake answer about a goal is not permission to infer
+unrelated presentation preferences or change another topic.
+
 The plan must affect teaching:
 
 - An implementation goal gets relevant implementation practice; an explanatory goal gets explanations and transfer questions; a conversation goal gets conversational tasks.

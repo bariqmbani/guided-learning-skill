@@ -121,6 +121,13 @@ Say **Continue [topic]** to resume a course or **I want to learn [new topic]** t
 start a separate subject. Updating your profile does not reset course progress.
 A topic's plan and your current requests take priority over vault defaults.
 
+Feedback can shape future lessons. For example, after "Why didn't you show the
+full sentence first?", the tutor can propose showing the original input before
+deriving counts. It asks before saving the change, and you choose **this topic**,
+**the whole vault**, **both**, or **neither**. Vault preferences are saved in your
+learner profile; topic preferences stay in that topic's roadmap. See
+[personalization from feedback](SKILLS/guided-learning/references/personalization.md).
+
 Read [SHARING.md](SHARING.md) for installation, public-template sharing, and fork
 updates. The [skill instructions](SKILLS/guided-learning/SKILL.md) define the
 teaching flow. The [onboarding research rationale](SKILLS/guided-learning/references/onboarding-evidence.md)

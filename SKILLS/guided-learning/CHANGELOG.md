@@ -1,5 +1,11 @@
 # Guided Learning — Changelog
 
+## Approved personalization from feedback — 2026-10-06
+
+- Propose concrete teaching adjustments and ask for topic, vault, both, or no saved change before adopting an inferred ongoing preference.
+- Store vault defaults in the learner profile and approved topic overrides in the registered roadmap's Teaching preferences section.
+- Repair current explanations immediately when requested, preserve course progress, and keep personal adaptations out of the shared skill source.
+
 ## Guided optional onboarding — 2026-10-06
 
 - Offer all nine editable learner-profile fields one question at a time, including preferred name, background, goals, explanation style, and activity priorities.

@@ -1,5 +1,10 @@
 # Guided Learning Skill
 
+The tutor can propose ongoing preferences from your feedback and asks before
+saving them. Choose the current topic, the whole vault, both, or neither. See
+[personalization from feedback](references/personalization.md) for the flow and
+how topic preferences override vault defaults.
+
 > [!info] Setup repository: multiple learning topics
 > The installed skill uses version `3.1.0-local` with independent learning tracks. This repository contains reusable setup files, not a learner's course data. Follow the installation prompt below to create a separate vault, then read [topic-routing.md](references/topic-routing.md) for the learning flow. The upstream installation examples later in this file describe a single-track vault.
 >

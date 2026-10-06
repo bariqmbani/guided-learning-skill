@@ -45,7 +45,14 @@ For new topics, concept filenames must be `<topic-id>--<concept-slug>.md`. Prefi
 
 Recall comes only from the selected topic's queue. Pick the next concept only from its roadmap. Detect domain mode from its own roadmap or recall header. Choose comprehension checks, number logs, count sessions, and analyze struggle patterns using only its logs. Include the topic ID in newly written journal and execution-log frontmatter. Do not backfill old records just to add metadata.
 
-Cross-topic links are allowed when useful. They do not mark another topic's concepts learned or change its recall queue or notes. Updating another track requires the learner to request that update. Do not change the shared teaching method based on a single topic's history unless the change applies across topics.
+Cross-topic links are allowed when useful. They do not mark another topic's concepts learned or change its recall queue or notes. Updating another track requires the learner to request that update.
+
+Read the selected roadmap's **Teaching preferences** section before teaching.
+Approved topic overrides take priority over vault defaults, while current explicit
+requests take priority over both. Follow [personalization.md](personalization.md)
+to propose and get approval for new ongoing preferences. Use the pinned roadmap
+path for topic preferences, including legacy courses. Vault preferences belong in
+the learner profile; learner feedback must not rewrite the shared skill source.
 
 After creating interactive HTML, run `bash "<resolved build_script>"` from the vault root. The builder and CSS live alongside that topic's HTML. Do not run the legacy builder for another topic; skip the build when the selected interactive directory contains no HTML.
 

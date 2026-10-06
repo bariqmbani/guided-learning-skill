@@ -22,6 +22,7 @@ ASSETS = [
     "scripts/install_vault.sh",
     "SKILLS/guided-learning/scripts/profile.py",
     "SKILLS/guided-learning/references/onboarding.md",
+    "SKILLS/guided-learning/references/personalization.md",
     "SKILLS/guided-learning/references/installation-prompt.md",
     "SKILLS/guided-learning/references/onboarding-example.md",
     "SKILLS/guided-learning/references/onboarding-evidence.md",
@@ -68,6 +69,11 @@ background and goals are context, not evidence that concepts have been learned.
 Use its learning context as a default for new topics; preserve an existing
 topic's stored goals and domain mode. Requests in the current conversation take
 priority over saved preferences. Ask only for missing topic-specific details.
+
+For feedback that suggests an ongoing teaching preference, follow the skill's
+`references/personalization.md`: propose the wording and scope, then wait for
+approval. Vault defaults live in the profile; topic overrides live in the selected
+roadmap's Teaching preferences section. Read both before teaching.
 
 Bootstrap only a selected topic with no concept checklist entries, checked or
 unchecked. Follow `references/topic-intake.md` for the outcome, starting
@@ -230,6 +236,10 @@ one question at a time, to personalize lessons. [Topic intake](references/topic-
 starting point for each subject. [Research rationale](references/onboarding-evidence.md)
 explains the evidence and limits of these design choices.
 
+[Personalization from feedback](references/personalization.md) lets the tutor
+propose ongoing changes. It asks before saving them; choose topic or vault scope,
+both, or neither. Topic overrides live in that topic's roadmap.
+
 {installation_prompt}
 
 {onboarding_example}
@@ -298,6 +308,12 @@ Your answers shape familiar examples, lesson pace, practice, and feedback.
 It saves `learner-profile.json` and `Learner Profile.md`. No topic or learning
 progress is created until you choose a subject. Run onboarding again in chat
 whenever you want to change preferences.
+
+When feedback suggests an ongoing preference, the tutor proposes a specific
+change and asks whether to save it for this topic, the whole vault, both, or
+neither. Vault defaults live in the learner profile; approved topic overrides
+live in the roadmap's Teaching preferences section. See
+[personalization from feedback](SKILLS/guided-learning/references/personalization.md).
 
 When starting each subject, the tutor asks only for missing information about
 your desired outcome, what you already know, and feasible practice. These answers

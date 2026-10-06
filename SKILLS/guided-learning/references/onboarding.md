@@ -92,6 +92,12 @@ Read the saved result and summarize the resulting teaching plan in a few sentenc
 
 Read the configured profile at session start. Current explicit requests take priority, then the selected topic's plan, then vault defaults. Choose explanations and aids by the concept, observed responses, and constraints; preferences are useful input, not evidence of mastery. Use worked examples when helpful, then reduce scaffolding as the learner succeeds independently. Provide accessible alternatives when an aid cannot be used.
 
+Also read approved overrides in the selected roadmap's **Teaching preferences**
+section. For an ongoing adjustment inferred from feedback, follow
+[personalization.md](personalization.md): propose the wording and scope, and wait
+for approval before changing future preferences. Explicit onboarding answers and
+direct requests to save a scoped preference already provide authorization.
+
 Briefly explain that lessons include trying an answer or task, corrective feedback, and later recall. Respect requests to pause, defer, or change the form of a check. Keep these learning activities in the method rather than presenting them as optional extras to purchase or select.
 
 If absent or unconfigured, offer onboarding without blocking a topic request; ask about language and immediate time constraints when needed. After an early lesson, invite one actionable adjustment, such as "Should we adjust pace, difficulty, or examples next time?" Skip this if the learner has already given feedback. Infer mastery from explanations and task performance over time, including delayed recall, not from preference answers or satisfaction alone.
