@@ -180,7 +180,7 @@ def make_files(source, name):
         if not path.is_file() or path.is_symlink():
             raise ValueError(f"Reusable asset missing or symlinked: {relative}")
         files[relative] = path.read_bytes()
-    onboarding_example = files["SKILLS/guided-learning/references/onboarding-example.md"].decode("utf-8")
+    onboarding_example = files["SKILLS/guided-learning/references/onboarding-example.md"].decode("utf-8").rstrip("\n")
     upstream = json.loads((source / "SKILLS/guided-learning/UPSTREAM.json").read_text(encoding="utf-8"))
     metadata = {key: upstream[key] for key in ["repository", "commit", "version"]}
     metadata["local_version"] = upstream.get("local_version", upstream["version"])
