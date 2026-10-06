@@ -13,6 +13,6 @@
     "Personalized concept-learning sessions with automatic notes, mentor feedback, and practice outside course topics.",
     "Three native Codex and Claude Code skill entries; fresh exports omit all concept-session learner data."
   ],
-  "local_version": "3.6.1",
+  "local_version": "3.6.2",
   "fork_repository": "https://github.com/bariqmbani/guided-learning-skill"
 }

@@ -1,7 +1,7 @@
 ---
 name: guided-learning
 metadata:
-  version: "3.6.1"
+  version: "3.6.2"
 description: >
   Guide ongoing courses with topic roadmaps, a spiral curriculum, personalized
   lessons, and spaced recall. Use to start or continue a course, work through
@@ -702,7 +702,7 @@ After each session, write a log to `{skill_logs_dir}/YYYY-MM-DD_sessionNN.md` (w
 ```yaml
 ---
 skill: "guided-learning"
-version: "3.6.1"
+version: "3.6.2"
 topic: "<selected-topic-id>"
 trigger: "<how the session was initiated>"
 pass: <1|2|3>

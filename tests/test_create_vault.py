@@ -146,7 +146,7 @@ class CreateVaultTests(unittest.TestCase):
     def test_skill_versions_and_release_history_survive_installation(self):
         vault = self.base / "versioned"
         setup.create_vault(ROOT, vault, "Versioned")
-        versions = {"guided-learning": "3.6.1", "concept-learning": "1.0.1", "learner-profile": "1.0.0"}
+        versions = {"guided-learning": "3.6.2", "concept-learning": "1.0.1", "learner-profile": "1.0.0"}
         for name, version in versions.items():
             source = ROOT / "SKILLS" / name
             installed = vault / "SKILLS" / name
@@ -187,6 +187,52 @@ class CreateVaultTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "single line"):
             setup.create_vault(ROOT, destination, "Bad\nName")
         self.assertFalse(destination.exists())
+
+    def test_crlf_source_installs_portable_skills_and_scripts(self):
+        source = self.base / "Windows source"
+        setup.create_vault(ROOT, source, "Source")
+        for path in source.rglob("*"):
+            if path.suffix in {".md", ".py", ".sh"}:
+                path.write_bytes(path.read_bytes().replace(b"\r\n", b"\n").replace(b"\n", b"\r\n"))
+        destination = self.base / "Portable learning 日本語"
+        result = subprocess.run([
+            sys.executable, str(source / "scripts/create_vault.py"), str(destination),
+        ], cwd=self.base, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        for skill in setup.SKILL_NAMES:
+            canonical = (destination / "SKILLS" / skill / "SKILL.md").read_text().split("---", 2)[1]
+            for agent in [".agents", ".claude"]:
+                entry = destination / agent / "skills" / skill / "SKILL.md"
+                self.assertEqual(entry.read_text().split("---", 2)[1], canonical)
+        for path in destination.rglob("*"):
+            if path.suffix in {".py", ".sh"}:
+                self.assertNotIn(b"\r\n", path.read_bytes(), str(path))
+        if shutil.which("bash"):
+            builder = destination / "learning/interactives/build.sh"
+            result = subprocess.run(["bash", str(builder), "example-interactive.html"],
+                                    cwd=self.base, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.session_helper(destination, "list"), {"sessions": []})
+        self.assertEqual(self.helper(destination, "list")["topics"], [])
+
+    def test_nested_installation_is_rejected_before_creating_an_unusable_vault(self):
+        source = self.base / "source"
+        setup.create_vault(ROOT, source, "Source")
+        (source / "AGENTS.md").write_text((ROOT / "AGENTS.md").read_text())
+        destination = source / "nested learning"
+        archive = self.base / "nested.zip"
+        before = {p: p.read_bytes() for p in source.rglob("*") if p.is_file()}
+        with self.assertRaisesRegex(ValueError, "outside the source"):
+            setup.create_vault(source, destination, "Learning", archive)
+        result = subprocess.run([
+            sys.executable, str(source / "scripts/create_vault.py"), str(destination),
+        ], capture_output=True, text=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("outside the source", result.stderr)
+        self.assertFalse(destination.exists())
+        self.assertFalse(archive.exists())
+        for path, contents in before.items():
+            self.assertEqual(path.read_bytes(), contents)
 
     @unittest.skipUnless(shutil.which("bash"), "Bash entry point requires Bash")
     def test_shell_installer_handles_spaces_and_initializes_skills(self):

@@ -19,6 +19,7 @@ profile_spec.loader.exec_module(profiles)
 
 # Explicitly enumerate reusable assets; never copy a course, registry, or workspace.
 ASSETS = [
+    ".gitattributes",
     "scripts/install_vault.sh",
     "SKILLS/learner-profile/SKILL.md",
     "SKILLS/learner-profile/LICENSE",
@@ -124,7 +125,8 @@ topic's registered builder after creating HTML.
 
 TOPICS = """# Learning Topics
 
-No topics yet. Ask your agent **I want to learn about [your topic]** to begin.
+Use **$guided-learning [subject]** in Codex or **/guided-learning [subject]** in
+Claude Code to start a course. Your registered courses appear below.
 
 <!-- topics:start -->
 | Topic | Roadmap | Recall | Glossary |
@@ -156,7 +158,7 @@ SKILL_NAMES = ("learner-profile", "concept-learning", "guided-learning")
 def skill_entry(name, canonical):
     # Keep discovery metadata (including version) identical to the canonical
     # skill without introducing a YAML package dependency for installation.
-    content = canonical.decode("utf-8")
+    content = canonical.decode("utf-8").replace("\r\n", "\n")
     frontmatter, separator, _ = content.removeprefix("---\n").partition("\n---\n")
     if not content.startswith("---\n") or not separator or f"name: {name}" not in frontmatter.splitlines():
         raise ValueError(f"Invalid canonical skill frontmatter: {name}")
@@ -243,7 +245,9 @@ def make_files(source, name):
         path = source / relative
         if not path.is_file() or path.is_symlink():
             raise ValueError(f"Reusable asset missing or symlinked: {relative}")
-        files[relative] = path.read_bytes()
+        content = path.read_bytes()
+        # Keep exported scripts usable in Bash/POSIX even from a CRLF source ZIP.
+        files[relative] = content.replace(b"\r\n", b"\n") if path.suffix in {".py", ".sh"} else content
     # Source assets stay with the skill; installed vaults also need shared templates.
     for asset_filename in ["interactive.css", "build.sh", "example-interactive.html"]:
         files[f"learning/interactives/{asset_filename}"] = files[f"SKILLS/guided-learning/interactives/{asset_filename}"]
@@ -301,7 +305,8 @@ both, or neither. Topic overrides live in that topic's roadmap.
 """,
         "Home.md": f"""# {name}
 
-Your learning vault is ready. There are no courses or concept sessions yet.
+Your learning vault is ready. Use the links below to start or resume a course or
+concept session.
 
 1. Open this folder as a vault in Obsidian.
 2. Open a terminal here and run `claude` or `codex`.
@@ -416,7 +421,8 @@ bash scripts/install_vault.sh /path/to/new-vault --zip /path/to/new-vault.zip
 You can also run `python3 scripts/create_vault.py /path/to/new-vault` directly.
 On Windows, use `py -3 scripts/create_vault.py C:/path/to/new-vault`.
 Choose a destination and ZIP path that
-do not already exist. The ZIP must be outside the new vault. No Git repository
+do not already exist. The destination must be outside this source vault's directory
+tree, and the ZIP must be outside the new vault. No Git repository
 is initialized. Current courses, concept sessions, study records, attachments, account paths,
 Obsidian workspace state, and source Git history are not copied.
 
@@ -439,14 +445,17 @@ its license and upstream attribution are included under `SKILLS/guided-learning/
             texts[f"{agent}/skills/{skill_name}/SKILL.md"] = entry
     files.update({relative: text.encode("utf-8") for relative, text in texts.items()})
     # Carry the generator forward, so the exported setup can generate more empty vaults.
-    files["scripts/create_vault.py"] = Path(__file__).read_bytes()
+    files["scripts/create_vault.py"] = Path(__file__).read_bytes().replace(b"\r\n", b"\n")
     return files
 
 
 def create_vault(source, destination, name, archive=None):
+    source = source.expanduser().resolve()
     destination = destination.expanduser().absolute()
     if destination.exists() or destination.is_symlink():
         raise ValueError(f"Destination already exists; nothing overwritten: {destination}")
+    if destination.resolve().is_relative_to(source):
+        raise ValueError("Destination must be outside the source setup or vault directory tree")
     if archive is not None:
         archive = archive.expanduser().absolute()
         if archive.exists() or archive.is_symlink():

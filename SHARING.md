@@ -18,7 +18,9 @@ Or use `python3 scripts/create_vault.py ../friend-learning` directly. On Windows
 use `py -3 scripts/create_vault.py C:/path/to/new-vault`. Interactive HTML builds
 use Bash; Windows users can use WSL or Git Bash.
 
-The destination must be a new directory. The installer creates Obsidian settings,
+The destination must be a new directory outside the source setup directory and
+all its subdirectories. If you run the generator from an installed vault, the new
+destination must also be outside that source vault. The installer creates Obsidian settings,
 templates, native entries for learner-profile, concept-learning, and guided-learning
 in both agents, shared interactive assets, an empty topic registry
 (`active_topic: null`, `topics: []`), and an unconfigured shared learner profile.
@@ -51,10 +53,12 @@ the concept session. Guided-learning keeps each subject's course data separate.
 ## Share an export
 
 ```sh
-./scripts/install_vault.sh dist/learning-starter --zip dist/learning-starter.zip
+./scripts/install_vault.sh ../learning-exports/learning-starter --zip ../learning-exports/learning-starter.zip
 ```
 
-The ZIP must be a new path outside the generated vault. Send the ZIP to your
+This example places both outputs outside the source checkout. The generated vault
+must be outside the source setup or installed vault directory; the ZIP must be a
+new path outside the generated vault. Send the ZIP to your
 friend; they extract it, open the folder in Obsidian, and choose a learning skill
 or optional profile setup.
 No ZIP is tracked in this repository.

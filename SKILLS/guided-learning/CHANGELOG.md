@@ -1,5 +1,14 @@
 # Guided Learning — Changelog
 
+## [3.6.2] — 2026-10-07
+
+### Fixed — Portable vault installation
+
+- Accept canonical skill frontmatter from Windows CRLF checkouts and export Python and shell scripts with LF line endings. Include Git attributes that preserve executable-script line endings in source and installed vaults.
+- Reject installation inside the source setup or vault before writing files, preventing nested vaults whose concept-session helper refuses to run. Move the documented export staging directory outside the checkout.
+- Keep Home and the course dashboard introductions accurate as courses and concept sessions are created.
+- Add regression coverage for CRLF installation and rejection of nested destinations without modifying the source.
+
 ## [3.6.1] — 2026-10-07
 
 ### Fixed — Shared reference cleanup

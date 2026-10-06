@@ -8,7 +8,8 @@ Create an empty Obsidian learning vault at "<vault-path>" using:
 https://github.com/bariqmbani/guided-learning-skill
 
 Clone main into a temporary folder, then follow AGENTS.md and SHARING.md to
-install into the destination. If it already exists, ask for another path.
+install into a new destination outside the clone. If it already exists, ask for
+another path.
 
 Verify learner-profile, concept-learning, and guided-learning are registered
 for both Codex and Claude Code. Verify the topic registry is empty, the shared

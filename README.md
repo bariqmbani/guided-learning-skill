@@ -15,21 +15,22 @@ and can begin before the profile is configured.
 
 Current releases: [learner-profile 1.0.0](SKILLS/learner-profile/CHANGELOG.md),
 [concept-learning 1.0.1](SKILLS/concept-learning/CHANGELOG.md), and
-[guided-learning 3.6.1](SKILLS/guided-learning/CHANGELOG.md). Versions are recorded
+[guided-learning 3.6.2](SKILLS/guided-learning/CHANGELOG.md). Versions are recorded
 in each skill's `metadata.version`; generated vaults preserve those versions and
 the complete changelogs.
 
 ## Install with an agent
 
 Copy this prompt into an agent with terminal access. Replace `<vault-path>` with
-an absolute path to a new folder.
+an absolute path to a new folder outside the source setup directory.
 
 ```text
 Create an empty Obsidian learning vault at "<vault-path>" using:
 https://github.com/bariqmbani/guided-learning-skill
 
 Clone main into a temporary folder, then follow AGENTS.md and SHARING.md to
-install into the destination. If it already exists, ask for another path.
+install into a new destination outside the clone. If it already exists, ask for
+another path.
 
 Verify learner-profile, concept-learning, and guided-learning are registered
 for both Codex and Claude Code. Verify the topic registry is empty, the shared
@@ -52,7 +53,9 @@ in a separate installed vault or learning workspace. Create your own empty vault
 
 Or run `python3 scripts/create_vault.py ../my-learning` directly. Python 3.9 or
 newer is required. Interactive HTML builds use Bash; on Windows, use WSL or Git
-Bash for those builds. The destination must be a new directory.
+Bash for those builds. The destination must be a new directory outside the source
+setup directory, including all its subdirectories. When generating another vault
+from an installed vault, choose a destination outside that source vault as well.
 
 Open the new folder in Obsidian. Run `codex` or `claude` from that folder, then
 choose a skill from the table above. The installer registers all three skills
