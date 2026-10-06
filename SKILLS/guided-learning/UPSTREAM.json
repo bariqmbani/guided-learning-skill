@@ -10,6 +10,6 @@
     "Setup repository contains no learner profiles, topics, roadmaps, recall records, or session journals.",
     "Agent installation prompt and Russian-language onboarding example; public setup distributed from main."
   ],
-  "local_version": "3.1.0-local",
+  "local_version": "3.5.0",
   "fork_repository": "https://github.com/bariqmbani/guided-learning-skill"
 }

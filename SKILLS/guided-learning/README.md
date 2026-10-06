@@ -6,7 +6,7 @@ saving them. Choose the current topic, the whole vault, both, or neither. See
 how topic preferences override vault defaults.
 
 > [!info] Setup repository: multiple learning topics
-> The installed skill uses version `3.1.0-local` with independent learning tracks. This repository contains reusable setup files, not a learner's course data. Follow the installation prompt below to create a separate vault, then read [topic-routing.md](references/topic-routing.md) for the learning flow. The upstream installation examples later in this file describe a single-track vault.
+> The installed skill uses version `3.5.0` with independent learning tracks. This repository contains reusable setup files, not a learner's course data. Follow the installation prompt below to create a separate vault, then read [topic-routing.md](references/topic-routing.md) for the learning flow. The upstream installation examples later in this file describe a single-track vault.
 >
 > In the installed vault, say **Continue [topic]** to resume an existing course, or **I want to learn [a new subject]** to create a separate course. Each track has its own roadmap, recall queue, notes, glossary, journals, and logs. To share the setup, read [the sharing instructions](../../SHARING.md).
 >

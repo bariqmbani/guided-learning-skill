@@ -1,6 +1,6 @@
 ---
 name: guided-learning
-version: 3.1.0-local
+version: 3.5.0
 description: >
   Run structured learning sessions using a spiral curriculum. Each session covers 1-3 concepts with
   adaptive explanations, comprehension checks, interactive HTML visualizations, and spaced recall.
@@ -675,7 +675,7 @@ After each session, write a log to `{skill_logs_dir}/YYYY-MM-DD_sessionNN.md` (w
 ```yaml
 ---
 skill: "guided-learning"
-version: "3.1.0-local"
+version: "3.5.0"
 topic: "<selected-topic-id>"
 trigger: "<how the session was initiated>"
 pass: <1|2|3>

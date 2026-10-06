@@ -1,6 +1,6 @@
 ---
 skill: "guided-learning"
-version: "3.1.0-local"
+version: "3.5.0"
 topic: "<selected-topic-id>"
 trigger: ""
 pass:

@@ -1,25 +1,33 @@
 # Guided Learning — Changelog
 
-## Harness questions during onboarding — 2026-10-06
+## [3.5.0] — 2026-10-06
+
+### Changed — Harness questions during onboarding
 
 - Prefer the host's available interactive question tool, continuing after each answer with one question outstanding at a time.
 - Keep free-text answers, skips, and early completion available; UI preselection does not count as an answer.
 - Fall back to chat questions when the current host or mode cannot provide the needed interaction.
 
-## Approved personalization from feedback — 2026-10-06
+## [3.4.0] — 2026-10-06
+
+### Added — Approved personalization from feedback
 
 - Propose concrete teaching adjustments and ask for topic, vault, both, or no saved change before adopting an inferred ongoing preference.
 - Store vault defaults in the learner profile and approved topic overrides in the registered roadmap's Teaching preferences section.
 - Repair current explanations immediately when requested, preserve course progress, and keep personal adaptations out of the shared skill source.
 
-## Guided optional onboarding — 2026-10-06
+## [3.3.0] — 2026-10-06
+
+### Changed — Guided optional onboarding
 
 - Offer all nine editable learner-profile fields one question at a time, including preferred name, background, goals, explanation style, and activity priorities.
 - Treat every answer as optional; support skips, delegated choices, targeted updates, and early completion without inventing personal details.
 - Use answers to explain how examples, pacing, practice, and feedback will be tailored; preserve existing profiles and course progress.
 - Copy the example interactive into fresh vaults' shared interactive folder and link it from Home.
 
-## Shareable setup — 2026-10-06
+## [3.2.0] — 2026-10-06
+
+### Added — Shareable setup
 
 - Converted the repository to setup files only: removed learner courses and state, moved reusable interactive assets into the skill, and kept generated vaults separate.
 - Installation prompts clone `main`; generated vaults start with an empty registry and unconfigured profile.
@@ -34,7 +42,7 @@
 - Added tests for empty exports, ZIP extraction, independent topics, repeated generation, and overwrite protection.
 - Added conversational `guided-learning onboard` with learner background, goals, teaching preferences, and optional aids; validated profile storage updates preferences without touching courses.
 
-## [3.1.0-local] — 2026-10-06
+## [3.1.0] — 2026-10-06
 
 ### Added
 - Independent topic selection and registered paths for multiple learning tracks in one vault.
