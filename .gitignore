@@ -5,3 +5,4 @@
 .DS_Store
 topics/.registry.lock
 __pycache__/
+/dist/

@@ -28,6 +28,8 @@ The links below belong to your existing **Tokenizers and Tokenization** course u
 
 ## Templates and skill
 
+To share a fresh setup, see [[SHARING|Create an empty vault for a friend]].
+
 Use Obsidian's **Templates: Insert template** command for a [[Templates/Concept|concept note]] or [[Templates/Session Protocol|session journal]].
 
 The [guided-learning skill](https://github.com/WSE-research/guided-learning-skill) lives in `SKILLS/guided-learning/`, including its method, references, examples, and license. Both agent skill directories point to this same copy.

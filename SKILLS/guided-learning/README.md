@@ -3,7 +3,9 @@
 > [!info] Local setup: multiple learning topics
 > This vault uses version `3.1.0-local`, which adds independent learning tracks. Read [topic-routing.md](references/topic-routing.md) for the installed behavior and open [[topics/README|Learning Topics]] to navigate courses. The upstream installation examples below describe a single-track vault.
 >
-> Your existing Tokenizers and Tokenization course keeps its original files and links. Say **Continue tokenization** to resume it, or **I want to learn [a new subject]** to create a separate course. New tracks have their own roadmap, recall queue, notes, glossary, journals, and logs. Restart an older agent session or have it reread the installed skill before switching topics.
+> Say **Continue [topic]** to resume an existing course, or **I want to learn [a new subject]** to create a separate course. Each track has its own roadmap, recall queue, notes, glossary, journals, and logs. Restart an older agent session or have it reread the installed skill before switching topics. To create an empty vault for someone else, read [[SHARING|the sharing instructions]].
+>
+> Start with **$guided-learning onboard** (Codex) or **/guided-learning onboard** (Claude Code) to set your learner profile and preferred learning extras in chat. Run it again to update preferences while retaining learning progress.
 
 A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill that turns any markdown-based knowledge vault into a structured learning environment. It runs interactive sessions using a **spiral curriculum** — three passes of increasing depth, with spaced recall, comprehension checks, and auto-generated interactive HTML visualizations.
 

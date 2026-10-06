@@ -1,5 +1,14 @@
 # Guided Learning — Changelog
 
+## Shareable setup — 2026-10-06
+
+- Added `scripts/create_vault.py` to generate empty vaults and shareable ZIPs from an explicit list of reusable assets.
+- Fresh registries have no active topic; agent instructions and Obsidian settings are generated without account-specific paths or existing course references.
+- Exported setups retain their generator and register both agents without requiring symlinks.
+- Topic registry locking supports Windows and POSIX; topic metadata uses UTF-8 consistently.
+- Added tests for empty exports, ZIP extraction, independent topics, repeated generation, and overwrite protection.
+- Added conversational `guided-learning onboard` with learner background, goals, teaching preferences, and optional aids; validated profile storage updates preferences without touching courses.
+
 ## [3.1.0-local] — 2026-10-06
 
 ### Added

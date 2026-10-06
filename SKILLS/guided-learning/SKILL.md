@@ -8,7 +8,8 @@ description: >
   bootstrap a roadmap from scratch, or (3) provide a PDF/URL/text to learn from immediately.
   Use when the learner wants to study, learn, continue their roadmap, work through concepts,
   review what they've learned, get quizzed, understand a paper or article, or start learning
-  a new topic from zero. Keeps independent learning tracks in one vault.
+  a new topic from zero. Supports onboard to set learner preferences in chat.
+  Keeps independent learning tracks in one vault.
 ---
 
 # Guided Learning — Spiral Curriculum Sessions
@@ -18,6 +19,8 @@ description: >
 Run structured learning sessions through a literature-backed concept collection using a spiral curriculum approach. Each session covers 1-3 concepts with explanations, comprehension checks, and hands-on application — including interactive HTML visualizations for concepts that benefit from them.
 
 ## Prerequisites
+
+**Dispatch `onboard` before selecting a topic or starting a session.** For `$guided-learning onboard`, `/guided-learning onboard`, or a request to set up learning preferences, read `references/onboarding.md` and follow its conversational flow. Onboarding requires no subject and updates only the vault-level learner profile; it must not bootstrap or reset a course.
 
 The skill uses the following vault structure. **All of these are created automatically** by the bootstrapper if they don't exist — you don't need to set anything up manually.
 
@@ -44,11 +47,21 @@ This returns the active topic's entry and its vault-relative `paths`. Explicitly
 
 Pin the selected topic ID and paths for the entire session. Every `{roadmap}`, `{recall_queue}`, `{protocols_dir}`, `{interactives_dir}`, `{concepts_dir}`, `{papers_dir}`, `{glossary}`, `{skill_logs_dir}`, `{css_file}`, and `{build_script}` below refers to that selected topic's registry entry. Join directory paths and filenames with exactly one slash. Placeholders must be resolved before file access.
 
-The tokenization track uses its registered paths under `topics/tokenizers-and-tokenization/`. New tracks use the same independent layout. The root-level `learning/interactives/interactive.css`, `build.sh`, and example interactive remain shared templates for creating future topics; course-specific interactive pages and their copied CSS/build script belong to the selected topic. Never read or update another topic's learning files as a fallback. Never initialize or reset an existing roadmap or recall queue. Older examples and templates must be adapted to the selected track's paths before use.
+Every course uses its registered paths. New tracks use `topics/<topic-id>/`; existing or migrated courses retain their registered paths and note filenames. The root-level `learning/interactives/interactive.css` and `build.sh` remain shared templates for creating future topics; course-specific interactive pages and their copied CSS/build script belong to the selected topic. Never read or update another topic's learning files as a fallback. Never initialize or reset an existing roadmap or recall queue. Older examples and templates must be adapted to the selected track's paths before use.
 
 For a missing or invalid registry, follow the recovery rules in `references/topic-routing.md` before proceeding; do not invent a subject from generic placeholder files.
 
 ## Domain Modes
+
+### Learner profile
+
+At the start of a session, read `learner-profile.json` from the vault root if it exists. If `configured` is true, use the learner's preferred language, approximate session length, explanation presentation, and preferred extras. Background and general goals guide examples and prerequisite probing; they do not establish mastery. Use `learning_context` as a default for a **new** topic when it is not `auto`. A selected topic's stored goals and domain mode take priority over global defaults, and explicit requests in the current conversation take priority over all saved preferences.
+
+Preferred extras are teaching aids to prioritize when relevant: worked examples, practice exercises, interactive visualizations, code examples, mini projects, writing exercises, and guided source reading. Keep comprehension checks and spaced recall in the session flow. Ask before introducing an unselected optional aid when a profile is configured. Respect the session length when choosing how many concepts or exercises to cover.
+
+If the profile is absent or unconfigured, continue with normal goal and mode detection; offer `$guided-learning onboard` or `/guided-learning onboard` without blocking learning. Ask only for missing topic-specific information; do not repeat questions already answered in a configured profile. Changing preferences does not reset or mark progress in any course.
+
+### Topic domain mode
 
 The skill supports three domain modes that adapt session framing — comprehension checks, connection mapping prompts, and application context — to the learner's situation. The core explanation approach (Phase 1) stays the same across all modes; what changes is the *lens* through which the learner is asked to demonstrate and apply understanding.
 
@@ -90,6 +103,7 @@ Comprehension checks ask the learner to explain at a dinner table, draft blog po
 ## Input
 
 One of:
+- **`onboard`** → collect or update learner preferences in chat using `references/onboarding.md`; do not select or initialize a topic.
 - **No input** → pick the next unchecked item from the learning roadmap
 - **Cluster name** → work on the next item in that cluster
 - **Concept name** → jump to that specific concept

@@ -49,11 +49,11 @@ Cross-topic links are allowed when useful. They do not mark another topic's conc
 
 After creating interactive HTML, run `bash "<resolved build_script>"` from the vault root. The builder and CSS live alongside that topic's HTML. Do not run the legacy builder for another topic; skip the build when the selected interactive directory contains no HTML.
 
-## Tokenizers and Tokenization course
+## Existing and migrated courses
 
-**Tokenizers and Tokenization** is registered as `tokenizers-and-tokenization`, with `root: "topics/tokenizers-and-tokenization"` and `layout: "topic"`. Its exact paths are in `topics/registry.json`; resolve it with `topics.py` rather than deriving paths from its ID.
+An existing course's exact paths are in `topics/registry.json`; resolve it with `topics.py` rather than deriving paths from its ID. A root-level course can have `layout: "legacy"`; a course under `topics/<topic-id>/` uses `layout: "topic"`. An empty vault has no registered courses and `active_topic: null`.
 
-The course was migrated from the root-level layout. Its roadmap progress, recall rows and dates, glossary, notes, journals, logs, and interactive pages were preserved. Existing concept filenames and short concept links remain valid. The shared interactive CSS, builder, and example page remain at `learning/interactives/` as templates copied into new topics.
+Preserve any existing course's roadmap progress, recall rows and dates, glossary, notes, journals, logs, interactive pages, filenames, and short concept links. The shared interactive CSS and builder remain at `learning/interactives/` as templates copied into new topics. Moving an existing course requires a separate migration request; registering or creating a topic must never migrate another course implicitly.
 
 ## Registry recovery
 

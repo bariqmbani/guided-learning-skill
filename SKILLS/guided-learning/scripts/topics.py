@@ -3,8 +3,8 @@
 
 import argparse
 from contextlib import contextmanager
-import fcntl
 import json
+import os
 from pathlib import Path
 import re
 import shutil
@@ -93,7 +93,7 @@ def read_registry(vault):
     path = inside(vault, "topics/registry.json")
     if not path.is_file():
         raise ValueError("Topic registry is missing; inspect existing learning before registering it")
-    return validate(vault, json.loads(path.read_text()))
+    return validate(vault, json.loads(path.read_text(encoding="utf-8")))
 
 
 def resolve(registry, query=None):
@@ -111,12 +111,27 @@ def resolve(registry, query=None):
 
 @contextmanager
 def registry_lock(vault):
-    with inside(vault, "topics/.registry.lock").open("a") as handle:
-        fcntl.flock(handle, fcntl.LOCK_EX)
+    with inside(vault, "topics/.registry.lock").open("a+b") as handle:
+        if os.name == "nt":
+            import msvcrt
+
+            if handle.seek(0, os.SEEK_END) == 0:
+                handle.write(b"\0")
+                handle.flush()
+            handle.seek(0)
+            msvcrt.locking(handle.fileno(), msvcrt.LK_LOCK, 1)
+        else:
+            import fcntl
+
+            fcntl.flock(handle, fcntl.LOCK_EX)
         try:
             yield
         finally:
-            fcntl.flock(handle, fcntl.LOCK_UN)
+            if os.name == "nt":
+                handle.seek(0)
+                msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                fcntl.flock(handle, fcntl.LOCK_UN)
 
 
 def atomic_write(path, content):
@@ -145,7 +160,7 @@ def update_dashboard(vault, registry):
                  for key, label in [("roadmap", "Roadmap"), ("recall_queue", "Recall queue"), ("glossary", "Glossary")]]
         rows.append(f"| {title} | " + " | ".join(links) + " |")
     block = start + "\n" + "\n".join(rows) + "\n" + end
-    current = path.read_text() if path.exists() else "# Learning Topics\n\n"
+    current = path.read_text(encoding="utf-8") if path.exists() else "# Learning Topics\n\n"
     if start in current and end in current:
         before, after = current.split(start, 1)[0], current.split(end, 1)[1]
         content = before + block + after
@@ -177,12 +192,12 @@ def create(vault, registry, topic_id, title, aliases):
             inside(vault, relative).mkdir(parents=True)
     p = topic["paths"]
     inside(vault, p["glossary"]).parent.mkdir(parents=True)
-    with inside(vault, p["roadmap"]).open("x") as handle:
+    with inside(vault, p["roadmap"]).open("x", encoding="utf-8") as handle:
         handle.write("# Learning Roadmap\n\nNo concepts yet. Bootstrap this topic using the learner's goal.\n")
-    with inside(vault, p["recall_queue"]).open("x") as handle:
+    with inside(vault, p["recall_queue"]).open("x", encoding="utf-8") as handle:
         handle.write("# Recall Queue\n\n| concept | learned | interval | next_recall | last_result | notes |\n"
                      "|---------|---------|----------|-------------|-------------|-------|\n")
-    with inside(vault, p["glossary"]).open("x") as handle:
+    with inside(vault, p["glossary"]).open("x", encoding="utf-8") as handle:
         handle.write("# Glossary\n\nTerms will be added during this topic's learning sessions.\n")
     for key, name in [("css_file", "interactive.css"), ("build_script", "build.sh")]:
         shutil.copy2(source / name, inside(vault, p[key]))
