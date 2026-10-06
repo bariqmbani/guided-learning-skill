@@ -1,6 +1,6 @@
 ## Onboarding example
 
-Run `$guided-learning onboard` in Codex, or `/guided-learning onboard` in Claude
+Run `$learner-profile` in Codex, or `/learner-profile` in Claude
 Code. The tutor guides you one question at a time through language, preferred
 name, background, broad goals, learning context, session time, explanation style,
 preferred activities, and other preferences. Every answer is optional: say
@@ -33,7 +33,7 @@ revisited to fill gaps; preferences already provided are preserved.
 You can also supply preferences up front, or request only a specific update:
 
 ```text
-$guided-learning onboard
+$learner-profile
 
 I prefer learning in Russian. A typical session can take about 20 minutes.
 Please save these preferences for future learning sessions:
@@ -70,12 +70,14 @@ STE is an English writing standard. For Russian, this example requests its
 plain-language principles; it does not claim that Russian prose conforms to STE.
 
 Onboarding updates only `learner-profile.json` and `Learner Profile.md`. These
-preferences apply across topics, and you can change them later by running
+preferences apply across both learning skills, and you can change them later by running
 onboarding again. To start a subject after setup, say:
 
 ```text
-I want to learn probability so I can make better decisions under uncertainty.
+$guided-learning probability so I can make better decisions under uncertainty.
 I am starting from the basics and can return three times a week.
 ```
 
 The tutor then records a separate plan for that topic and starts a useful lesson.
+
+For a focused lesson instead, use `$concept-learning bubble sort` or `/concept-learning bubble sort`. The legacy `guided-learning onboard` command still opens this same shared setup flow.

@@ -11,7 +11,7 @@ import zipfile
 
 
 profile_spec = importlib.util.spec_from_file_location(
-    "vault_profile", Path(__file__).resolve().parents[1] / "SKILLS/guided-learning/scripts/profile.py"
+    "vault_profile", Path(__file__).resolve().parents[1] / "SKILLS/learner-profile/scripts/profile.py"
 )
 profiles = importlib.util.module_from_spec(profile_spec)
 profile_spec.loader.exec_module(profiles)
@@ -20,18 +20,30 @@ profile_spec.loader.exec_module(profiles)
 # Explicitly enumerate reusable assets; never copy a course, registry, or workspace.
 ASSETS = [
     "scripts/install_vault.sh",
+    "SKILLS/learner-profile/SKILL.md",
+    "SKILLS/learner-profile/LICENSE",
+    "SKILLS/learner-profile/CHANGELOG.md",
+    "SKILLS/learner-profile/scripts/profile.py",
+    "SKILLS/learner-profile/references/onboarding.md",
+    "SKILLS/learner-profile/references/onboarding-example.md",
+    "SKILLS/learner-profile/references/onboarding-evidence.md",
+    "SKILLS/learner-profile/references/personalization.md",
+    "SKILLS/learner-profile/references/teaching.md",
+    "SKILLS/concept-learning/SKILL.md",
+    "SKILLS/concept-learning/LICENSE",
+    "SKILLS/concept-learning/CHANGELOG.md",
+    "SKILLS/concept-learning/scripts/sessions.py",
+    "SKILLS/concept-learning/assets/note.md",
+    "SKILLS/concept-learning/assets/mentor-feedback.md",
+    "SKILLS/concept-learning/assets/practice.md",
     "SKILLS/guided-learning/scripts/profile.py",
-    "SKILLS/guided-learning/references/onboarding.md",
-    "SKILLS/guided-learning/references/personalization.md",
     "SKILLS/guided-learning/references/installation-prompt.md",
-    "SKILLS/guided-learning/references/onboarding-example.md",
-    "SKILLS/guided-learning/references/onboarding-evidence.md",
     "SKILLS/guided-learning/references/topic-intake.md",
     "SKILLS/guided-learning/SKILL.md",
+    "SKILLS/guided-learning/CHANGELOG.md",
     "SKILLS/guided-learning/PEDAGOGY.md",
     "SKILLS/guided-learning/LICENSE",
     "SKILLS/guided-learning/references/topic-routing.md",
-    "SKILLS/guided-learning/references/session-log-template.md",
     "SKILLS/guided-learning/examples/concept-note.md",
     "SKILLS/guided-learning/examples/learning-roadmap.md",
     "SKILLS/guided-learning/examples/recall-queue.md",
@@ -46,39 +58,61 @@ AGENTS = """# Learning vault
 
 Treat this directory as the vault root. All learning paths are relative to it.
 
-For learning sessions, study, quizzes, papers, or new subjects, read
-`SKILLS/guided-learning/SKILL.md` and its `references/topic-routing.md` before
-reading or writing learning data. Use `SKILLS/guided-learning/scripts/topics.py`
-to resolve, create, or select the intended topic from `topics/registry.json`.
+Choose the learning workflow before selecting a topic or writing learning data:
 
-New subjects have independent folders under `topics/<topic-id>/`. Each has its
+- Profile setup or preference updates: read `SKILLS/learner-profile/SKILL.md`.
+  `guided-learning onboard` is a compatibility alias for this same flow.
+- A focused concept, a bounded source explanation, or resuming a concept session:
+  read `SKILLS/concept-learning/SKILL.md`. Every session creates and maintains
+  `note.md`, `mentor-feedback.md`, and `practice.md` in its own `concept-sessions/`
+  folder. Use its session helper; do not create or select a course for this route.
+- A course, roadmap, scheduled recall, or continuing a topic: read
+  `SKILLS/guided-learning/SKILL.md` and `references/topic-routing.md` inside that
+  skill. Use its `scripts/topics.py` to resolve, create, or select the intended
+  course from `topics/registry.json`.
+
+Honor an explicit skill choice. If a request is ambiguous between a focused
+lesson and a course, ask one short scope question. Named concept sessions resume
+their own documents; an existing active course is not a default save destination.
+
+In the course workflow, subjects have independent folders under `topics/<topic-id>/`. Each has its
 own roadmap, concepts, sources, recall queue, glossary, journals, and logs.
 Pin the selected topic ID and paths for the whole session. Never reset an
 existing topic or fall back to another topic's roadmap.
 
-For `guided-learning onboard`, follow the skill's `references/onboarding.md`
-as a conversation before topic selection. Save only the learner profile and
+For `learner-profile` or `guided-learning onboard`, follow the shared profile
+skill's onboarding conversation before topic selection. Save only the profile and
 its readable note; do not create a subject or change learning progress.
-Offer each editable profile field one question at a time, accepting skips or
-an early finish. Optional fields still deserve an invitation; do not complete
-onboarding by silently saving defaults or asking only language and time.
+For general setup, offer each unanswered editable profile field one question at
+a time, accepting skips or an early finish. Optional fields still deserve an
+invitation; do not complete onboarding by silently saving defaults or asking
+only language and time. For a targeted update, change only the requested
+preferences and preserve everything else without restarting the questionnaire.
 Use the harness's interactive question tool when available in the current mode.
 Keep one question outstanding and continue after its answer; use chat as fallback.
 
-Read the learner profile using the skill's profile helper. Use its configured
+Both teaching skills read `SKILLS/learner-profile/scripts/profile.py show`.
+Full onboarding is optional and must not block a lesson. Use the configured
 language, session budget, and access constraints to tailor teaching. Its
 background and goals are context, not evidence that concepts have been learned.
 Use its learning context as a default for new topics; preserve an existing
 topic's stored goals and domain mode. Requests in the current conversation take
 priority over saved preferences. Ask only for missing topic-specific details.
 
-For feedback that suggests an ongoing teaching preference, follow the skill's
-`references/personalization.md`: propose the wording and scope, then wait for
+For feedback that suggests an ongoing teaching preference, follow
+`SKILLS/learner-profile/references/personalization.md`: propose the wording and scope, then wait for
 approval. Vault defaults live in the profile; topic overrides live in the selected
-roadmap's Teaching preferences section. Read both before teaching.
+roadmap's Teaching preferences section. Concept-session goals and adjustments
+belong in that session's note. Never infer mastery from preferences or background.
 
-Bootstrap only a selected topic with no concept checklist entries, checked or
-unchecked. Follow `references/topic-intake.md` for the outcome, starting
+Tutor one step at a time, wait for attempts, and adapt examples and support to
+the actual responses. Update session documents as the lesson proceeds. Feedback
+must distinguish demonstrated understanding from pending assessment; never invent
+learner answers. Concept sessions can become course material only on explicit
+request; preserve their original records and all existing course progress.
+
+In course work, bootstrap only a selected topic with no concept checklist entries,
+checked or unchecked. Follow `SKILLS/guided-learning/references/topic-intake.md` for the outcome, starting
 knowledge, and feasible practice; keep the plan in that topic. Preserve existing
 notes and progress, and record learning only from actual sessions.
 
@@ -102,25 +136,38 @@ under `topics/<topic-id>/`. Say **Continue [topic]** to resume a course, or
 **Continue my roadmap** to resume the last selected topic.
 """
 
-SKILL_ENTRY = """---
-name: guided-learning
-description: >
-  Onboard learners, teach, study, quiz, understand papers, and learn new subjects using independent
-  topic tracks, a spiral curriculum, comprehension checks, and spaced recall.
+CONCEPT_SESSIONS = """# Concept Sessions
+
+Use `$concept-learning <concept>` in Codex or `/concept-learning <concept>` in
+Claude Code for a personalized, focused lesson. Each session creates a dated
+folder here containing `note.md`, `mentor-feedback.md`, and `practice.md`.
+Supporting resources and an interactive are added only when useful. Documents
+are updated from actual attempts; an unfinished assessment stays pending.
+
+Ask to resume a named session to continue its records. Repeated sessions get
+separate folders and may link to earlier work. These sessions do not change
+`topics/` or its active course. Ask explicitly to add a lesson to a course when
+you want it included in a roadmap or future recall.
+"""
+
+SKILL_NAMES = ("learner-profile", "concept-learning", "guided-learning")
+
+
+def skill_entry(name, canonical):
+    # Keep discovery metadata (including version) identical to the canonical
+    # skill without introducing a YAML package dependency for installation.
+    content = canonical.decode("utf-8")
+    frontmatter, separator, _ = content.removeprefix("---\n").partition("\n---\n")
+    if not content.startswith("---\n") or not separator or f"name: {name}" not in frontmatter.splitlines():
+        raise ValueError(f"Invalid canonical skill frontmatter: {name}")
+    return f"""---
+{frontmatter}
 ---
 
-# Guided Learning
-
-Read `SKILLS/guided-learning/SKILL.md` from the vault root and its
-`SKILLS/guided-learning/references/topic-routing.md` before any learning-file
-read or write, then follow those instructions. The canonical skill and helpers
-live under `SKILLS/guided-learning/`; this entry registers that shared skill.
-For the `onboard` subcommand, follow the canonical skill's conversational
-onboarding flow before topic selection. Onboarding does not require a subject.
-Guide every editable profile field one question at a time; every answer is
-optional. Ask and wait rather than silently saving the default profile.
-Prefer the host's available interactive question tool over ending each question
-with a final chat reply. Fall back to chat if the tool is unavailable or restricted.
+Read `SKILLS/{name}/SKILL.md` from the learning vault root and follow its
+instructions. Resolve the requested entry point before selecting a course or
+writing learning data. References are relative to that canonical skill directory,
+not this registration entry. The same canonical instructions serve both agents.
 """
 
 CONCEPT = """---
@@ -200,7 +247,7 @@ def make_files(source, name):
     # Source assets stay with the skill; installed vaults also need shared templates.
     for asset_filename in ["interactive.css", "build.sh", "example-interactive.html"]:
         files[f"learning/interactives/{asset_filename}"] = files[f"SKILLS/guided-learning/interactives/{asset_filename}"]
-    onboarding_example = files["SKILLS/guided-learning/references/onboarding-example.md"].decode("utf-8").rstrip("\n")
+    onboarding_example = files["SKILLS/learner-profile/references/onboarding-example.md"].decode("utf-8").rstrip("\n")
     installation_prompt = files["SKILLS/guided-learning/references/installation-prompt.md"].decode("utf-8").rstrip("\n")
     upstream = json.loads((source / "SKILLS/guided-learning/UPSTREAM.json").read_text(encoding="utf-8"))
     metadata = {key: upstream[key] for key in ["repository", "commit", "version"]}
@@ -210,6 +257,8 @@ def make_files(source, name):
         "Customized shared interactive design system and CSS builder.",
         "Empty portable starter generated by scripts/create_vault.py.",
         "Conversational onboarding for language, time, and constraints; topic-specific learning plans with evidence-informed adaptive teaching.",
+        "Shared learner-profile skill and compatibility aliases for existing onboarding and profile helper paths.",
+        "Personalized concept-learning sessions with notes, mentor feedback, and practice outside course topics.",
     ]
     texts = {
         "AGENTS.md": AGENTS,
@@ -218,11 +267,10 @@ def make_files(source, name):
         "Learner Profile.md": profiles.profile_markdown(profile),
         "topics/README.md": TOPICS,
         "topics/registry.json": json_text({"schema_version": 1, "active_topic": None, "topics": []}),
+        "concept-sessions/README.md": CONCEPT_SESSIONS,
         "Templates/Concept.md": CONCEPT,
         "Templates/Session Protocol.md": PROTOCOL,
         ".gitignore": IGNORE,
-        ".agents/skills/guided-learning/SKILL.md": SKILL_ENTRY,
-        ".claude/skills/guided-learning/SKILL.md": SKILL_ENTRY,
         "SKILLS/guided-learning/UPSTREAM.json": json_text(metadata),
         "SKILLS/guided-learning/README.md": f"""# Guided Learning
 
@@ -235,12 +283,15 @@ The canonical instructions are in [SKILL.md](SKILL.md) and
 explains the method. This setup builds on the MIT-licensed
 [WSE Research guided-learning skill](https://github.com/WSE-research/guided-learning-skill).
 
-[Onboarding](references/onboarding.md) guides every optional profile field,
-one question at a time, to personalize lessons. [Topic intake](references/topic-intake.md) sets a useful outcome and
-starting point for each subject. [Research rationale](references/onboarding-evidence.md)
+[Learner Profile](../learner-profile/SKILL.md) guides every optional profile field,
+one question at a time, to personalize both learning skills. `guided-learning onboard`
+remains an alias. [Concept Learning](../concept-learning/SKILL.md) teaches one concept
+and saves notes, mentor feedback, and practice under `concept-sessions/` without
+selecting a course. [Topic intake](references/topic-intake.md) sets a useful outcome and
+starting point for each course. [Research rationale](../learner-profile/references/onboarding-evidence.md)
 explains the evidence and limits of these design choices.
 
-[Personalization from feedback](references/personalization.md) lets the tutor
+[Personalization from feedback](../learner-profile/references/personalization.md) lets the tutor
 propose ongoing changes. It asks before saving them; choose topic or vault scope,
 both, or neither. Topic overrides live in that topic's roadmap.
 
@@ -248,48 +299,48 @@ both, or neither. Topic overrides live in that topic's roadmap.
 
 {onboarding_example}
 """,
-        "SKILLS/guided-learning/CHANGELOG.md": """# Guided Learning — Changelog
-
-## Empty starter
-
-- Independent topic tracks and a registry with no active topic.
-- Portable agent instructions and shared interactive assets.
-- No course notes, journals, recall history, or source-vault Git history.
-""",
         "Home.md": f"""# {name}
 
-Your learning vault is ready. No subject has been selected yet.
+Your learning vault is ready. There are no courses or concept sessions yet.
 
 1. Open this folder as a vault in Obsidian.
 2. Open a terminal here and run `claude` or `codex`.
-3. Start with **$guided-learning onboard** in Codex or **/guided-learning onboard** in Claude Code. Your tutor guides you through your profile one question at a time; every answer is optional.
-4. Say **I want to learn about [your topic]** to start your first subject.
+3. Optionally use **$learner-profile** in Codex or **/learner-profile** in Claude Code. Your tutor guides you through shared preferences one question at a time; every answer is optional.
+4. Choose **$concept-learning bubble sort** for one concept or **$guided-learning algorithms** for an ongoing course. In Claude Code, use `/` in place of `$`.
 
-The tutor asks about your desired outcome, starting knowledge, and opportunities
-to practice, then creates a roadmap and starts teaching. You can explore a topic
-without a fixed goal or schedule.
-Every additional subject gets its own folder and progress.
+Both teaching skills adapt to your goals, starting knowledge, available time, and
+responses. Concept Learning guides a focused lesson and saves its three standard
+documents automatically. Guided Learning creates a course roadmap and revisits
+concepts through practice and spaced recall. Onboarding never blocks a lesson.
 
 - [[topics/README|Learning Topics]] — start or resume a subject.
+- [[concept-sessions/README|Concept Sessions]] — focused lessons with notes, feedback, and practice.
 - [[Learner Profile|Your learner profile]] — language, session time, and practical preferences.
 - [[Templates/Concept|Concept template]]
 - [[Templates/Session Protocol|Session journal template]]
 - [Example interactive](learning/interactives/example-interactive.html) — open in a browser to preview a learning activity.
 - [Setup and sharing instructions](README.md)
 
-In Claude Code, invoke `/guided-learning`; in Codex, use `$guided-learning`.
-Later, say **Continue [topic]** or **Continue my roadmap**.
+Say **Continue [topic]** or **Continue my roadmap** for a course, or ask
+**Resume concept session [session folder]** for a focused lesson.
 
-Shared interactive assets are under `learning/interactives/`; actual lessons,
-roadmaps, recall, and journals are created inside each topic's folder.
+Shared interactive assets are under `learning/interactives/`. Course roadmaps,
+recall, and journals stay in `topics/`; focused lessons stay in `concept-sessions/`.
+Adding a focused lesson to a course requires your explicit request.
 
-Run the skill's **onboard** command again whenever you want to update your preferences.
+Run **$learner-profile** or **/learner-profile** to update preferences.
+**$guided-learning onboard** and **/guided-learning onboard** remain compatibility aliases.
 """,
         "README.md": f"""# Empty Learning Vault
 
 Open this folder as a vault in Obsidian, then run Claude Code or Codex from the
-same folder. Say **I want to learn about [your topic]**. Read [Home.md](Home.md)
-for the learning flow.
+same folder. Read [Home.md](Home.md) to choose a learning workflow:
+
+| Skill | Codex | Claude Code | Saved output |
+| --- | --- | --- | --- |
+| Learner Profile | `$learner-profile` | `/learner-profile` | Shared preferences |
+| Concept Learning | `$concept-learning bubble sort` | `/concept-learning bubble sort` | A focused session under `concept-sessions/` |
+| Guided Learning | `$guided-learning algorithms` | `/guided-learning algorithms` | A course under `topics/` |
 
 {installation_prompt}
 
@@ -297,34 +348,56 @@ If you cloned this as a public template, first run
 `python3 scripts/create_vault.py ../my-learning` and use that new folder for
 your learning. Keep the template checkout separate from personal study records.
 
-Python 3.9 or newer is required for the topic helper and setup script. Interactive
+Python 3.9 or newer is required for the helpers and setup script. Interactive
 HTML builds also use Bash; on Windows use WSL or Git Bash for those builds.
 No Python packages are required. Skills are registered for both agents using
-small entry files that load the shared canonical skill; symlinks are unnecessary.
+small entry files that load each canonical skill; symlinks are unnecessary.
 
 The installer creates files without asking learning questions. Start onboarding
-in your learning chat with **$guided-learning onboard** (Codex) or
-**/guided-learning onboard** (Claude Code). The tutor asks one question at a time
+in your learning chat with **$learner-profile** (Codex) or
+**/learner-profile** (Claude Code). The tutor asks one question at a time
 about language, preferred name, background, broad goals, learning context,
 session time, explanation preferences, preferred activities, and other needs.
 Every answer is optional: skip a question, let the tutor choose, or finish early.
 Your answers shape familiar examples, lesson pace, practice, and feedback.
-It saves `learner-profile.json` and `Learner Profile.md`. No topic or learning
-progress is created until you choose a subject. Run onboarding again in chat
-whenever you want to change preferences.
+It saves `learner-profile.json` and `Learner Profile.md`, shared by both teaching
+skills. No topic or concept session is created during onboarding. Full onboarding
+is optional; lessons can begin with the preferences and context already available.
+Run Learner Profile again for a targeted change or to fill unanswered fields.
+`guided-learning onboard` remains a compatibility alias and uses the same data.
+
+Concept Learning guides one concept through explanation, a worked example,
+practice with gradually reduced help, and an independent check. It adapts to your
+responses and waits for attempts. Every session automatically creates and updates:
+
+```text
+concept-sessions/YYYY-MM-DD_concept-slug/
+  note.md
+  mentor-feedback.md
+  practice.md
+```
+
+Repeated sessions use a new suffix rather than overwriting earlier work. Resume a
+named session to continue it. Feedback records only demonstrated understanding;
+pending or interrupted work stays incomplete. `interactive.html` and `resources.md`
+are added when useful. This route does not select a course, update a roadmap, or
+schedule recall. Ask explicitly to add the session to a course; the original
+session documents and existing course progress are preserved.
 
 When feedback suggests an ongoing preference, the tutor proposes a specific
-change and asks whether to save it for this topic, the whole vault, both, or
-neither. Vault defaults live in the learner profile; approved topic overrides
-live in the roadmap's Teaching preferences section. See
-[personalization from feedback](SKILLS/guided-learning/references/personalization.md).
+change and asks which scope should retain it. Vault defaults live in the shared
+learner profile; approved course overrides live in the roadmap's Teaching
+preferences section, and session-specific context stays in its note. See
+[personalization from feedback](SKILLS/learner-profile/references/personalization.md).
 
-When starting each subject, the tutor asks only for missing information about
+When starting a course, the tutor asks only for missing information about
 your desired outcome, what you already know, and feasible practice. These answers
 stay in that topic's learning plan. Practice, feedback, and later recall are
 part of lessons; you do not need to select them from an extras menu. Presentation
 preferences can change and are not a test of ability. See the skill's
-[research rationale](SKILLS/guided-learning/references/onboarding-evidence.md).
+[research rationale](SKILLS/learner-profile/references/onboarding-evidence.md).
+The research supports teaching principles; it does not validate this exact agent
+workflow or establish durable mastery from a single successful session.
 
 {onboarding_example}
 
@@ -344,10 +417,10 @@ You can also run `python3 scripts/create_vault.py /path/to/new-vault` directly.
 On Windows, use `py -3 scripts/create_vault.py C:/path/to/new-vault`.
 Choose a destination and ZIP path that
 do not already exist. The ZIP must be outside the new vault. No Git repository
-is initialized. Current courses, study records, attachments, account paths,
+is initialized. Current courses, concept sessions, study records, attachments, account paths,
 Obsidian workspace state, and source Git history are not copied.
 
-The shared skill is based on the MIT-licensed
+Guided Learning and the adapted shared teaching guidance build on the MIT-licensed
 [WSE Research guided-learning skill](https://github.com/WSE-research/guided-learning-skill);
 its license and upstream attribution are included under `SKILLS/guided-learning/`.
 """,
@@ -360,6 +433,10 @@ its license and upstream attribution are included under `SKILLS/guided-learning/
             "note-composer", "outline", "word-count", "file-recovery",
         ]),
     }
+    for skill_name in SKILL_NAMES:
+        entry = skill_entry(skill_name, files[f"SKILLS/{skill_name}/SKILL.md"])
+        for agent in [".agents", ".claude"]:
+            texts[f"{agent}/skills/{skill_name}/SKILL.md"] = entry
     files.update({relative: text.encode("utf-8") for relative, text in texts.items()})
     # Carry the generator forward, so the exported setup can generate more empty vaults.
     files["scripts/create_vault.py"] = Path(__file__).read_bytes()
@@ -427,7 +504,8 @@ def main():
     print(f"Created empty learning vault: {destination}")
     if archive is not None:
         print(f"Shareable ZIP: {archive}")
-    print("Open the folder in Obsidian, run claude or codex here, and start guided-learning onboard.")
+    print("Open the folder in Obsidian and run claude or codex here. Use learner-profile to personalize,")
+    print("concept-learning for one concept, or guided-learning for an ongoing course.")
 
 
 if __name__ == "__main__":

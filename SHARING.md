@@ -1,11 +1,12 @@
 # Create and share an empty learning vault
 
 This repository contains reusable setup files. Learning data belongs in a
-separate installed vault. Python 3.9 or newer is required; no packages are needed.
+separate installed vault or learning workspace. Python 3.9 or newer is required;
+no packages are needed.
 
 For an agent to clone and install the setup, use the **Install with an agent**
 prompt in [README.md](README.md#install-with-an-agent). It clones `main` and
-creates a new vault before onboarding.
+creates a new vault before learning or optional profile setup.
 
 ## Install
 
@@ -18,16 +19,34 @@ use `py -3 scripts/create_vault.py C:/path/to/new-vault`. Interactive HTML build
 use Bash; Windows users can use WSL or Git Bash.
 
 The destination must be a new directory. The installer creates Obsidian settings,
-templates, both agents' skill entries, shared interactive assets, an empty topic
-registry (`active_topic: null`, `topics: []`), and an unconfigured learner profile.
-It does not ask questions, select a subject, or create course progress.
+templates, native entries for learner-profile, concept-learning, and guided-learning
+in both agents, shared interactive assets, an empty topic registry
+(`active_topic: null`, `topics: []`), and an unconfigured shared learner profile.
+It does not ask questions, select a subject, create course progress, or include
+learner concept sessions. Verify all three entries in `.agents/skills/` and
+`.claude/skills/` after installation.
 
-Open the installed folder in Obsidian and run Codex or Claude Code there. Start
-with **$guided-learning onboard** in Codex or **/guided-learning onboard** in
-Claude Code. Onboarding offers every profile field one question at a time,
-including your background, goals, and preferred activities. Every answer is
-optional; you can skip questions or finish early. Then say **I want to learn [topic]**. Each subject has its
-own plan and course data. Run onboarding again to update preferences.
+Open the installed folder in Obsidian and run Codex or Claude Code there. Choose:
+
+| Purpose | Codex | Claude Code |
+| --- | --- | --- |
+| Optional shared preference setup or updates | `$learner-profile` | `/learner-profile` |
+| One concept with saved notes, feedback, and practice | `$concept-learning bubble sort` | `/concept-learning bubble sort` |
+| A course with a roadmap and spaced recall | `$guided-learning probability` | `/guided-learning probability` |
+
+Profile setup offers every field one question at a time, accepts skips and early
+completion, and supports targeted updates. The old `guided-learning onboard`
+command remains an alias. Both teaching skills read the same root
+`learner-profile.json` and `Learner Profile.md`; profile setup is not required to
+start learning. The canonical profile helper is
+`SKILLS/learner-profile/scripts/profile.py`, with the former guided-learning path
+kept as a compatibility alias.
+
+Concept-learning always writes `note.md`, `mentor-feedback.md`, and `practice.md`
+under `concept-sessions/YYYY-MM-DD_slug/`; `interactive.html` and `resources.md`
+are added when useful. Ordinary concept sessions do not write course data.
+Explicitly requesting a course hands off to guided-learning while preserving
+the concept session. Guided-learning keeps each subject's course data separate.
 
 ## Share an export
 
@@ -36,29 +55,33 @@ own plan and course data. Run onboarding again to update preferences.
 ```
 
 The ZIP must be a new path outside the generated vault. Send the ZIP to your
-friend; they extract it, open the folder in Obsidian, and start onboarding.
+friend; they extract it, open the folder in Obsidian, and choose a learning skill
+or optional profile setup.
 No ZIP is tracked in this repository.
 
 The generator copies an explicit list of reusable assets. It never copies owner
-profiles, topics, course notes, recall history, journals, attachments, execution
+profiles, topics, concept-session bundles, course notes, recall history, journals, attachments, execution
 logs, account-specific instructions, Git history, or Obsidian workspace state.
 The skill entries are regular files, so ZIP extraction does not require symlinks.
 Exported vaults retain the generator and can create another fresh vault later.
 
 ## Maintain the public setup
 
-Keep studying in an installed vault rather than this checkout. Learner directories
-and generated exports are ignored here. Do not add learner files to this repository.
+Keep studying in an installed vault or separate learning workspace. This checkout
+contains only skills, templates, installer code, and documentation. Do not add
+learner profiles, concept-session bundles, course files, or generated exports here.
 Deleting a file in a new commit does not erase it from earlier Git history.
 
 Reusable interactive source files live under
 `SKILLS/guided-learning/interactives/`; installed vaults receive shared templates
-under `learning/interactives/`. Actual lessons use each topic's registered paths.
+under `learning/interactives/`. Course lessons use each topic's registered paths;
+concept lessons keep any interactive in their own session bundle.
 
 The original skill and pinned upstream commit are recorded in
 `SKILLS/guided-learning/UPSTREAM.json`. The public fork's `main` branch distributes
 this complete setup. Retain the MIT license and upstream attribution when sharing.
 
-Read [the onboarding research rationale](SKILLS/guided-learning/references/onboarding-evidence.md)
+Read [the onboarding research rationale](SKILLS/learner-profile/references/onboarding-evidence.md)
 for the question design and evidence limits. Learning research informs the method;
-this specific LLM tutor and its onboarding flow still need user evaluation.
+these specific agent skills and their flows still need user evaluation. A correct
+answer during one session does not prove lasting mastery.

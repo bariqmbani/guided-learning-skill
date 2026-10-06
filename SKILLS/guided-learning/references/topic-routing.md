@@ -1,16 +1,25 @@
 # Topic Routing
 
-Resolve a topic before reading or writing learning data. These instructions override the single-roadmap assumptions in upstream examples and templates.
+Use this only after dispatch has selected ongoing course work. Resolve a topic before reading or writing course learning data. These instructions override the single-roadmap assumptions in upstream examples and templates.
+
+Shared profile setup uses `SKILLS/learner-profile/SKILL.md` and never resolves a
+topic. Independent concept lessons use `SKILLS/concept-learning/SKILL.md` and
+save their session documents under `concept-sessions/`, without selecting or
+creating a topic. Honor an explicit `/guided-learning` or `$guided-learning`
+invocation; a question within an ongoing course lesson also stays in that course.
+For an unscoped standalone one-concept request, route to concept-learning before
+running this helper. The active topic is a course default, not a destination for
+all future learning requests.
 
 ## Resolve and pin a topic
 
 From the vault root, use `python3 SKILLS/guided-learning/scripts/topics.py list` to see registered topics. The registry is `topics/registry.json`.
 
 1. An explicitly named topic takes priority. Match its ID, title, or aliases, ignoring case. Select it with `python3 SKILLS/guided-learning/scripts/topics.py select "<topic>"`. An existing subject resumes its course; never bootstrap it again just because the learner says "I want to learn".
-2. A request to learn an unregistered subject creates a separate track. Choose a descriptive lowercase topic ID, then run `python3 SKILLS/guided-learning/scripts/topics.py create <topic-id> --title "<title>" --alias "<short name>"`. A new subject must not be added to an existing roadmap unless the learner explicitly requests that extension. If the request could instead name an existing concept or cluster, inspect the selected roadmap and ask once when the intent is unclear.
-3. "Continue", "continue my roadmap", and unnamed sessions use the last active topic: `python3 SKILLS/guided-learning/scripts/topics.py resolve`. If none is active, show the topics and ask the learner to choose or name a new subject.
+2. A request to start ongoing study of an unregistered subject creates a separate track. Choose a descriptive lowercase topic ID, then run `python3 SKILLS/guided-learning/scripts/topics.py create <topic-id> --title "<title>" --alias "<short name>"`. A new subject must not be added to an existing roadmap unless the learner explicitly requests that extension. If an explicit course request could name an existing concept or cluster, inspect the selected roadmap and ask once when the intended course destination is unclear. Do not create a course for a standalone focused lesson.
+3. "Continue my roadmap", course-context "continue", and unnamed explicit guided-learning sessions use the last active topic: `python3 SKILLS/guided-learning/scripts/topics.py resolve`. If none is active, show the topics and ask the learner to choose or name a new subject.
 4. A named concept or cluster is resolved within the selected topic. If multiple topics match or a topic cannot be resolved, ask before saving learning data; never fall back to the root roadmap.
-5. For a PDF, URL, or paste, establish the target topic from the request. If the source is unrelated to the selected topic, or its destination is unclear, ask which topic to use or whether to create a new one before persisting it. A source taught without adding concepts still needs a topic for its journal.
+5. For a PDF, URL, or paste assigned to course study, establish the target topic from the request. If the source is unrelated to the selected topic, or its destination is unclear, ask which topic to use or whether to create a new one before persisting it. A source taught in the course workflow without adding concepts still needs a topic for its journal. Independent focused source lessons use concept-session records instead.
 
 The helper prints the selected entry as JSON, including its `paths`. Pin that topic ID and those paths in the session context; announce its title once. Do not reread a global active-topic value to decide where to save an in-progress session. Another session may have changed it. If the learner explicitly switches topics mid-session, save the current journal in its original topic before switching.
 
@@ -49,7 +58,7 @@ Cross-topic links are allowed when useful. They do not mark another topic's conc
 
 Read the selected roadmap's **Teaching preferences** section before teaching.
 Approved topic overrides take priority over vault defaults, while current explicit
-requests take priority over both. Follow [personalization.md](personalization.md)
+requests take priority over both. Follow [personalization.md](../../learner-profile/references/personalization.md)
 to propose and get approval for new ongoing preferences. Use the pinned roadmap
 path for topic preferences, including legacy courses. Vault preferences belong in
 the learner profile; learner feedback must not rewrite the shared skill source.

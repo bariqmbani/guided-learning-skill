@@ -32,6 +32,14 @@ class CreateVaultTests(unittest.TestCase):
         self.assertEqual(result.returncode == 0, success, result.stderr)
         return json.loads(result.stdout) if success else result.stderr
 
+    def session_helper(self, vault, *arguments):
+        result = subprocess.run([
+            sys.executable, str(vault / "SKILLS/concept-learning/scripts/sessions.py"),
+            "--vault", str(vault), *arguments,
+        ], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return json.loads(result.stdout)
+
     def test_export_is_empty_and_does_not_copy_source_learning(self):
         source = self.base / "source"
         for relative in [*setup.ASSETS, "SKILLS/guided-learning/UPSTREAM.json"]:
@@ -46,6 +54,10 @@ class CreateVaultTests(unittest.TestCase):
             "topics/registry.json", "SKILLS/guided-learning/logs/session.md",
             "learning/interactives/private-lesson.html",
             "learner-profile.json", "Learner Profile.md",
+            "concept-sessions/2026-10-07_private/note.md",
+            "concept-sessions/2026-10-07_private/mentor-feedback.md",
+            "concept-sessions/2026-10-07_private/practice.md",
+            "SKILLS/concept-learning/logs/private.md",
         ]:
             target = source / relative
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -55,6 +67,7 @@ class CreateVaultTests(unittest.TestCase):
         registry = json.loads((destination / "topics/registry.json").read_text())
         self.assertEqual(registry, {"schema_version": 1, "active_topic": None, "topics": []})
         self.assertEqual({p.name for p in (destination / "topics").iterdir()}, {"README.md", "registry.json"})
+        self.assertEqual({p.name for p in (destination / "concept-sessions").iterdir()}, {"README.md"})
         self.assertEqual({p.name for p in (destination / "learning/interactives").iterdir()}, {"build.sh", "interactive.css", "example-interactive.html"})
         self.assertEqual(
             (destination / "learning/interactives/example-interactive.html").read_bytes(),
@@ -75,9 +88,40 @@ class CreateVaultTests(unittest.TestCase):
         self.assertEqual(profile["name"], "")
         self.assertEqual(profile["explanation_style"], "adaptive")
         self.assertEqual(profile["preferred_extras"], [])
-        for reference in ["onboarding-evidence.md", "topic-intake.md"]:
-            self.assertTrue((destination / "SKILLS/guided-learning/references" / reference).is_file())
+        for reference in [
+            "SKILLS/learner-profile/references/onboarding-evidence.md",
+            "SKILLS/guided-learning/references/topic-intake.md",
+        ]:
+            self.assertTrue((destination / reference).is_file())
         self.assertIn("$guided-learning onboard", (destination / "Home.md").read_text())
+        self.assertEqual(self.session_helper(destination, "list"), {"sessions": []})
+
+    def test_focused_sessions_preserve_courses_and_shared_preferences(self):
+        vault = self.base / "learning"
+        setup.create_vault(ROOT, vault, "Learning")
+        self.helper(vault, "create", "physics", "--title", "Physics")
+        profile = {**setup.profiles.default_profile(), "language": "Bahasa Indonesia"}
+        setup.profiles.save_profile(vault, profile)
+        before = {p: p.read_bytes() for p in vault.rglob("*") if p.is_file()}
+
+        first = self.session_helper(vault, "create", "bubble-sort", "--title", "Bubble Sort",
+                                    "--date", "2026-10-07")
+        session = vault / first["root"]
+        self.assertEqual(session.parent, vault / "concept-sessions")
+        self.assertEqual({p.name for p in session.iterdir()}, {"note.md", "mentor-feedback.md", "practice.md"})
+        note = vault / first["paths"]["note"]
+        note.write_text(note.read_text() + "\nActual learner attempt: [1, 4, 2, 5].\n")
+        original_note = note.read_bytes()
+
+        second = self.session_helper(vault, "create", "bubble-sort", "--title", "Bubble Sort",
+                                     "--date", "2026-10-07")
+        self.assertNotEqual(first["root"], second["root"])
+        self.assertEqual(note.read_bytes(), original_note)
+        self.assertEqual(self.session_helper(vault, "resolve", first["root"]), first)
+        self.assertEqual(len(self.session_helper(vault, "list")["sessions"]), 2)
+        for path, contents in before.items():
+            self.assertEqual(path.read_bytes(), contents, str(path.relative_to(vault)))
+        self.assertEqual(self.helper(vault, "resolve")["id"], "physics")
 
     def test_generated_vault_can_create_and_switch_independent_topics(self):
         vault = self.base / "learning"
@@ -98,6 +142,23 @@ class CreateVaultTests(unittest.TestCase):
         for path, digest in before.items():
             self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), digest)
         self.assertIn("[[topics/physics/learning/learning-roadmap|Roadmap]]", (vault / "topics/README.md").read_text())
+
+    def test_skill_versions_and_release_history_survive_installation(self):
+        vault = self.base / "versioned"
+        setup.create_vault(ROOT, vault, "Versioned")
+        versions = {"guided-learning": "3.6.1", "concept-learning": "1.0.1", "learner-profile": "1.0.0"}
+        for name, version in versions.items():
+            source = ROOT / "SKILLS" / name
+            installed = vault / "SKILLS" / name
+            header = (source / "SKILL.md").read_text().split("---", 2)[1]
+            self.assertIn(f'  version: "{version}"', header)
+            self.assertEqual((installed / "CHANGELOG.md").read_bytes(), (source / "CHANGELOG.md").read_bytes())
+            self.assertIn(f"## [{version}]", (installed / "CHANGELOG.md").read_text())
+            for agent in [".agents", ".claude"]:
+                entry = vault / agent / "skills" / name / "SKILL.md"
+                self.assertEqual(entry.read_text().split("---", 2)[1], header)
+        upstream = json.loads((vault / "SKILLS/guided-learning/UPSTREAM.json").read_text())
+        self.assertEqual(upstream["local_version"], versions["guided-learning"])
 
     def test_refuses_existing_destinations_and_archives(self):
         destination = self.base / "existing"
@@ -137,10 +198,12 @@ class CreateVaultTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(self.helper(destination, "list")["topics"], [])
         for agent in [".agents", ".claude"]:
-            entry = destination / agent / "skills/guided-learning/SKILL.md"
-            self.assertTrue(entry.is_file())
-            self.assertFalse(entry.is_symlink())
-            self.assertIn("SKILLS/guided-learning/SKILL.md", entry.read_text())
+            for name in ["learner-profile", "concept-learning", "guided-learning"]:
+                entry = destination / agent / "skills" / name / "SKILL.md"
+                self.assertTrue(entry.is_file())
+                self.assertFalse(entry.is_symlink())
+                self.assertIn(f"SKILLS/{name}/SKILL.md", entry.read_text())
+                self.assertTrue((destination / "SKILLS" / name / "SKILL.md").is_file())
         self.assertIn("# My Learning", (destination / "Home.md").read_text())
 
     def test_zip_keeps_hidden_skill_entries_and_can_generate_another_empty_vault(self):
@@ -149,8 +212,9 @@ class CreateVaultTests(unittest.TestCase):
         setup.create_vault(ROOT, destination, "Learning", archive)
         extracted = self.base / "extracted"
         with zipfile.ZipFile(archive) as bundle:
-            self.assertIn("first/.agents/skills/guided-learning/SKILL.md", bundle.namelist())
-            self.assertIn("first/.claude/skills/guided-learning/SKILL.md", bundle.namelist())
+            for name in ["learner-profile", "concept-learning", "guided-learning"]:
+                self.assertIn(f"first/.agents/skills/{name}/SKILL.md", bundle.namelist())
+                self.assertIn(f"first/.claude/skills/{name}/SKILL.md", bundle.namelist())
             self.assertIn("first/attachments/", bundle.namelist())
             self.assertIn("first/learning/interactives/example-interactive.html", bundle.namelist())
             self.assertFalse(any("/.git/" in name for name in bundle.namelist()))
@@ -162,6 +226,9 @@ class CreateVaultTests(unittest.TestCase):
         profile = setup.profiles.default_profile()
         profile["name"] = "Original Owner"
         setup.profiles.save_profile(portable, profile)
+        session = self.session_helper(portable, "create", "private-concept", "--title", "Private concept",
+                                      "--date", "2026-10-07")
+        (portable / session["paths"]["mentor_feedback"]).write_text("Private learner feedback")
         another = self.base / "second"
         result = subprocess.run([
             sys.executable, str(portable / "scripts/create_vault.py"), str(another),
@@ -169,6 +236,8 @@ class CreateVaultTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(self.helper(another, "list")["topics"], [])
         self.assertFalse((another / "topics/biology").exists())
+        self.assertEqual(self.session_helper(another, "list"), {"sessions": []})
+        self.assertEqual({p.name for p in (another / "concept-sessions").iterdir()}, {"README.md"})
         self.assertEqual(
             (another / "learning/interactives/example-interactive.html").read_bytes(),
             (ROOT / "SKILLS/guided-learning/interactives/example-interactive.html").read_bytes(),
@@ -221,6 +290,23 @@ class CreateVaultTests(unittest.TestCase):
         self.assertEqual(setup.profiles.read_profile(vault), saved)
         changed = {str(p.relative_to(vault)) for p, content in before.items() if p.read_bytes() != content}
         self.assertEqual(changed, {"learner-profile.json", "Learner Profile.md"})
+
+    def test_canonical_and_legacy_profile_helpers_share_one_profile(self):
+        vault = self.base / "learning"
+        setup.create_vault(ROOT, vault, "Learning")
+        profile = {**setup.profiles.default_profile(), "language": "日本語", "session_minutes": 15}
+        input_path = self.base / "profile.json"
+        input_path.write_text(json.dumps(profile))
+        for skill in ["learner-profile", "guided-learning"]:
+            command = [sys.executable, str(vault / "SKILLS" / skill / "scripts/profile.py"),
+                       "--vault", str(vault)]
+            saved = subprocess.run([*command, "save", "--input", str(input_path)], capture_output=True, text=True)
+            self.assertEqual(saved.returncode, 0, saved.stderr)
+            loaded = subprocess.run([*command, "show"], capture_output=True, text=True)
+            self.assertEqual(loaded.returncode, 0, loaded.stderr)
+            self.assertEqual(json.loads(loaded.stdout), {**profile, "configured": True})
+        self.assertEqual(self.helper(vault, "list")["topics"], [])
+        self.assertEqual(self.session_helper(vault, "list"), {"sessions": []})
 
     def test_invalid_profile_is_rejected_before_any_preference_or_course_write(self):
         vault = self.base / "learning"

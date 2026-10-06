@@ -1,20 +1,20 @@
-# Guided Learning Onboarding
+# Shared Learner Setup
 
-Handle `$guided-learning onboard` (Codex), `/guided-learning onboard` (Claude Code), or a request to set up or update learning preferences as a conversation in chat. This sets reusable vault preferences. It does not require a topic, select a course, generate a roadmap, or change learning progress.
+Handle `$learner-profile` (Codex), `/learner-profile` (Claude Code), a request to set up or update shared learning preferences, or the compatibility alias `guided-learning onboard` as a conversation in chat. This sets reusable vault preferences. It supports both guided-learning and concept-learning. It does not require a topic, select a course, create a concept session, generate a roadmap, or change learning progress.
 
-Act like a thoughtful one-to-one tutor getting to know a learner. **Optional means offer the question and accept a skip, not omit the question.** Guide the learner through every editable field in `learner-profile.json`, explaining how answers can shape lessons. The rationale and evidence are in [onboarding-evidence.md](onboarding-evidence.md). Detailed topic goals and starting knowledge belong to [topic-intake.md](topic-intake.md), when the learner starts a subject.
+Act like a thoughtful one-to-one tutor getting to know a learner. **Optional means offer the question and accept a skip, not omit the question.** Guide the learner through every editable field in `learner-profile.json`, explaining how answers can shape lessons. The rationale and evidence are in [onboarding-evidence.md](onboarding-evidence.md). Detailed course goals and starting knowledge belong to [topic intake](../../guided-learning/references/topic-intake.md). A focused concept session keeps its own objective and starting-point evidence in `note.md`. Neither belongs in the global profile.
 
 ## Read existing preferences
 
 From the vault root:
 
 ```bash
-python3 SKILLS/guided-learning/scripts/profile.py show
+python3 SKILLS/learner-profile/scripts/profile.py show
 ```
 
 An absent profile returns unconfigured defaults without writing anything. Preserve every unanswered field, including older presentation and extras preferences. Never replace a configured profile with new defaults. If invalid, inspect the error and repair only the concrete problem; do not discard answers.
 
-For a bare `onboard` request, briefly acknowledge saved choices, then guide the learner through the remaining optional fields. `configured: true` means preferences were saved; it does not prove every field was offered. If the learner requests a specific update only, make that update without restarting the full conversation. Respect requests to keep all other fields unchanged. Do not restart onboarding during ordinary lessons.
+For a bare `learner-profile` or legacy `onboard` request, briefly acknowledge saved choices, then guide the learner through the remaining optional fields. `configured: true` means preferences were saved; it does not prove every field was offered. If the learner requests a specific update only, make that update without restarting the full conversation. Respect requests to keep all other fields unchanged. Do not restart onboarding during ordinary lessons.
 
 ## Guide the conversation
 
@@ -69,8 +69,8 @@ Use these prompts as a guide, adapting the wording to earlier answers:
 | `language` | "Which language would you like us to use? A bilingual mix is welcome, or you can skip." | Use it immediately for the remaining conversation and future lessons. Never infer it from name, location, or locale. Keep bilingual wording verbatim. If skipped, disclose the English starting default. |
 | `name` | "What would you like me to call you? A nickname is fine, and you can leave this blank." | Address the learner naturally, without repeating their name in every reply. |
 | `background` | "What experience or interests could I draw on when explaining new ideas? A little context is enough, or we can skip." | Choose familiar examples and analogies. Do not require an employer, degree, job title, or personal history, or treat self-report as proof of mastery. |
-| `goals` | "Broadly, what would you like learning to help you do? It's fine to be exploring." | Tailor encouragement and relevance. Accept broad aims; leave detailed course outcomes for topic intake. |
-| `learning_context` | "Is this mainly for personal curiosity, work, research, or a mix? We can also decide per topic." | Map to `self-study`, `professional`, `research`, or `auto`. Reuse an explicitly stated purpose instead of asking twice. Mixed or undecided purposes use `auto`. |
+| `goals` | "Broadly, what would you like learning to help you do? It's fine to be exploring." | Tailor encouragement and relevance. Accept broad aims; leave detailed outcomes for the course plan or focused session note. |
+| `learning_context` | "Is this mainly for personal curiosity, work, research, or a mix? We can also decide per course or concept session." | Map to `self-study`, `professional`, `research`, or `auto`. Reuse an explicitly stated purpose instead of asking twice. Mixed or undecided purposes use `auto`. |
 | `session_minutes` | "How much time usually feels comfortable for a lesson? We can start around 20 minutes if you're unsure." | Set a realistic scope. For a range, use a representative integer and keep the range in `preferences`. |
 | `explanation_style` | "What would feel helpful: a careful step-by-step explanation, a short overview, a back-and-forth discussion, or having me adapt as we go? Other suggestions are welcome." | Offer an adjustable presentation preference. Visual and hands-on requests are also valid; explain unfamiliar options with a short example if asked. |
 | `preferred_extras` | "Would you enjoy more worked examples, practice challenges, or small projects? You can choose several, suggest something else, or let me choose as we go." | Offer two or three concrete aids suited to what they shared. Code, interactive visuals, writing, and guided source reading are also available. Avoid requiring a catalog selection. |
@@ -113,29 +113,28 @@ Save after every pending field has been answered or explicitly skipped, or when 
 - `preferences`: constraints, accommodations, available tools, and free-text requests. Store a desired restriction such as "no interactives" here; an empty extras list is not a ban on teaching aids.
 - `explanation_style`: `adaptive`, `step-by-step`, `concise`, `visual`, `discussion`, or `hands-on`. This is an adjustable presentation preference, never a diagnosis or proof of an effective method.
 - `preferred_extras`: optional priorities from `worked_examples`, `practice_exercises`, `interactive_visualizations`, `code_examples`, `mini_projects`, `writing_exercises`, or `source_reading`. An empty list means no priorities stated. Practice and feedback remain part of teaching.
-- `learning_context`: `auto`, `self-study`, `professional`, or `research`; use the learner's stated purpose. Each topic may differ.
-- `name`, `background`, `goals`: optional general context. Store a particular course's goal and evidence of starting knowledge in that course, not as universal facts about the learner.
+- `learning_context`: `auto`, `self-study`, `professional`, or `research`; use the learner's stated purpose. Each course or concept session may differ.
+- `name`, `background`, `goals`: optional general context. Store a particular course's goal and evidence of starting knowledge in that course, and a focused lesson's goal in its session note, not as universal facts about the learner.
 
 Write a complete object to a temporary JSON file using a structured write; do not interpolate learner text into a shell command. Save it:
 
 ```bash
-python3 SKILLS/guided-learning/scripts/profile.py save --input /path/to/temporary-profile.json
+python3 SKILLS/learner-profile/scripts/profile.py save --input /path/to/temporary-profile.json
 ```
 
 The helper validates before writing, sets `configured: true`, and updates only `learner-profile.json` and `Learner Profile.md`. Delete the temporary input. Explain that preferences are stored in these local vault files; the learning chat runs through the learner's chosen AI service. Do not request credentials or unrelated private material.
 
-Read the saved result and summarize the resulting teaching plan in a few sentences, connecting answers to specific choices of examples, pace, explanation, practice, and feedback. Identify retained defaults and skipped details without presenting them as personal facts. Give an illustrative lesson approach, not a fabricated completed lesson. Explain **I want to learn [topic]** or **Continue [topic]**, and that onboarding can be revisited anytime. If a session is already in progress, apply the preferences while preserving its pinned topic and current position. Onboarding never edits course goals, checkboxes, recall dates, or journals.
+Read the saved result and summarize the resulting teaching plan in a few sentences, connecting answers to specific choices of examples, pace, explanation, practice, and feedback. Identify retained defaults and skipped details without presenting them as personal facts. Give an illustrative lesson approach, not a fabricated completed lesson. Explain that `$concept-learning <concept>` / `/concept-learning <concept>` starts a focused session, while `$guided-learning <topic>` / `/guided-learning <topic>` starts or continues a course, and setup can be revisited anytime. If a session is already in progress, apply the preferences while preserving its pinned topic or concept-session path and current position. Setup never edits course goals, checkboxes, recall dates, journals, or concept-session records.
 
 ## Apply and refine
 
-Read the configured profile at session start. Current explicit requests take priority, then the selected topic's plan, then vault defaults. Choose explanations and aids by the concept, observed responses, and constraints; preferences are useful input, not evidence of mastery. Use worked examples when helpful, then reduce scaffolding as the learner succeeds independently. Provide accessible alternatives when an aid cannot be used.
+Read the configured profile at session start. Current explicit requests take priority, then approved preferences in the selected course or current concept session, then vault defaults. A standalone concept session never inherits the active course's preferences implicitly. Choose explanations and aids by the concept, observed responses, and constraints; preferences are useful input, not evidence of mastery. Use worked examples when helpful, then reduce scaffolding as the learner succeeds independently. Provide accessible alternatives when an aid cannot be used.
 
-Also read approved overrides in the selected roadmap's **Teaching preferences**
-section. For an ongoing adjustment inferred from feedback, follow
+For a course, also read approved overrides in the selected roadmap's **Teaching preferences** section. For focused learning, read the current session note and its recorded preferences, without resolving an unrelated active topic. For an ongoing adjustment inferred from feedback, follow
 [personalization.md](personalization.md): propose the wording and scope, and wait
 for approval before changing future preferences. Explicit onboarding answers and
 direct requests to save a scoped preference already provide authorization.
 
-Briefly explain that lessons include trying an answer or task, corrective feedback, and later recall. Respect requests to pause, defer, or change the form of a check. Keep these learning activities in the method rather than presenting them as optional extras to purchase or select.
+Briefly explain that lessons include trying an answer or task and corrective feedback. Courses also include later recall; focused sessions offer later review without enrolling the learner or scheduling recall automatically. Respect requests to pause, defer, or change the form of a check. Keep these learning activities in the method rather than presenting them as optional extras to purchase or select.
 
-If absent or unconfigured, offer onboarding without blocking a topic request; ask about language and immediate time constraints when needed. After an early lesson, invite one actionable adjustment, such as "Should we adjust pace, difficulty, or examples next time?" Skip this if the learner has already given feedback. Infer mastery from explanations and task performance over time, including delayed recall, not from preference answers or satisfaction alone.
+If absent or unconfigured, offer learner-profile setup without blocking a course or concept request; ask about language and immediate time constraints when needed. After an early lesson, invite one actionable adjustment, such as "Should we adjust pace, difficulty, or examples next time?" Skip this if the learner has already given feedback. Infer mastery from explanations and task performance over time, including delayed recall, not from preference answers or satisfaction alone.

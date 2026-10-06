@@ -1,14 +1,14 @@
 # Why These Onboarding Questions
 
-Reviewed 2026-10-06. These are design recommendations inferred from learning research. The research supports teaching principles; it does not validate this exact chatbot flow, its question count, a 20-minute session, or the skill as a complete intervention.
+Research reviewed 2026-10-06; scope extended to both learning skills 2026-10-07. These are design recommendations inferred from learning research. The research supports teaching principles; it does not validate this exact chatbot flow, its question count, a 20-minute session, or the skill as a complete intervention.
 
 ## Evidence behind the decisions
 
 | Research finding | Design implication |
 | --- | --- |
-| Prior knowledge, the learning task, and goals affect how instructional strategies work. Meaningful goals and learner agency matter for motivation. [National Academies, *How People Learn II*, 2018, conclusions 5-1, 5-4, 6-2](https://www.nationalacademies.org/read/24783/chapter/2) | Ask for an actionable outcome and starting knowledge per topic. Make goals provisional and editable; use brief task evidence to adjust support. |
+| Prior knowledge, the learning task, and goals affect how instructional strategies work. Meaningful goals and learner agency matter for motivation. [National Academies, *How People Learn II*, 2018, conclusions 5-1, 5-4, 6-2](https://www.nationalacademies.org/read/24783/chapter/2) | Ask for an actionable outcome and starting knowledge per course or focused concept session. Make goals provisional and editable; use brief task evidence to adjust support. |
 | The evidence reviewed did not justify assigning learners a style and matching instruction to that style. [Pashler et al., *Learning Styles: Concepts and Evidence*, 2008](https://doi.org/10.1111/j.1539-6053.2009.01038.x) | Remove the required style survey. Respect presentation preferences and access needs without treating them as fixed traits or guarantees. |
-| Practice testing and distributed practice received high utility ratings across the reviewed contexts; feedback improves the usefulness of practice testing. [Dunlosky et al., 2013](https://doi.org/10.1177/1529100612453266) ([full paper](https://acs.ist.psu.edu/ist521/dunloskyRMNW13.pdf)) | Keep attempts, feedback, and later recall in the lesson method. Ask about realistic opportunities to return; don't ask learners to choose these from an extras catalog. |
+| Practice testing and distributed practice received high utility ratings across the reviewed contexts; feedback improves the usefulness of practice testing. [Dunlosky et al., 2013](https://doi.org/10.1177/1529100612453266) ([full paper](https://acs.ist.psu.edu/ist521/dunloskyRMNW13.pdf)) | Keep attempts and feedback in both lesson methods, with later recall in ongoing courses. Offer optional later review for focused sessions. Ask about realistic opportunities to return for a course; don't ask learners to choose these from an extras catalog. |
 | A systematic review of applied school and classroom research found benefits from retrieval practice across varied settings. [Agarwal, Nunes, and Blunt, 2021](https://doi.org/10.1007/s10648-021-09595-9) | Use retrieval in real lessons, with feedback. Classroom findings are useful guidance, not direct validation of an adult learning chatbot. |
 | The guide recommends combining worked examples with problem solving, graphics with verbal descriptions, and reducing worked examples as expertise grows. It rates pre-questions less strongly than retrieval quizzes. [IES practice guide, 2007](https://ies.ed.gov/ncee/wwc/PracticeGuide/1) | Choose representations for the task. Use a brief starting probe to calibrate teaching, then adapt scaffolding from actual attempts. Don't claim the probe itself guarantees better learning. |
 
@@ -21,12 +21,12 @@ Language, time, tools, and accommodations are practical design inputs here. Aski
 | Preferred teaching language or bilingual mix? | First vault setup, unless explicitly known | Explanations, questions, lesson notes, terminology. |
 | Preferred name or nickname? | Optional during guided onboarding | How the tutor addresses the learner. This is a conversational preference, not a claim of improved learning. |
 | General experience and interests? | Optional during guided onboarding | Familiar examples and analogies; does not establish topic mastery. |
-| Broad aims and personal, work, or research context? | Optional during guided onboarding | Default relevance and audience; each topic still gets its own concrete outcome. |
+| Broad aims and personal, work, or research context? | Optional during guided onboarding | Default relevance and audience; each course or focused session still gets its own concrete outcome. |
 | Typical session time? | Vault setup; reuse until changed | Scope and number of activities; split heavy concepts. |
 | Explanation and activity preferences? | Optional during guided onboarding | Adjustable presentation and aid priorities, without assigning learner types or making practice conditional on selection. |
 | Constraints or explicit preferences? | Optional at setup; clarify only when relevant | Usable formats, tools, chunks, and examples. |
-| What should you be able to do, and for what purpose? | Each new topic | Roadmap scope, application tasks, success demonstration. |
-| What have you tried, and where do you get stuck? | Each new topic | Provisional starting point, prerequisite checks, support. |
+| What should you be able to do, and for what purpose? | Each new course or focused session | Roadmap or lesson scope, application tasks, success demonstration. |
+| What have you tried, and where do you get stuck? | Each new course or focused session | Provisional starting point, prerequisite checks, support. |
 | When can you return for practice or review? | Each new topic; optional | Feasible amount of new learning and review. |
 | Did pace, difficulty, or examples need adjustment? | After an early lesson, if not already answered | One concrete teaching adjustment; not a mastery score. |
 

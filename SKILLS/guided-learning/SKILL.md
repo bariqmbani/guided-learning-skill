@@ -1,15 +1,14 @@
 ---
 name: guided-learning
-version: 3.5.0
+metadata:
+  version: "3.6.1"
 description: >
-  Run structured learning sessions using a spiral curriculum. Each session covers 1-3 concepts with
-  adaptive explanations, comprehension checks, interactive HTML visualizations, and spaced recall.
-  Supports three entry points: (1) continue an existing learning roadmap, (2) name a topic to
-  bootstrap a roadmap from scratch, or (3) provide a PDF/URL/text to learn from immediately.
-  Use when the learner wants to study, learn, continue their roadmap, work through concepts,
-  review what they've learned, get quizzed, understand a paper or article, or start learning
-  a new topic from zero. Supports onboard to set learner preferences in chat.
-  Keeps independent learning tracks in one vault.
+  Guide ongoing courses with topic roadmaps, a spiral curriculum, personalized
+  lessons, and spaced recall. Use to start or continue a course, work through
+  its concepts or sources, or review its learning progress. Explicit
+  guided-learning requests choose this course workflow. Independent focused
+  concept lessons use concept-learning; shared preference setup uses
+  learner-profile. Keeps guided-learning onboard as a compatibility alias.
 ---
 
 # Guided Learning — Spiral Curriculum Sessions
@@ -18,15 +17,39 @@ description: >
 
 Run structured learning sessions through a literature-backed concept collection using a spiral curriculum approach. Each session covers 1-3 concepts with explanations, comprehension checks, and hands-on application — including interactive HTML visualizations for concepts that benefit from them.
 
+## Dispatch Before Topic Selection
+
+Choose the workflow before resolving a topic or reading/writing course data:
+
+1. **Shared learner setup:** `$guided-learning onboard`, `/guided-learning onboard`,
+   or a request whose purpose is to set up/update shared learning preferences
+   forwards to [learner-profile](../learner-profile/SKILL.md). Follow its
+   conversational setup or targeted update flow, then stop unless the learner
+   also asked to learn. It requires no subject and never creates or resets a
+   course or concept session. Existing saved answers remain valid.
+2. **Explicit course choice:** `$guided-learning` or `/guided-learning` without
+   `onboard` selects this course workflow, including when a concept is supplied.
+   Requests to continue a roadmap, review a course, or learn a subject over time
+   also use this workflow. Honor an explicitly named learning skill; do not
+   silently redirect `/guided-learning bubble sort` to another skill.
+3. **Focused concept learning:** An independent request to understand one concept
+   or mechanism, without an explicit course command or an ongoing course lesson
+   context, uses [concept-learning](../concept-learning/SKILL.md). Route there
+   before `topics.py resolve` or `create`; its automatic session documents belong
+   under `concept-sessions/`, outside topics. A question within the current course
+   lesson stays in its pinned topic. A source request aimed at one concept can
+   use the focused workflow; a source explicitly assigned to a course stays here.
+4. **Ambiguous scope:** Ask one short scope question only if the request does not
+   distinguish a focused lesson from an ongoing course. A broad subject plus a
+   request for a curriculum clearly selects this skill; an active topic alone
+   does not turn an unrelated standalone concept question into course work.
+
+Both learning skills use the same profile and
+[shared tutoring principles](../learner-profile/references/teaching.md): guided
+small steps, learner attempts, adaptive support, feedback, and evidence from an
+independent demonstration. This skill adds course progression and spaced recall.
+
 ## Prerequisites
-
-**Dispatch `onboard` before selecting a topic or starting a session.** For `$guided-learning onboard`, `/guided-learning onboard`, or a request to set up learning preferences, read `references/onboarding.md` and follow its conversational flow. Actively offer all nine editable profile fields, one question at a time; every answer is optional. Begin with the first unanswered question and wait. Do not save defaults or end onboarding merely because language and time are known. Respect skips, early finish, and targeted updates. Onboarding requires no subject and updates only the vault-level learner profile; it must not bootstrap or reset a course.
-
-During onboarding, prefer the harness's available interactive question tool. Keep
-one question outstanding, consume its answer, then continue to the next field;
-reserve the final reply for completion or a requested stop. Use chat questions when the host or
-current mode does not provide a usable question tool. Follow the delivery rules
-in `references/onboarding.md`.
 
 The skill uses the following vault structure. **All of these are created automatically** by the bootstrapper if they don't exist — you don't need to set anything up manually.
 
@@ -43,7 +66,7 @@ For manual setup, see the `examples/` directory for starter templates.
 
 ## Configuration and Topic Selection
 
-**Before any learning-file read or write, read `references/topic-routing.md` relative to this skill directory and resolve the topic using `scripts/topics.py` from the vault root.** Routing applies to the Bootstrapper, Teach-from-Source, every session phase, connection mapping, recall, and log analysis.
+**After dispatch selects the course workflow and before any course-file read or write, read `references/topic-routing.md` relative to this skill directory and resolve the topic using `scripts/topics.py` from the vault root.** Shared profile setup and focused concept sessions do not use topic routing. Routing applies to the Bootstrapper, Teach-from-Source, every session phase, connection mapping, recall, and log analysis.
 
 ```bash
 python3 SKILLS/guided-learning/scripts/topics.py resolve
@@ -61,11 +84,11 @@ For a missing or invalid registry, follow the recovery rules in `references/topi
 
 ### Learner profile
 
-At the start of a session, read the vault profile with `python3 SKILLS/guided-learning/scripts/profile.py show`. If `configured` is true, use the preferred teaching language for explanations, recall questions, comprehension checks, exercise prompts, and new lesson prose, including any bilingual preference. Apply the approximate session budget and functional constraints. During first onboarding, explicitly ask the language unless already provided; an unconfigured English placeholder is not an answer. Background and general goals guide examples and prerequisite probing; they do not establish mastery. Use `learning_context` as a default for a **new** topic when it is not `auto`. The selected topic's stored goals and domain mode take priority over global defaults; explicit requests in the current conversation take priority over all saved preferences.
+At the start of a session, read the vault profile with `python3 SKILLS/learner-profile/scripts/profile.py show`. If `configured` is true, use the preferred teaching language for explanations, recall questions, comprehension checks, exercise prompts, and new lesson prose, including any bilingual preference. Apply the approximate session budget and functional constraints. During shared learner setup, explicitly ask the language unless already provided; an unconfigured English placeholder is not an answer. Background and general goals guide examples and prerequisite probing; they do not establish mastery. Use `learning_context` as a default for a **new** topic when it is not `auto`. The selected topic's stored goals and domain mode take priority over global defaults; explicit requests in the current conversation take priority over all saved preferences.
 
 Choose teaching methods by the task, observed responses, and access constraints. `adaptive` is the default presentation; older saved styles remain valid, adjustable preferences rather than fixed learner types. Preferred extras are priorities, not an allowlist; an empty list does not disable practice or visuals. Respect explicit exclusions in `preferences` and provide usable alternatives. Worked examples, practice, feedback, and spaced recall belong in the teaching method when appropriate; no extra approval is needed merely because an aid was not selected. Respect requests to pause or defer checks. Split heavy concepts across sessions instead of exceeding the available time.
 
-If absent or unconfigured, offer `$guided-learning onboard` or `/guided-learning onboard` without blocking learning; ask about teaching language and immediate time constraints when needed. Use `references/topic-intake.md` for missing goals and starting knowledge in a new track. In an existing course, use its plan and recent protocol without rerunning intake. After an early lesson, invite one actionable adjustment to pace, difficulty, or examples if feedback has not already been given. Changing preferences never resets or marks progress.
+If absent or unconfigured, offer `$learner-profile` or `/learner-profile` without blocking learning; ask about teaching language and immediate time constraints when needed. Use `references/topic-intake.md` for missing goals and starting knowledge in a new track. In an existing course, use its plan and recent protocol without rerunning intake. After an early lesson, invite one actionable adjustment to pace, difficulty, or examples if feedback has not already been given. Changing preferences never resets or marks progress.
 
 ### Personalization from feedback
 
@@ -73,7 +96,7 @@ Read the selected roadmap's **Teaching preferences** section alongside the vault
 profile before teaching. Current requests take priority, then approved topic
 preferences, then vault defaults; topic overrides also apply when the global
 profile is unconfigured. When feedback suggests an ongoing adjustment, read
-`references/personalization.md`. Repair the current explanation, propose concrete
+[shared personalization](../learner-profile/references/personalization.md). Repair the current explanation, propose concrete
 wording for the topic, the vault, or both, and wait for approval before saving or
 adopting the new ongoing rule. A direct request with explicit scope already
 authorizes that change. Personal adaptations belong in the profile or selected
@@ -111,23 +134,25 @@ Comprehension checks ask the learner to explain at a dinner table, draft blog po
 
 ## When to Use
 
-- The learner wants to study or work through their literature
-- The learner asks to continue their learning roadmap
-- The learner references a specific concept they want to understand
-- The learner asks for an interactive explanation of something
-- **The learner names a topic they want to learn** (no existing roadmap required — triggers bootstrapper)
-- **The learner provides a PDF, URL, or paste** they want to understand (triggers teach-from-source mode)
+- The learner explicitly invokes `$guided-learning` or `/guided-learning`.
+- The learner wants to start an ongoing course, follow a curriculum, or continue
+  a registered roadmap.
+- The learner wants to study a concept or source within their selected course.
+- The learner asks for spaced recall, course quizzes, or progress review.
+
+For an independent concept lesson use `concept-learning`; for shared preference
+setup use `learner-profile`. Dispatch these before topic selection as above.
 
 ## Input
 
 One of:
-- **`onboard`** → collect or update learner preferences in chat using `references/onboarding.md`; do not select or initialize a topic.
-- **No input** → pick the next unchecked item from the learning roadmap
-- **Cluster name** → work on the next item in that cluster
-- **Concept name** → jump to that specific concept
-- **"continue"** → resume from last session
-- **A topic** (e.g., "I want to learn Bayesian statistics") → triggers the **Bootstrapper** (see below)
-- **A PDF path, URL, or pasted text** → triggers **Teach-from-Source** mode (see below)
+- **`onboard`** → compatibility alias for shared learner setup; do not select or initialize a topic.
+- **No input** after an explicit course invocation → pick the next unchecked item from the learning roadmap.
+- **Cluster name** in a course → work on the next item in that cluster.
+- **Concept name** with an explicit course invocation or course context → jump to that concept in the selected topic.
+- **"continue"** → resume the current course from its last session.
+- **A subject for ongoing study** → start or resume its course; a new empty track triggers the **Bootstrapper**.
+- **A PDF path, URL, or pasted text assigned to a course** → **Teach-from-Source** mode in that topic.
 
 ---
 
@@ -139,7 +164,7 @@ After topic selection, when the selected track has no concept checklist entries 
 
 - Topic routing has selected the intended existing or newly created track.
 - Its roadmap does not exist or has no concept checklist entries (checked or unchecked).
-- The learner provides a topic rather than a concept name (e.g., "I want to learn about reinforcement learning", "teach me UX research methods", "help me understand transformer architectures")
+- Dispatch selected an ongoing course (for example, "build me a reinforcement learning curriculum" or `/guided-learning UX research methods`). An independent single-concept request has already routed to `concept-learning`.
 
 ### What it does
 
@@ -177,9 +202,11 @@ After topic selection, when the selected track has no concept checklist entries 
 
 ## Teach-from-Source — Learn from a PDF, URL, or Paste
 
-When the learner provides a specific source (PDF, URL, or pasted text) rather than a topic or concept name, the skill extracts concepts and teaches them in a single session flow.
+When a specific source (PDF, URL, or pasted text) is assigned to a course, the skill extracts concepts and teaches them within that topic. Dispatch an independent one-concept source lesson to `concept-learning` before topic selection.
 
 ### When it triggers
+
+Course intent has already been established, and:
 
 - The learner provides a file path to a PDF or text file
 - The learner provides a URL to an article, paper, or documentation page
@@ -188,7 +215,7 @@ When the learner provides a specific source (PDF, URL, or pasted text) rather th
 
 ### What it does
 
-First establish the intended topic using the topic-routing rules. Never silently add an unrelated source to the active roadmap.
+After dispatch selects this course workflow, establish the intended topic using the topic-routing rules. Never silently add an unrelated source to the active roadmap.
 
 1. **Extract the source content:**
    - PDF: read the full text (use available PDF reading tools)
@@ -230,7 +257,7 @@ First establish the intended topic using the topic-routing rules. Never silently
 
 ### Phase 0: Orient (1 min)
 
-1. **Resolve and pin the topic** using `references/topic-routing.md`, announce its title, then check for bootstrapper or teach-from-source triggers (see sections above). If triggered, follow that flow instead of the standard session flow.
+1. **Confirm course dispatch, then resolve and pin the topic** using `references/topic-routing.md`, announce its title, then check for bootstrapper or teach-from-source triggers (see sections above). If triggered, follow that flow instead of the standard session flow.
 2. Read the learning roadmap to find the next unchecked concept(s), and apply its approved Teaching preferences alongside the vault profile.
 3. Determine which pass we're in (1 = Overview, 2 = Working Understanding, 3 = Fluency)
 4. **Detect or recall domain mode** (see Domain Modes section). On the first session, infer from content or ask. On subsequent sessions, read the stored preference.
@@ -590,7 +617,7 @@ Track recurring correction types to adapt explanations preemptively.
 
 **Every 5 sessions in the selected topic**, review only its logs and count tag frequencies. If any tag appears in >=3 of the last 5 sessions:
 - **Surface it to the learner**: "I've noticed a pattern — [tag] has come up in X of our last 5 sessions."
-- **Propose an ongoing adjustment**: For `implication-gap`, suggest an explicit "What this means for your system" paragraph. For `math-gap`, suggest a longer prerequisite probe. For `terminology-confusion`, suggest a glossary sidebar. Show the concrete change and ask which scope to save it in, following `references/personalization.md`.
+- **Propose an ongoing adjustment**: For `implication-gap`, suggest an explicit "What this means for your system" paragraph. For `math-gap`, suggest a longer prerequisite probe. For `terminology-confusion`, suggest a glossary sidebar. Show the concrete change and ask which scope to save it in, following [shared personalization](../learner-profile/references/personalization.md).
 - **Save approved adaptations** in the vault profile or selected topic's Teaching preferences. Record actual feedback and the approval in the topic journal; do not write learner-specific changes into the shared CHANGELOG.
 
 ---
@@ -675,7 +702,7 @@ After each session, write a log to `{skill_logs_dir}/YYYY-MM-DD_sessionNN.md` (w
 ```yaml
 ---
 skill: "guided-learning"
-version: "3.5.0"
+version: "3.6.1"
 topic: "<selected-topic-id>"
 trigger: "<how the session was initiated>"
 pass: <1|2|3>

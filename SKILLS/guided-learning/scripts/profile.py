@@ -1,131 +1,29 @@
 #!/usr/bin/env python3
-"""Read or save preferences collected by the guided-learning onboarding conversation."""
+"""Compatibility entry point for the shared learner-profile helper.
 
-import argparse
-import json
+Existing installed commands and Python callers retain the same public API.
+"""
+
+import importlib.util
 from pathlib import Path
-import tempfile
 
 
-CONTEXTS = ["auto", "self-study", "professional", "research"]
-STYLES = ["adaptive", "step-by-step", "concise", "visual", "discussion", "hands-on"]
-EXTRAS = {
-    "worked_examples": "Worked examples",
-    "practice_exercises": "Practice exercises",
-    "interactive_visualizations": "Interactive visualizations",
-    "code_examples": "Code examples",
-    "mini_projects": "Mini projects",
-    "writing_exercises": "Writing exercises",
-    "source_reading": "Guided source reading",
-}
+_shared_path = Path(__file__).resolve().parents[2] / "learner-profile/scripts/profile.py"
+_spec = importlib.util.spec_from_file_location("shared_learner_profile", _shared_path)
+_shared = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_shared)
 
-
-def default_profile():
-    return {
-        "schema_version": 1,
-        "configured": False,
-        "name": "",
-        "background": "",
-        "goals": "",
-        "language": "English",
-        "learning_context": "auto",
-        "session_minutes": 20,
-        "explanation_style": "adaptive",
-        "preferred_extras": [],
-        "preferences": "",
-    }
-
-
-def validate_profile(profile):
-    if not isinstance(profile, dict) or set(profile) != set(default_profile()):
-        raise ValueError("Learner profile has missing or unknown fields")
-    if profile["schema_version"] != 1 or type(profile["configured"]) is not bool:
-        raise ValueError("Unsupported learner profile schema")
-    for field in ["name", "background", "goals", "language", "preferences"]:
-        if not isinstance(profile[field], str):
-            raise ValueError(f"Learner profile {field} must be text")
-    if not profile["language"].strip():
-        raise ValueError("Preferred language must not be empty")
-    if profile["learning_context"] not in CONTEXTS or profile["explanation_style"] not in STYLES:
-        raise ValueError("Unknown learning context or explanation preference")
-    minutes = profile["session_minutes"]
-    if type(minutes) is not int or not 5 <= minutes <= 180:
-        raise ValueError("Session length must be between 5 and 180 minutes")
-    extras = profile["preferred_extras"]
-    if not isinstance(extras, list) or any(not isinstance(item, str) or item not in EXTRAS for item in extras):
-        raise ValueError("Unknown preferred learning extra")
-    if len(extras) != len(set(extras)):
-        raise ValueError("Preferred learning extras must not repeat")
-    return profile
-
-
-def read_profile(vault):
-    path = vault / "learner-profile.json"
-    return validate_profile(json.loads(path.read_text(encoding="utf-8"))) if path.exists() else default_profile()
-
-
-def profile_markdown(profile):
-    validate_profile(profile)
-    intro = ("Your tutor uses these preferences as defaults. Each topic keeps its own goals and progress. "
-             "Run onboarding again to fill optional gaps or change any preference."
-             if profile["configured"] else
-             "Start onboarding in your learning chat with `$guided-learning onboard` (Codex) or `/guided-learning onboard` (Claude Code). "
-             "Your tutor will guide each field one question at a time. Every answer is optional; skip any question or finish early. "
-             "The values below are starting defaults, not answers you have given.")
-    values = [
-        ("Name", profile["name"] or "Not provided"),
-        ("General background", profile["background"] or "Not provided"),
-        ("General goals", profile["goals"] or "Not provided; set separately for each topic"),
-        ("Teaching language", profile["language"]),
-        ("Learning context", profile["learning_context"]),
-        ("Session length", f"{profile['session_minutes']} minutes"),
-        ("Explanation preference", profile["explanation_style"]),
-        ("Preferred aids", ", ".join(EXTRAS[key] for key in profile["preferred_extras"]) or "No priorities specified; tutor chooses when useful"),
-        ("Constraints and other preferences", profile["preferences"] or "Not provided"),
-    ]
-    return ("# Learner Profile\n\n" + intro + "\n\n"
-            + "\n".join(f"- **{label}:** {value}" for label, value in values)
-            + "\n\nPresentation preferences can change. They do not measure ability or mastery. "
-            "Practice, feedback, and spaced recall are part of the teaching method.\n")
-
-
-def atomic_write(path, content):
-    with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=path.parent, delete=False) as handle:
-        temporary = Path(handle.name)
-        handle.write(content)
-    try:
-        temporary.replace(path)
-    finally:
-        temporary.unlink(missing_ok=True)
-
-
-def save_profile(vault, profile):
-    if not (vault / "topics/registry.json").is_file() or not (vault / ".obsidian").is_dir():
-        raise ValueError("Choose an installed learning vault with --vault")
-    profile = {**validate_profile(profile), "configured": True}
-    markdown = profile_markdown(profile)
-    atomic_write(vault / "learner-profile.json", json.dumps(profile, indent=2, ensure_ascii=False) + "\n")
-    atomic_write(vault / "Learner Profile.md", markdown)
-    return profile
-
-
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--vault", type=Path, default=Path(__file__).resolve().parents[3])
-    commands = parser.add_subparsers(dest="command", required=True)
-    commands.add_parser("show")
-    save = commands.add_parser("save")
-    save.add_argument("--input", type=Path, required=True, help="JSON file with the profile collected in chat")
-    args = parser.parse_args()
-    vault = args.vault.expanduser().resolve()
-    try:
-        if args.command == "show":
-            profile = read_profile(vault)
-        else:
-            profile = save_profile(vault, json.loads(args.input.read_text(encoding="utf-8")))
-    except (ValueError, OSError) as exc:
-        parser.exit(1, f"Error: {exc}\n")
-    print(json.dumps(profile, indent=2, ensure_ascii=False))
+# Re-export the original public API so existing installers and integrations work.
+CONTEXTS = _shared.CONTEXTS
+STYLES = _shared.STYLES
+EXTRAS = _shared.EXTRAS
+default_profile = _shared.default_profile
+validate_profile = _shared.validate_profile
+read_profile = _shared.read_profile
+profile_markdown = _shared.profile_markdown
+atomic_write = _shared.atomic_write
+save_profile = _shared.save_profile
+main = _shared.main
 
 
 if __name__ == "__main__":

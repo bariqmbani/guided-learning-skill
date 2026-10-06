@@ -2,13 +2,61 @@
 
 A pedagogical framework for teaching complex academic concepts through structured revisitation, spaced recall, and adaptive explanation.
 
-The public vault setup uses [guided optional onboarding](references/onboarding.md)
-to offer every profile field one question at a time and tailor lesson examples,
-pace, explanations, and activities, then [topic intake](references/topic-intake.md)
-for a useful outcome and starting knowledge. Presentation preferences are adjustable;
-choose methods from the task and observed responses rather than a fixed learner type.
-The [research rationale](references/onboarding-evidence.md) distinguishes supported
+The public setup offers three skills: `learner-profile` for shared preferences,
+`concept-learning` for a focused lesson, and `guided-learning` for a course.
+Optional [learner-profile setup](../learner-profile/SKILL.md) offers every profile
+field one question at a time and tailors examples, pace, explanations, and
+activities for both learning skills. Learning can start before setup is complete.
+Guided-learning also uses [topic intake](references/topic-intake.md) for a course
+outcome and starting knowledge. Presentation preferences are adjustable; choose
+methods from the task and observed responses rather than a fixed learner type.
+The [research rationale](../learner-profile/references/onboarding-evidence.md) distinguishes supported
 principles from unvalidated choices in this particular tutor.
+
+---
+
+## Focused understanding and continued study
+
+A focused concept lesson and a course serve different scopes. For an immediate
+goal such as understanding bubble sort, `concept-learning` can combine intuition,
+a traced example, and an independent attempt in one session. It does not require
+a curriculum, a topic registry entry, or a future recall schedule. For a broader
+goal, `guided-learning` retains the spiral curriculum and scheduled recall
+described below.
+
+The focused lesson uses a compact teaching cycle:
+
+1. Establish one observable outcome and relevant starting knowledge.
+2. Explain through a worked example, with a representation suited to the task.
+3. Let the learner complete or predict part of an example, then give feedback.
+4. Ask for an independent explanation or a new application and address the gaps.
+5. Record the evidence from the session and give practice for the next attempt.
+
+For bubble sort, a suitable outcome might be tracing the adjacent comparisons and
+explaining why a completed pass puts the largest remaining element in its final
+position. A new input and a request to explain that property provide stronger
+evidence than agreement that an animation made sense. More advanced goals, such
+as implementing the algorithm or analyzing complexity, need their own attempts.
+
+This is a design assembled from evidence-informed principles, including worked
+examples, practice, feedback, and retrieval; see the
+[research rationale](../learner-profile/references/onboarding-evidence.md). The exact sequence,
+duration, generated documents, and model's assessment have not been validated as
+a complete intervention. Same-session performance is not evidence of durable
+retention, and a finished document is not evidence of a finished learning task.
+
+Concept-learning always saves `note.md`, `mentor-feedback.md`, and `practice.md`
+under `concept-sessions/YYYY-MM-DD_slug/` in the learner's workspace. It adds
+`interactive.html` or `resources.md` when useful. Feedback records actual answers,
+help given, and remaining uncertainty; it does not invent unobserved success.
+These documents support review while leaving course records untouched during
+ordinary concept lessons. A learner can explicitly request a course later;
+guided-learning then uses the existing topic workflow and preserves the session.
+
+Both routes can support useful learning. The spiral method below supplies
+continued opportunities to revisit and apply ideas; a focused session supplies a
+bounded goal and evidence of current understanding. Choosing one does not make
+the other method invalid.
 
 ---
 
@@ -312,7 +360,7 @@ When a pattern emerges, do two things:
 1. **Surface it to the learner.** "I have noticed a pattern: in three of our last five sessions, you have understood the mechanism but missed the implication for your own work." This is not criticism; it is diagnostic information. Most learners appreciate knowing their blind spots.
 
 2. **Propose a teaching adjustment.** In this vault, follow
-   [personalization.md](references/personalization.md): explain the suggested
+   [personalization.md](../learner-profile/references/personalization.md): explain the suggested
    ongoing change, ask whether to save it for this topic or the whole vault, and
    wait for approval. Immediate clarification and ordinary corrective teaching
    can continue. Possible adaptations for each pattern:

@@ -1,5 +1,24 @@
 # Guided Learning — Changelog
 
+## [3.6.1] — 2026-10-07
+
+### Fixed — Shared reference cleanup
+
+- Point personalization and onboarding research links directly to the maintained learner-profile references in source documentation and generated vaults.
+- Remove the four obsolete onboarding and personalization forwarding documents from guided-learning and its installer assets. The `guided-learning onboard` command and legacy profile-helper path remain supported.
+- Remove the unused session-log template; the execution-log schema remains in `SKILL.md`.
+
+## [3.6.0] — 2026-10-07
+
+### Added — Focused concept learning and shared learner profiles
+
+- Added `concept-learning` for personalized lessons on one concept, with worked examples, learner attempts, feedback, and an independent understanding check.
+- Each concept session writes `note.md`, `mentor-feedback.md`, and `practice.md` under `concept-sessions/YYYY-MM-DD_slug/`; interactives and resource lists are added when useful.
+- Ordinary concept sessions leave course topics, roadmaps, and recall queues unchanged. An explicit request can promote a session into a guided-learning course while preserving its documents.
+- Added `learner-profile` as the shared entry point for optional profile setup and targeted updates. Both learning skills use the same root profile files; the former `guided-learning onboard` command and profile-helper path remain compatibility aliases.
+- New vaults register all three skills for Codex and Claude Code, with an unconfigured profile, an empty topic registry, and no learner concept sessions.
+- Updated installation and method documentation to distinguish focused understanding from course revisitation. Same-session performance does not establish lasting mastery, and supporting research does not validate these exact agent skills as complete interventions.
+
 ## [3.5.0] — 2026-10-06
 
 ### Changed — Harness questions during onboarding
