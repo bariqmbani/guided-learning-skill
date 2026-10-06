@@ -1,6 +1,6 @@
 ---
 name: guided-learning
-version: 3.0.0
+version: 3.1.0-local
 description: >
   Run structured learning sessions using a spiral curriculum. Each session covers 1-3 concepts with
   adaptive explanations, comprehension checks, interactive HTML visualizations, and spaced recall.
@@ -8,7 +8,7 @@ description: >
   bootstrap a roadmap from scratch, or (3) provide a PDF/URL/text to learn from immediately.
   Use when the learner wants to study, learn, continue their roadmap, work through concepts,
   review what they've learned, get quizzed, understand a paper or article, or start learning
-  a new topic from zero.
+  a new topic from zero. Keeps independent learning tracks in one vault.
 ---
 
 # Guided Learning — Spiral Curriculum Sessions
@@ -23,34 +23,30 @@ The skill uses the following vault structure. **All of these are created automat
 
 | Path | Purpose | Created by |
 |------|---------|------------|
-| `learning/learning-roadmap.md` | Ordered list of concepts grouped by cluster and pass | Bootstrapper or manual |
-| `learning/recall-queue.md` | Spaced repetition tracker | Bootstrapper or first session |
-| `learning/protocols/` | Session protocols (learning journal) | First session |
-| `learning/interactives/` | Generated HTML visualizations | First interactive build |
-| `concepts/` | Atomic concept notes (Zettelkasten-style) | Bootstrapper, teach-from-source, or manual |
-| `research/glossary.md` | Domain glossary | First session |
+| `{roadmap}` | Ordered list of concepts grouped by cluster and pass | Bootstrapper or manual |
+| `{recall_queue}` | Spaced repetition tracker | Bootstrapper or first session |
+| `{protocols_dir}` | Session protocols (learning journal) | First session |
+| `{interactives_dir}` | Generated HTML visualizations | First interactive build |
+| `{concepts_dir}` | Atomic concept notes (Zettelkasten-style) | Bootstrapper, teach-from-source, or manual |
+| `{glossary}` | Domain glossary | First session |
 
 For manual setup, see the `examples/` directory for starter templates.
 
-## Configuration
+## Configuration and Topic Selection
 
-Adapt these paths and references to your vault. The skill uses them throughout:
+**Before any learning-file read or write, read `references/topic-routing.md` relative to this skill directory and resolve the topic using `scripts/topics.py` from the vault root.** Routing applies to the Bootstrapper, Teach-from-Source, every session phase, connection mapping, recall, and log analysis.
 
-```yaml
-# Paths (relative to vault root)
-roadmap: learning/learning-roadmap.md
-recall_queue: learning/recall-queue.md
-protocols_dir: learning/protocols/
-interactives_dir: learning/interactives/
-concepts_dir: concepts/
-glossary: research/glossary.md
-skill_logs_dir: SKILLS/guided-learning/logs/
-
-# Interactive HTML
-css_file: learning/interactives/interactive.css
-build_script: learning/interactives/build.sh
-
+```bash
+python3 SKILLS/guided-learning/scripts/topics.py resolve
 ```
+
+This returns the active topic's entry and its vault-relative `paths`. Explicitly named topics take priority over the active default. Use the topic-routing reference for creating or switching tracks; do not default a new subject to an existing roadmap.
+
+Pin the selected topic ID and paths for the entire session. Every `{roadmap}`, `{recall_queue}`, `{protocols_dir}`, `{interactives_dir}`, `{concepts_dir}`, `{papers_dir}`, `{glossary}`, `{skill_logs_dir}`, `{css_file}`, and `{build_script}` below refers to that selected topic's registry entry. Join directory paths and filenames with exactly one slash. Placeholders must be resolved before file access.
+
+The existing tokenization track uses its original root-level paths. New tracks use `topics/<topic-id>/...`. Never read or update another topic's learning files as a fallback. Never initialize or reset an existing roadmap or recall queue. Older examples and templates must be adapted to the selected track's paths before use.
+
+For a missing or invalid registry, follow the recovery rules in `references/topic-routing.md` before proceeding; do not invent a subject from generic placeholder files.
 
 ## Domain Modes
 
@@ -105,11 +101,12 @@ One of:
 
 ## Bootstrapper — Zero-to-First-Session in 5 Minutes
 
-When the learner names a topic but has no roadmap, concept notes, or vault structure yet, the skill bootstraps everything needed to start learning immediately.
+After topic selection, when the selected track has no concept checklist entries yet, the skill bootstraps everything needed to start learning immediately.
 
 ### When it triggers
 
-- The learning roadmap does not exist or is empty
+- Topic routing has selected the intended existing or newly created track.
+- Its roadmap does not exist or has no concept checklist entries (checked or unchecked).
 - The learner provides a topic rather than a concept name (e.g., "I want to learn about reinforcement learning", "teach me UX research methods", "help me understand transformer architectures")
 
 ### What it does
@@ -120,16 +117,16 @@ When the learner names a topic but has no roadmap, concept notes, or vault struc
    - Use the learner's stated goal to pick relevant sub-topics
    - Order clusters by dependency (foundations first)
    - Each concept gets one line in the roadmap checklist
-   - Write the roadmap to `learning/learning-roadmap.md`
+   - Write the roadmap to `{roadmap}`
 
 3. **Generate stub concept notes** for each concept in the roadmap:
-   - Create one file per concept in `concepts/`
+   - Create one file per concept in `{concepts_dir}`. For new tracks, use `<topic-id>--<concept-slug>.md` filenames and vault-relative wikilinks with display titles. Preserve existing legacy filenames and links.
    - Each stub has: title, a 2-3 sentence core claim (from the agent's knowledge), empty Evidence and Implications sections, and placeholder source links
    - These are starting points, not finished notes — the learner (or other skills like literature-intake) can enrich them later
 
-4. **Create the recall queue** (empty table) and the `learning/protocols/` directory
+4. **Create the recall queue** only if missing and the `{protocols_dir}` directory if missing. Preserve all existing recall rows and files.
 
-5. **Create the glossary** with a header and the first few key terms from the topic
+5. **Create the glossary** if missing, then add the first few key terms from the topic without replacing any existing entries
 
 6. **Announce what was created**: List the clusters, concept count, and invite the learner to review and adjust before starting. Show the roadmap structure briefly.
 
@@ -158,6 +155,8 @@ When the learner provides a specific source (PDF, URL, or pasted text) rather th
 
 ### What it does
 
+First establish the intended topic using the topic-routing rules. Never silently add an unrelated source to the active roadmap.
+
 1. **Extract the source content:**
    - PDF: read the full text (use available PDF reading tools)
    - URL: fetch and extract the main content (use WebFetch or similar)
@@ -182,7 +181,7 @@ When the learner provides a specific source (PDF, URL, or pasted text) rather th
 
 5. **After the session, offer to persist:**
    - "Want me to add these concepts to your learning roadmap for deeper study later?"
-   - If yes: create concept notes in `concepts/`, add them to the roadmap (or create one if it doesn't exist — chain into Bootstrapper), and schedule recall
+   - If yes: create concept notes in `{concepts_dir}`, add them to the roadmap (or create one if it doesn't exist — chain into Bootstrapper), and schedule recall
    - If no: just write a session protocol and move on
 
 ### Guidelines
@@ -198,7 +197,7 @@ When the learner provides a specific source (PDF, URL, or pasted text) rather th
 
 ### Phase 0: Orient (1 min)
 
-1. **Check for bootstrapper or teach-from-source triggers** (see sections above). If triggered, follow that flow instead of the standard session flow.
+1. **Resolve and pin the topic** using `references/topic-routing.md`, announce its title, then check for bootstrapper or teach-from-source triggers (see sections above). If triggered, follow that flow instead of the standard session flow.
 2. Read the learning roadmap to find the next unchecked concept(s)
 3. Determine which pass we're in (1 = Overview, 2 = Working Understanding, 3 = Fluency)
 4. **Detect or recall domain mode** (see Domain Modes section). On the first session, infer from content or ask. On subsequent sessions, read the stored preference.
@@ -220,7 +219,7 @@ When the learner provides a specific source (PDF, URL, or pasted text) rather th
 4. If no items are due, skip this phase silently.
 5. Log recall results in the session protocol under "## Recall checks".
 
-**Recall queue format** (`learning/recall-queue.md`):
+**Recall queue format** (`{recall_queue}`):
 
 ```markdown
 # Recall Queue
@@ -302,7 +301,7 @@ The learner understands the concept and its mechanism. Now they need to wield it
    - Pass the subagent the full concept content, the CSS design system path, the build script path, and the output filename.
    - The subagent should follow all Interactive HTML Guidelines below.
 2. **Do not wait** — proceed immediately to Phase 2 (Comprehension Check). The learner reads your explanation while the interactive builds.
-3. When the subagent completes, **announce it** before the learner answers the comprehension check prompt: *"The interactive is ready — open `learning/interactives/YYYY-MM-DD_concept-slug.html` and explore it before answering."*
+3. When the subagent completes, **announce it** before the learner answers the comprehension check prompt: *"The interactive is ready — open `{interactives_dir}/YYYY-MM-DD_concept-slug.html` and explore it before answering."*
 4. If the concept does not warrant an interactive (e.g., it's a writing or scenario exercise), skip this phase entirely.
 
 **Why this order matters:** The interactive reinforces the explanation visually *before* the learner has to reproduce the concept — not after. Seeing the model in motion gives them something concrete to reason about during the comprehension check.
@@ -426,7 +425,7 @@ Create a self-contained HTML file with:
 - Brief explanatory text embedded in the page
 - "What to notice" prompts that guide exploration
 - Realistic values from the learner's research domain
-- Save to `learning/interactives/YYYY-MM-DD_concept-slug.html`
+- Save to `{interactives_dir}/YYYY-MM-DD_concept-slug.html`
 
 **B) Scenario Exercise** — for design/decision concepts:
 - Present a realistic scenario from the learner's domain and ask how they would apply the concept
@@ -456,7 +455,7 @@ Prefer A for concepts that involve numbers, processes, or tradeoffs. Use B when 
 
 The learner should identify at least 2 upstream and 1 downstream connection.
 
-If new connections are discovered that aren't in the concept notes, update the wikilinks in the relevant concept files.
+If new connections are discovered that aren't in the concept notes, update the selected topic's concept files. Cross-topic references are allowed when useful, but do not change another topic's notes, progress, recall queue, or glossary without the learner requesting that change.
 
 ### Phase 4: Update & Log (2 min)
 
@@ -464,14 +463,14 @@ If new connections are discovered that aren't in the concept notes, update the w
 2. **Link protocol from roadmap**: Add an indented protocol link below the checked-off concept:
    ```
    - [x] [[concept-slug]]
-       - [[learning/protocols/YYYY-MM-DD_concept-slug|protocol]]
+       - [[{protocols_dir}/YYYY-MM-DD_concept-slug|protocol]]
    ```
 3. **Suggest paper status update**: List all source papers referenced in this session and their current `status`. Suggest updating them to `skimmed` (Pass 1) or `read` (Pass 2/3). Wait for the learner to confirm before changing any status.
 4. **Update progress summary** at the top of the roadmap
 5. **Update glossary**: Add any key terms introduced during the session to the glossary (alphabetical order, with research-domain context)
 6. **Schedule recall**: Add the concept to the recall queue with `interval: 3d` and `next_recall` set to today + 3 days. If the concept is already in the queue (Pass 2/3 revisit), reset its interval to 3d.
-7. **Write session protocol** to `learning/protocols/YYYY-MM-DD_concept-slug.md` (see template below)
-8. **Write execution log** to `SKILLS/guided-learning/logs/YYYY-MM-DD_sessionNN.md` (see Execution Logging section)
+7. **Write session protocol** to `{protocols_dir}/YYYY-MM-DD_concept-slug.md` (see template below)
+8. **Write execution log** to `{skill_logs_dir}/YYYY-MM-DD_sessionNN.md` (see Execution Logging section)
 9. **Ask**: "Want to do another concept, or is this a good stopping point?"
 
 ---
@@ -480,13 +479,13 @@ If new connections are discovered that aren't in the concept notes, update the w
 
 When creating interactive HTML pages:
 
-- **Shared design system**: Every interactive uses the universal stylesheet from `learning/interactives/interactive.css`. New interactives should link it via:
+- **Shared design system**: Every interactive uses the universal stylesheet from `{css_file}`. New interactives should link it via:
   ```html
   <link rel="stylesheet" href="interactive.css">
   ```
   Then run the build script to inline the CSS (required for Obsidian compatibility):
   ```bash
-  cd learning/interactives && ./build.sh
+  bash "{build_script}"
   ```
   The script replaces the `<link>` tag with an inline `<style>` block wrapped in `<!-- interactive.css:start -->` / `<!-- interactive.css:end -->` markers. It's idempotent — re-running after CSS edits updates all HTML files. Page-specific styles go in a separate inline `<style>` block.
 - **Class conventions**: Use the standard classes from `interactive.css`:
@@ -505,8 +504,8 @@ When creating interactive HTML pages:
 - **Visually clean**: Use a simple, readable design. No flashy animations — clarity over aesthetics.
 - **Cross-tab data provenance**: When an interactive has multiple tabs where later tabs depend on data configured in earlier tabs, always make this dependency explicit. Label the source tab as the shared data source, add a live summary at the end of the source tab previewing what flows into later tabs, and reference the source tab by name in later tabs' introductions. Never assume the learner tracks implicit state across tabs.
 - **Toggle/switch components**: Custom toggles must use `<label for="inputId">` for the clickable track element, not `<div>`. The hidden-checkbox + styled-sibling pattern requires the visual element to be a `<label>` with a `for` attribute. CSS selectors targeting labels inside control rows must use the direct-child combinator (`>`) to avoid styling nested labels (e.g., `.toggle-row > label` not `.toggle-row label`).
-- **Running build.sh**: The interactive subagent may not have Bash permission. After the subagent completes, the main agent MUST run `cd learning/interactives && ./build.sh` to inline the CSS. Do not rely on the subagent to do this. If the learner reports missing styles in Obsidian, build.sh was not run.
-- **Store in**: `learning/interactives/` with naming scheme `YYYY-MM-DD_concept-slug.html`.
+- **Running build.sh**: The interactive subagent may not have Bash permission. After the subagent completes, the main agent MUST run `bash "{build_script}"` to inline the CSS. Do not rely on the subagent to do this. If the learner reports missing styles in Obsidian, build.sh was not run.
+- **Store in**: `{interactives_dir}` with naming scheme `YYYY-MM-DD_concept-slug.html`.
 
 ---
 
@@ -547,7 +546,7 @@ Track recurring correction types to adapt explanations preemptively.
 | `shallow-framing` | Describes the algorithm but not why it matters or when to use it | "Described EM steps but couldn't say when DS beats MV" |
 | `connection-blind` | Fails to see how this concept relates to previously learned ones | "Didn't connect annotation quality to uncertainty quantification" |
 
-**Every 5 sessions**, review the logs and count tag frequencies. If any tag appears in >=3 of the last 5 sessions:
+**Every 5 sessions in the selected topic**, review only its logs and count tag frequencies. If any tag appears in >=3 of the last 5 sessions:
 - **Surface it to the learner**: "I've noticed a pattern — [tag] has come up in X of our last 5 sessions."
 - **Adapt explanations**: For `implication-gap`, always end explanations with an explicit "What this means for your system" paragraph. For `math-gap`, extend the prerequisite probe. For `terminology-confusion`, add a glossary sidebar to the session. And so on.
 - **Log the adaptation** in the CHANGELOG if it becomes a permanent skill change.
@@ -556,7 +555,7 @@ Track recurring correction types to adapt explanations preemptively.
 
 ## Adaptation & Self-Improvement
 
-This skill self-improves. After every 5 sessions, briefly review the logs:
+This skill self-improves. After every 5 sessions in the selected topic, briefly review only its logs:
 
 - Which application methods worked best for which concept types?
 - Which concepts needed re-explanation?
@@ -569,11 +568,12 @@ This skill self-improves. After every 5 sessions, briefly review the logs:
 
 ## Session Protocol
 
-After each session, write a human-readable protocol to `learning/protocols/YYYY-MM-DD_concept-slug.md`. This is the learning journal — it captures what worked, what needed correction, and what to revisit. Unlike the execution log (which is operational), the protocol is written for the learner to review later.
+After each session, write a human-readable protocol to `{protocols_dir}/YYYY-MM-DD_concept-slug.md`. This is the learning journal — it captures what worked, what needed correction, and what to revisit. Unlike the execution log (which is operational), the protocol is written for the learner to review later.
 
 ```markdown
 ---
-date: YYYY-MM-DD
+date: "YYYY-MM-DD"
+topic: "<selected-topic-id>"
 pass: <1|2|3>
 cluster: <cluster name>
 concept: <concept wikilink slug>
@@ -595,7 +595,7 @@ comprehension: <passed|partial|needs-revisit>
 - <which methods were used: conversational explanation, interactive HTML, scenario exercise, writing exercise, connection mapping>
 
 ## Artifacts
-- <link to any interactives created, e.g. `[[learning/interactives/YYYY-MM-DD_concept-slug.html]]`>
+- <link to any interactives created, e.g. `[[{interactives_dir}/YYYY-MM-DD_concept-slug.html]]`>
 - <omit this section if no artifacts were created>
 
 ## What worked well
@@ -626,14 +626,15 @@ Use Obsidian Flavored Markdown to make learning protocols rich:
 
 ## Execution Logging
 
-After each session, write a log to `SKILLS/guided-learning/logs/YYYY-MM-DD_sessionNN.md` (where NN is the next session number):
+After each session, write a log to `{skill_logs_dir}/YYYY-MM-DD_sessionNN.md` (where NN is the next session number):
 
 **YAML quoting rule:** Always quote all string values in frontmatter. Unquoted `~20` parses as null, bare `none` parses as null, and strings with colons or dashes can break Obsidian's YAML parser. Only leave numeric and boolean values unquoted.
 
 ```yaml
 ---
 skill: "guided-learning"
-version: "3.0.0"
+version: "3.1.0-local"
+topic: "<selected-topic-id>"
 trigger: "<how the session was initiated>"
 pass: <1|2|3>
 cluster: "<cluster name>"

@@ -3,3 +3,5 @@
 .obsidian/cache/
 .trash/
 .DS_Store
+topics/.registry.lock
+__pycache__/

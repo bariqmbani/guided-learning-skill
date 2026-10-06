@@ -7,6 +7,8 @@
     "learning/interactives/build.sh: use literal regex replacements so CSS backslash escapes survive inlining.",
     "learning/interactives/example-interactive.html: redesigned Learning Lab with responsive SVG tradeoff chart, accessible controls and tabs, guided exercises, reset and copy actions; original model preserved.",
     "learning/interactives/interactive.css: minimalist light theme with muted colors and accessible controls.",
-    "learning/interactives/example-interactive.html: responsive single-page explorer, collapsible experiments, labeled controls, and synchronized presets."
-  ]
+    "learning/interactives/example-interactive.html: responsive single-page explorer, collapsible experiments, labeled controls, and synchronized presets.",
+    "Topic registry, per-topic routing, and non-overwriting creation/selection helper; tokenization course registered in place without modifying learning data."
+  ],
+  "local_version": "3.1.0-local"
 }

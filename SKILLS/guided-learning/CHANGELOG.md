@@ -1,5 +1,16 @@
 # Guided Learning — Changelog
 
+## [3.1.0-local] — 2026-10-06
+
+### Added
+- Independent topic selection and registered paths for multiple learning tracks in one vault.
+- Registered Tokenizers and Tokenization in place; preserved existing roadmap, concepts, recall, glossary, journals, interactives, logs, and links.
+- Non-overwriting topic creation and switching helper; serialized registry updates and atomic saves.
+- Qualified links and topic-prefixed note filenames for new tracks to protect legacy short links.
+- Topic-specific mode detection, recall, journals, execution logs, and learning-history analysis.
+- Topic dashboard and updated vault instructions.
+
+
 ## [3.0.0] — 2026-05-13
 
 ### Changed — Public release

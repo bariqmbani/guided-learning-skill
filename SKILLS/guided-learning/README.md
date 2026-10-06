@@ -1,5 +1,10 @@
 # Guided Learning Skill
 
+> [!info] Local setup: multiple learning topics
+> This vault uses version `3.1.0-local`, which adds independent learning tracks. Read [topic-routing.md](references/topic-routing.md) for the installed behavior and open [[topics/README|Learning Topics]] to navigate courses. The upstream installation examples below describe a single-track vault.
+>
+> Your existing Tokenizers and Tokenization course keeps its original files and links. Say **Continue tokenization** to resume it, or **I want to learn [a new subject]** to create a separate course. New tracks have their own roadmap, recall queue, notes, glossary, journals, and logs. Restart an older agent session or have it reread the installed skill before switching topics.
+
 A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill that turns any markdown-based knowledge vault into a structured learning environment. It runs interactive sessions using a **spiral curriculum** — three passes of increasing depth, with spaced recall, comprehension checks, and auto-generated interactive HTML visualizations.
 
 Three ways to start: name a topic and the skill **bootstraps a full roadmap** from scratch, drop a **PDF or URL** and learn from it immediately, or continue an **existing roadmap**. Three domain modes (research, professional, self-study) are detected automatically. Built for anyone who wants to actually retain what they read.

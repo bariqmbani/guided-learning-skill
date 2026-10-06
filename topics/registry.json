@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "active_topic": "tokenizers-and-tokenization",
+  "topics": [
+    {
+      "id": "tokenizers-and-tokenization",
+      "title": "Tokenizers and Tokenization",
+      "aliases": ["tokenizers", "tokenization"],
+      "root": ".",
+      "layout": "legacy",
+      "paths": {
+        "roadmap": "learning/learning-roadmap.md",
+        "recall_queue": "learning/recall-queue.md",
+        "protocols_dir": "learning/protocols/",
+        "interactives_dir": "learning/interactives/",
+        "concepts_dir": "concepts/",
+        "papers_dir": "literature/papers/",
+        "glossary": "research/glossary.md",
+        "skill_logs_dir": "SKILLS/guided-learning/logs/",
+        "css_file": "learning/interactives/interactive.css",
+        "build_script": "learning/interactives/build.sh"
+      }
+    }
+  ]
+}
