@@ -1,33 +1,3 @@
-# Empty Learning Vault
-
-Open this folder as a vault in Obsidian, then run Claude Code or Codex from the
-same folder. Say **I want to learn about [your topic]**. Read [Home.md](Home.md)
-for the learning flow.
-
-If you cloned this as a public template, first run
-`python3 scripts/create_vault.py ../my-learning` and use that new folder for
-your learning. Keep the template checkout separate from personal study records.
-
-Python 3.9 or newer is required for the topic helper and setup script. Interactive
-HTML builds also use Bash; on Windows use WSL or Git Bash for those builds.
-No Python packages are required. Skills are registered for both agents using
-small entry files that load the shared canonical skill; symlinks are unnecessary.
-
-The installer creates files without asking learning questions. Start onboarding
-in your learning chat with **$guided-learning onboard** (Codex) or
-**/guided-learning onboard** (Claude Code). The tutor asks for your teaching
-language, typical session time, and optional constraints or explicit preferences.
-It saves `learner-profile.json` and `Learner Profile.md`. No topic or learning
-progress is created until you choose a subject. Run onboarding again in chat
-whenever you want to change preferences.
-
-When starting each subject, the tutor asks only for missing information about
-your desired outcome, what you already know, and feasible practice. These answers
-stay in that topic's learning plan. Practice, feedback, and later recall are
-part of lessons; you do not need to select them from an extras menu. Presentation
-preferences can change and are not a test of ability. See the skill's
-[research rationale](SKILLS/guided-learning/references/onboarding-evidence.md).
-
 ## Onboarding example
 
 Run `$guided-learning onboard` in Codex, or `/guided-learning onboard` in Claude
@@ -81,26 +51,3 @@ I am starting from the basics and can return three times a week.
 ```
 
 The tutor then records a separate plan for that topic and starts a useful lesson.
-
-To create another empty vault from this setup:
-
-```sh
-bash scripts/install_vault.sh /path/to/new-vault
-```
-
-To also produce a ZIP you can share:
-
-```sh
-bash scripts/install_vault.sh /path/to/new-vault --zip /path/to/new-vault.zip
-```
-
-You can also run `python3 scripts/create_vault.py /path/to/new-vault` directly.
-On Windows, use `py -3 scripts/create_vault.py C:/path/to/new-vault`.
-Choose a destination and ZIP path that
-do not already exist. The ZIP must be outside the new vault. No Git repository
-is initialized. Current courses, study records, attachments, account paths,
-Obsidian workspace state, and source Git history are not copied.
-
-The shared skill is based on the MIT-licensed
-[WSE Research guided-learning skill](https://github.com/WSE-research/guided-learning-skill);
-its license and upstream attribution are included under `SKILLS/guided-learning/`.
