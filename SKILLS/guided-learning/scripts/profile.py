@@ -66,9 +66,12 @@ def read_profile(vault):
 
 def profile_markdown(profile):
     validate_profile(profile)
-    intro = ("Your tutor uses these preferences as defaults. Each topic keeps its own goals and progress."
+    intro = ("Your tutor uses these preferences as defaults. Each topic keeps its own goals and progress. "
+             "Run onboarding again to fill optional gaps or change any preference."
              if profile["configured"] else
-             "Start onboarding in your learning chat with `$guided-learning onboard` (Codex) or `/guided-learning onboard` (Claude Code).")
+             "Start onboarding in your learning chat with `$guided-learning onboard` (Codex) or `/guided-learning onboard` (Claude Code). "
+             "Your tutor will guide each field one question at a time. Every answer is optional; skip any question or finish early. "
+             "The values below are starting defaults, not answers you have given.")
     values = [
         ("Name", profile["name"] or "Not provided"),
         ("General background", profile["background"] or "Not provided"),

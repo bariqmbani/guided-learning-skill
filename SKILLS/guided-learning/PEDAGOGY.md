@@ -2,8 +2,9 @@
 
 A pedagogical framework for teaching complex academic concepts through structured revisitation, spaced recall, and adaptive explanation.
 
-The public vault setup uses [short conversational onboarding](references/onboarding.md)
-for language, session time, and practical constraints, then [topic intake](references/topic-intake.md)
+The public vault setup uses [guided optional onboarding](references/onboarding.md)
+to offer every profile field one question at a time and tailor lesson examples,
+pace, explanations, and activities, then [topic intake](references/topic-intake.md)
 for a useful outcome and starting knowledge. Presentation preferences are adjustable;
 choose methods from the task and observed responses rather than a fixed learner type.
 The [research rationale](references/onboarding-evidence.md) distinguishes supported

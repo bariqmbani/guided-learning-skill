@@ -58,6 +58,9 @@ existing topic or fall back to another topic's roadmap.
 For `guided-learning onboard`, follow the skill's `references/onboarding.md`
 as a conversation before topic selection. Save only the learner profile and
 its readable note; do not create a subject or change learning progress.
+Offer each editable profile field one question at a time, accepting skips or
+an early finish. Optional fields still deserve an invitation; do not complete
+onboarding by silently saving defaults or asking only language and time.
 
 Read the learner profile using the skill's profile helper. Use its configured
 language, session budget, and access constraints to tailor teaching. Its
@@ -106,6 +109,8 @@ read or write, then follow those instructions. The canonical skill and helpers
 live under `SKILLS/guided-learning/`; this entry registers that shared skill.
 For the `onboard` subcommand, follow the canonical skill's conversational
 onboarding flow before topic selection. Onboarding does not require a subject.
+Guide every editable profile field one question at a time; every answer is
+optional. Ask and wait rather than silently saving the default profile.
 """
 
 CONCEPT = """---
@@ -220,8 +225,8 @@ The canonical instructions are in [SKILL.md](SKILL.md) and
 explains the method. This setup builds on the MIT-licensed
 [WSE Research guided-learning skill](https://github.com/WSE-research/guided-learning-skill).
 
-[Onboarding](references/onboarding.md) covers language, time, and optional
-constraints. [Topic intake](references/topic-intake.md) sets a useful outcome and
+[Onboarding](references/onboarding.md) guides every optional profile field,
+one question at a time, to personalize lessons. [Topic intake](references/topic-intake.md) sets a useful outcome and
 starting point for each subject. [Research rationale](references/onboarding-evidence.md)
 explains the evidence and limits of these design choices.
 
@@ -243,7 +248,7 @@ Your learning vault is ready. No subject has been selected yet.
 
 1. Open this folder as a vault in Obsidian.
 2. Open a terminal here and run `claude` or `codex`.
-3. Start with **$guided-learning onboard** in Codex or **/guided-learning onboard** in Claude Code to set your teaching language, session time, and optional constraints.
+3. Start with **$guided-learning onboard** in Codex or **/guided-learning onboard** in Claude Code. Your tutor guides you through your profile one question at a time; every answer is optional.
 4. Say **I want to learn about [your topic]** to start your first subject.
 
 The tutor asks about your desired outcome, starting knowledge, and opportunities
@@ -285,8 +290,11 @@ small entry files that load the shared canonical skill; symlinks are unnecessary
 
 The installer creates files without asking learning questions. Start onboarding
 in your learning chat with **$guided-learning onboard** (Codex) or
-**/guided-learning onboard** (Claude Code). The tutor asks for your teaching
-language, typical session time, and optional constraints or explicit preferences.
+**/guided-learning onboard** (Claude Code). The tutor asks one question at a time
+about language, preferred name, background, broad goals, learning context,
+session time, explanation preferences, preferred activities, and other needs.
+Every answer is optional: skip a question, let the tutor choose, or finish early.
+Your answers shape familiar examples, lesson pace, practice, and feedback.
 It saves `learner-profile.json` and `Learner Profile.md`. No topic or learning
 progress is created until you choose a subject. Run onboarding again in chat
 whenever you want to change preferences.

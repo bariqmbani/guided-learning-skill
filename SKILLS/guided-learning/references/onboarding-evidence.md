@@ -12,21 +12,25 @@ Reviewed 2026-10-06. These are design recommendations inferred from learning res
 | A systematic review of applied school and classroom research found benefits from retrieval practice across varied settings. [Agarwal, Nunes, and Blunt, 2021](https://doi.org/10.1007/s10648-021-09595-9) | Use retrieval in real lessons, with feedback. Classroom findings are useful guidance, not direct validation of an adult learning chatbot. |
 | The guide recommends combining worked examples with problem solving, graphics with verbal descriptions, and reducing worked examples as expertise grows. It rates pre-questions less strongly than retrieval quizzes. [IES practice guide, 2007](https://ies.ed.gov/ncee/wwc/PracticeGuide/1) | Choose representations for the task. Use a brief starting probe to calibrate teaching, then adapt scaffolding from actual attempts. Don't claim the probe itself guarantees better learning. |
 
-Language, time, tools, and accommodations are practical design inputs here. Asking them lets the tutor produce lessons the learner can use; these sources do not establish a causal benefit from asking any particular wording. The three-prompt setup and optional follow-ups are usability choices that need real-user evaluation.
+Language, time, tools, and accommodations are practical design inputs here. Asking them lets the tutor produce lessons the learner can use; these sources do not establish a causal benefit from asking any particular wording. Offering all editable profile fields one question at a time, with skips and early completion, is a usability choice that needs real-user evaluation. Optional fields should be offered explicitly instead of relying on learners to volunteer them.
 
 ## Which answers earn a question
 
 | Question | When | What changes |
 | --- | --- | --- |
 | Preferred teaching language or bilingual mix? | First vault setup, unless explicitly known | Explanations, questions, lesson notes, terminology. |
+| Preferred name or nickname? | Optional during guided onboarding | How the tutor addresses the learner. This is a conversational preference, not a claim of improved learning. |
+| General experience and interests? | Optional during guided onboarding | Familiar examples and analogies; does not establish topic mastery. |
+| Broad aims and personal, work, or research context? | Optional during guided onboarding | Default relevance and audience; each topic still gets its own concrete outcome. |
 | Typical session time? | Vault setup; reuse until changed | Scope and number of activities; split heavy concepts. |
+| Explanation and activity preferences? | Optional during guided onboarding | Adjustable presentation and aid priorities, without assigning learner types or making practice conditional on selection. |
 | Constraints or explicit preferences? | Optional at setup; clarify only when relevant | Usable formats, tools, chunks, and examples. |
 | What should you be able to do, and for what purpose? | Each new topic | Roadmap scope, application tasks, success demonstration. |
 | What have you tried, and where do you get stuck? | Each new topic | Provisional starting point, prerequisite checks, support. |
 | When can you return for practice or review? | Each new topic; optional | Feasible amount of new learning and review. |
 | Did pace, difficulty, or examples need adjustment? | After an early lesson, if not already answered | One concrete teaching adjustment; not a mastery score. |
 
-No required name, degree, job title, demographics, diagnosis, personality quiz, motivation score, or long list of preferred extras. Ask a relevant follow-up when it changes the next teaching decision. A learner can volunteer general context or request a format without completing a survey.
+All profile questions are optional, including language and time. Offer a name or nickname, general background, and goals without demanding identifying details. Do not require a degree, job title, demographics, diagnosis, personality quiz, motivation score, or full extras catalog. Ask relevant follow-ups to clarify teaching choices, preserve skipped values, and accept an early finish. Every invitation should explain or demonstrate how an answer can affect the lesson.
 
 ## Public release and evaluation
 

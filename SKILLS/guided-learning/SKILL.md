@@ -20,7 +20,7 @@ Run structured learning sessions through a literature-backed concept collection 
 
 ## Prerequisites
 
-**Dispatch `onboard` before selecting a topic or starting a session.** For `$guided-learning onboard`, `/guided-learning onboard`, or a request to set up learning preferences, read `references/onboarding.md` and follow its conversational flow. Onboarding requires no subject and updates only the vault-level learner profile; it must not bootstrap or reset a course.
+**Dispatch `onboard` before selecting a topic or starting a session.** For `$guided-learning onboard`, `/guided-learning onboard`, or a request to set up learning preferences, read `references/onboarding.md` and follow its conversational flow. Actively offer all nine editable profile fields, one question at a time; every answer is optional. Begin with the first unanswered question and wait. Do not save defaults or end onboarding merely because language and time are known. Respect skips, early finish, and targeted updates. Onboarding requires no subject and updates only the vault-level learner profile; it must not bootstrap or reset a course.
 
 The skill uses the following vault structure. **All of these are created automatically** by the bootstrapper if they don't exist — you don't need to set anything up manually.
 

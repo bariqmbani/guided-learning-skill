@@ -212,6 +212,16 @@ class CreateVaultTests(unittest.TestCase):
         for path, contents in course_before.items():
             self.assertEqual(path.read_bytes(), contents)
 
+    def test_finishing_onboarding_with_all_questions_skipped_saves_valid_defaults(self):
+        vault = self.base / "learning"
+        setup.create_vault(ROOT, vault, "Learning")
+        before = {p: p.read_bytes() for p in vault.rglob("*") if p.is_file()}
+        saved = setup.profiles.save_profile(vault, setup.profiles.read_profile(vault))
+        self.assertEqual(saved, {**setup.profiles.default_profile(), "configured": True})
+        self.assertEqual(setup.profiles.read_profile(vault), saved)
+        changed = {str(p.relative_to(vault)) for p, content in before.items() if p.read_bytes() != content}
+        self.assertEqual(changed, {"learner-profile.json", "Learner Profile.md"})
+
     def test_invalid_profile_is_rejected_before_any_preference_or_course_write(self):
         vault = self.base / "learning"
         setup.create_vault(ROOT, vault, "Learning")

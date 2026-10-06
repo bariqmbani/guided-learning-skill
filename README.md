@@ -40,8 +40,32 @@ start onboarding in the learning chat. The installer does not ask learning quest
 ## Onboarding example
 
 Run `$guided-learning onboard` in Codex, or `/guided-learning onboard` in Claude
-Code. Answer the tutor's questions in your own words. You can also include your
-answers in the first message:
+Code. The tutor guides you one question at a time through language, preferred
+name, background, broad goals, learning context, session time, explanation style,
+preferred activities, and other preferences. Every answer is optional: say
+**skip**, **you choose**, or **finish**. You never need to edit JSON yourself.
+
+For example, the beginning of a guided conversation might be:
+
+> **Tutor:** Which language would you like us to use? A bilingual mix is welcome.
+>
+> **Learner:** English.
+>
+> **Tutor:** We'll use English. What would you like me to call you? A nickname is fine, or we can skip.
+>
+> **Learner:** Skip.
+>
+> **Tutor:** Of course. What experience or interests could I use for familiar examples?
+>
+> **Learner:** I work on backend systems and enjoy cooking.
+>
+> **Tutor:** I'll draw on those for examples and explain where each analogy stops working. Broadly, what would you like learning to help you do?
+
+The tutor continues through the remaining optional fields and finishes with a
+short plan for how your answers will shape lessons. A saved profile can be
+revisited to fill gaps; preferences already provided are preserved.
+
+You can also supply preferences up front, or request only a specific update:
 
 ```text
 $guided-learning onboard

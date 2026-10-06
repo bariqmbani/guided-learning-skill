@@ -5,7 +5,7 @@
 >
 > In the installed vault, say **Continue [topic]** to resume an existing course, or **I want to learn [a new subject]** to create a separate course. Each track has its own roadmap, recall queue, notes, glossary, journals, and logs. To share the setup, read [the sharing instructions](../../SHARING.md).
 >
-> Start with **$guided-learning onboard** (Codex) or **/guided-learning onboard** (Claude Code) to set teaching language, session time, and optional constraints in chat. Each new topic gets its own goal and starting point. Run onboarding again to update preferences while retaining progress. Read [the research rationale](references/onboarding-evidence.md) for the question design and its limits.
+> Start with **$guided-learning onboard** (Codex) or **/guided-learning onboard** (Claude Code) for a guided conversation covering every profile field. Each answer is optional; skip any question or finish early. Each new topic gets its own goal and starting point. Run onboarding again to update preferences while retaining progress. Read [the research rationale](references/onboarding-evidence.md) for the question design and its limits.
 
 A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill that turns any markdown-based knowledge vault into a structured learning environment. It runs interactive sessions using a **spiral curriculum** — three passes of increasing depth, with spaced recall, comprehension checks, and auto-generated interactive HTML visualizations.
 
@@ -31,8 +31,32 @@ Obsidian and start guided-learning onboard.
 ## Onboarding example
 
 Run `$guided-learning onboard` in Codex, or `/guided-learning onboard` in Claude
-Code. Answer the tutor's questions in your own words. You can also include your
-answers in the first message:
+Code. The tutor guides you one question at a time through language, preferred
+name, background, broad goals, learning context, session time, explanation style,
+preferred activities, and other preferences. Every answer is optional: say
+**skip**, **you choose**, or **finish**. You never need to edit JSON yourself.
+
+For example, the beginning of a guided conversation might be:
+
+> **Tutor:** Which language would you like us to use? A bilingual mix is welcome.
+>
+> **Learner:** English.
+>
+> **Tutor:** We'll use English. What would you like me to call you? A nickname is fine, or we can skip.
+>
+> **Learner:** Skip.
+>
+> **Tutor:** Of course. What experience or interests could I use for familiar examples?
+>
+> **Learner:** I work on backend systems and enjoy cooking.
+>
+> **Tutor:** I'll draw on those for examples and explain where each analogy stops working. Broadly, what would you like learning to help you do?
+
+The tutor continues through the remaining optional fields and finishes with a
+short plan for how your answers will shape lessons. A saved profile can be
+revisited to fill gaps; preferences already provided are preserved.
+
+You can also supply preferences up front, or request only a specific update:
 
 ```text
 $guided-learning onboard

@@ -24,8 +24,9 @@ It does not ask questions, select a subject, or create course progress.
 
 Open the installed folder in Obsidian and run Codex or Claude Code there. Start
 with **$guided-learning onboard** in Codex or **/guided-learning onboard** in
-Claude Code. Onboarding asks for teaching language, typical session time, and
-optional constraints. Then say **I want to learn [topic]**. Each subject has its
+Claude Code. Onboarding offers every profile field one question at a time,
+including your background, goals, and preferred activities. Every answer is
+optional; you can skip questions or finish early. Then say **I want to learn [topic]**. Each subject has its
 own plan and course data. Run onboarding again to update preferences.
 
 ## Share an export

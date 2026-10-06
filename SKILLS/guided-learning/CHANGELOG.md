@@ -1,5 +1,12 @@
 # Guided Learning — Changelog
 
+## Guided optional onboarding — 2026-10-06
+
+- Offer all nine editable learner-profile fields one question at a time, including preferred name, background, goals, explanation style, and activity priorities.
+- Treat every answer as optional; support skips, delegated choices, targeted updates, and early completion without inventing personal details.
+- Use answers to explain how examples, pacing, practice, and feedback will be tailored; preserve existing profiles and course progress.
+- Copy the example interactive into fresh vaults' shared interactive folder and link it from Home.
+
 ## Shareable setup — 2026-10-06
 
 - Converted the repository to setup files only: removed learner courses and state, moved reusable interactive assets into the skill, and kept generated vaults separate.
