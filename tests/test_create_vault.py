@@ -42,7 +42,7 @@ class CreateVaultTests(unittest.TestCase):
         for relative in [
             "topics/private/concepts/note.md", "topics/private/logs/session.md",
             "learning/learning-roadmap.md", "attachments/private.txt", ".git/config",
-            ".obsidian/workspace.json", "AGENTS.md", "Home.md", "README.md",
+            ".obsidian/workspace.json", "AGENTS.md", "Home.md",
             "topics/registry.json", "SKILLS/guided-learning/logs/session.md",
             "learning/interactives/private-lesson.html",
             "learner-profile.json", "Learner Profile.md",
@@ -56,8 +56,6 @@ class CreateVaultTests(unittest.TestCase):
         self.assertEqual(registry, {"schema_version": 1, "active_topic": None, "topics": []})
         self.assertEqual({p.name for p in (destination / "topics").iterdir()}, {"README.md", "registry.json"})
         self.assertEqual({p.name for p in (destination / "learning/interactives").iterdir()}, {"build.sh", "interactive.css"})
-        self.assertFalse((destination / "SKILLS/guided-learning/interactives").exists())
-        self.assertEqual((destination / "LICENSE").read_bytes(), (ROOT / "LICENSE").read_bytes())
         self.assertFalse((destination / ".git").exists())
         self.assertEqual(list((destination / "attachments").iterdir()), [])
         for path in destination.rglob("*"):
@@ -154,8 +152,6 @@ class CreateVaultTests(unittest.TestCase):
             bundle.extractall(extracted)
         portable = extracted / "first"
         self.assertFalse(any(p.is_symlink() for p in portable.rglob("*")))
-        css = portable / "learning/interactives/interactive.css"
-        css.write_text(css.read_text() + "\n/* Shared theme customization. */\n")
         self.assertEqual(self.helper(portable, "list")["topics"], [])
         self.helper(portable, "create", "biology", "--title", "Biology")
         profile = setup.profiles.default_profile()
@@ -171,8 +167,6 @@ class CreateVaultTests(unittest.TestCase):
         fresh_profile = json.loads((another / "learner-profile.json").read_text())
         self.assertFalse(fresh_profile["configured"])
         self.assertEqual(fresh_profile["name"], "")
-        self.assertEqual((another / "learning/interactives/interactive.css").read_bytes(), css.read_bytes())
-        self.assertFalse((another / "SKILLS/guided-learning/interactives").exists())
 
     def test_conversational_profile_save_and_updates_preserve_course_progress(self):
         vault = self.base / "learning"

@@ -33,7 +33,7 @@ The skill uses the following vault structure. **All of these are created automat
 | `{concepts_dir}` | Atomic concept notes (Zettelkasten-style) | Bootstrapper, teach-from-source, or manual |
 | `{glossary}` | Domain glossary | First session |
 
-The installer creates `Templates/Concept.md` and `Templates/Session Protocol.md` in each new vault. Adapt them to the selected topic's paths.
+For manual setup, see the `examples/` directory for starter templates.
 
 ## Configuration and Topic Selection
 
@@ -334,37 +334,93 @@ First check the profile's access constraints and available tools. For text-only 
 1. **Announce the interactive** and invite the learner to explore it freely.
 2. **After exploring**, ask the comprehension check question — pick ONE from the pool below. **Do not reuse the same format two sessions in a row.** Track the last format used in the execution log (`check_format` field).
 
-**Comprehension check pool — choose by pass and vary the format:**
+**Comprehension check pool — pick by pass, domain mode, and variety:**
 
-Use the selected topic's `domain_mode` and goal to frame each prompt. In research,
-use papers, hypotheses, and academic audiences; in professional learning, use
-projects, decisions, and colleagues; in self-study, use personal projects and
-curious beginners. Adapt the audience and example without duplicating the pool.
-Record the format label in `check_format`; preserve older labels in existing logs.
+Use the pool matching the configured `domain_mode`. Checks marked "(shared)" are identical across all modes. **Do not reuse the same format two sessions in a row.**
 
-**Pass 1:**
-- **Explain it**: Explain the core idea to someone unfamiliar with it.
-- **Elevator pitch**: In one sentence, why does this matter for your goal?
-- **Predict the outcome**: If a specific variable changes from X to Y, what happens and why?
-- **Spot the flaw**: Identify what is wrong with a deliberately flawed one-sentence claim.
-- **Analogy check**: Give your own analogy, different from the tutor's, and state its limits.
-- **What breaks?**: What would go wrong if this concept were ignored?
+---
 
-**Pass 2:**
-- **Explain the mechanism**: Explain how it works to an advisor, colleague, or curious friend.
-- **Two-concept bridge**: How does this connect to a previously learned concept? What does each add?
-- **Design decision**: Where would this change your design or the first thing you implement?
-- **Devil's advocate**: Respond to a concrete opposing claim using this concept.
-- **Evidence check**: What is the strongest evidence for this claim, and its biggest limitation?
-- **Predict the failure**: Give a concrete condition where this approach fails.
+#### `research` mode
 
-**Pass 3:**
-- **Write it**: Write a Related Work sentence, decision memo, or explanatory paragraph.
-- **Defend it**: Respond to a skeptical reviewer, colleague, or reader.
-- **Goal link**: How does this support your hypothesis, current project, or personal learning goal?
-- **Counter-argument**: Give evidence or a concept that challenges the claim.
-- **Teach it**: Explain it to a beginner well enough for them to use it.
-- **Write the limitation**: Write two sentences about its limitations, risks, or caveats in your context.
+**Pass 1 (any of these):**
+- **Conference pitch**: "Explain this to a fellow researcher at a poster session."
+- **Elevator pitch**: "You have 30 seconds — sell me on why this concept matters for your research."
+- **Predict the outcome**: "If [specific variable] changes from X to Y, what happens and why?" *(shared)*
+- **Spot the flaw**: Present a deliberately wrong one-sentence summary. "What's wrong with this claim: '[flawed statement]'?" *(shared)*
+- **Analogy check**: "Come up with your own analogy for this concept — different from the one I used." *(shared)*
+- **What breaks?**: "If we ignored this concept entirely in your system, what would go wrong?"
+
+**Pass 2 (any of these):**
+- **Advisor pitch**: "How would you explain this mechanism to your advisor?"
+- **Two-concept bridge**: "How does this connect to [[previously-learned-concept]]? What does one give you that the other doesn't?" *(shared)*
+- **Design decision**: "You're building your system — where exactly does this concept change your design, and how?"
+- **Devil's advocate**: "I think [opposing claim]. Convince me I'm wrong using this concept." *(shared)*
+- **Evidence check**: "What's the strongest piece of evidence for this claim, and what's its biggest limitation?"
+- **Predict the failure**: "Under what conditions would this approach fail? Give a concrete example from your domain."
+
+**Pass 3 (any of these):**
+- **Related Work sentence**: "Write the one sentence you'd put in a Related Work section about this."
+- **Reviewer simulation**: "I'm Reviewer 2 and I say your use of this concept is superficial. Defend it."
+- **Hypothesis link**: "Which of your hypotheses does this concept support, and how would you cite it as evidence?"
+- **Counter-argument**: "Name one paper or concept that could be used to argue *against* this claim." *(shared)*
+- **Teach it**: "Explain this to a student who has never read the paper. They need to understand it well enough to implement it."
+- **Write the limitation**: "Write the 2-sentence limitation paragraph for this concept as it applies to your system."
+
+---
+
+#### `professional` mode
+
+**Pass 1 (any of these):**
+- **Team standup**: "Explain this to your team in 30 seconds at standup."
+- **Stakeholder pitch**: "Your VP asks why this matters for the product. What do you say?"
+- **Predict the outcome**: "If [specific variable] changes from X to Y, what happens and why?" *(shared)*
+- **Spot the flaw**: Present a deliberately wrong one-sentence summary. "What's wrong with this claim: '[flawed statement]'?" *(shared)*
+- **Analogy check**: "Come up with your own analogy for this concept — different from the one I used." *(shared)*
+- **What breaks?**: "If your team ignored this concept, what would go wrong in production?"
+
+**Pass 2 (any of these):**
+- **Manager briefing**: "Write a one-paragraph briefing for your manager on this."
+- **Two-concept bridge**: "How does this connect to [[previously-learned-concept]]? What does one give you that the other doesn't?" *(shared)*
+- **Design decision**: "You're architecting the system — where does this change your design?"
+- **Devil's advocate**: "I think [opposing claim]. Convince me I'm wrong using this concept." *(shared)*
+- **Cost-benefit**: "What's the cost of implementing this vs. the cost of not implementing it?"
+- **Predict the failure**: "Under what conditions would this fail in a real deployment?"
+
+**Pass 3 (any of these):**
+- **Decision memo**: "Write the one-paragraph recommendation for the decision doc."
+- **Pushback simulation**: "Your skeptical colleague says this is over-engineered. Defend it."
+- **Project link**: "Which current project would benefit most from this, and how?"
+- **Counter-argument**: "Name one paper or concept that could be used to argue *against* this claim." *(shared)*
+- **Teach it**: "Explain this to a new team member who starts Monday."
+- **Write the risk**: "Write the 2-sentence risk assessment for NOT applying this."
+
+---
+
+#### `self-study` mode
+
+**Pass 1 (any of these):**
+- **Dinner table**: "Explain this to a curious friend over dinner."
+- **Elevator pitch**: "In one sentence, why should anyone care about this?"
+- **Predict the outcome**: "If [specific variable] changes from X to Y, what happens and why?" *(shared)*
+- **Spot the flaw**: Present a deliberately wrong one-sentence summary. "What's wrong with this claim: '[flawed statement]'?" *(shared)*
+- **Analogy check**: "Come up with your own analogy for this concept — different from the one I used." *(shared)*
+- **What breaks?**: "If this concept didn't exist, what problems would remain unsolved?"
+
+**Pass 2 (any of these):**
+- **Teach a friend**: "How would you explain the mechanism to someone smart but unfamiliar?"
+- **Two-concept bridge**: "How does this connect to [[previously-learned-concept]]? What does one give you that the other doesn't?" *(shared)*
+- **Build something**: "If you were building a project using this, what's the first thing you'd implement?"
+- **Devil's advocate**: "I think [opposing claim]. Convince me I'm wrong using this concept." *(shared)*
+- **Evidence check**: "What's the strongest piece of evidence for this claim, and what's its biggest limitation?"
+- **Edge case**: "What's the weirdest or most extreme scenario where this still applies?"
+
+**Pass 3 (any of these):**
+- **Blog post opener**: "Write the opening paragraph of a blog post explaining this."
+- **Skeptic response**: "Someone on Twitter says this concept is overrated. Draft your reply."
+- **Portfolio link**: "How would you demonstrate understanding of this in a portfolio project?"
+- **Counter-argument**: "Name one paper or concept that could be used to argue *against* this claim." *(shared)*
+- **Teach it**: "Explain this to a motivated beginner. They want to understand, not just memorize."
+- **Write the caveat**: "Write the 2-sentence 'but here's the catch' paragraph."
 
 If gaps appear, re-explain those parts. Don't move on until the core idea clicks.
 
@@ -437,7 +493,7 @@ If new connections are discovered that aren't in the concept notes, update the s
 4. **Update progress summary** at the top of the roadmap
 5. **Update glossary**: Add any key terms introduced during the session to the glossary (alphabetical order, with research-domain context)
 6. **Schedule recall**: Add the concept to the recall queue with `interval: 3d` and `next_recall` set to today + 3 days. If the concept is already in the queue (Pass 2/3 revisit), reset its interval to 3d.
-7. **Write session protocol** to `{protocols_dir}/YYYY-MM-DD_concept-slug.md` (see Session Protocol)
+7. **Write session protocol** to `{protocols_dir}/YYYY-MM-DD_concept-slug.md` (see template below)
 8. **Write execution log** to `{skill_logs_dir}/YYYY-MM-DD_sessionNN.md` (see Execution Logging section)
 9. **Ask**: "Want to do another concept, or is this a good stopping point?"
 
@@ -517,14 +573,20 @@ Track recurring correction types to adapt explanations preemptively.
 **Every 5 sessions in the selected topic**, review only its logs and count tag frequencies. If any tag appears in >=3 of the last 5 sessions:
 - **Surface it to the learner**: "I've noticed a pattern — [tag] has come up in X of our last 5 sessions."
 - **Adapt explanations**: For `implication-gap`, always end explanations with an explicit "What this means for your system" paragraph. For `math-gap`, extend the prerequisite probe. For `terminology-confusion`, add a glossary sidebar to the session. And so on.
-- **Record the adaptation** in the selected topic's next session protocol. Learner-specific adjustments belong in that topic, not the shared skill source.
+- **Log the adaptation** in the CHANGELOG if it becomes a permanent skill change.
 
 ---
 
-During that same five-session review, consider which methods helped, which
-concepts needed re-explanation, whether cluster ordering needs adjustment, and
-whether session length fits the learner's budget. Record any agreed adjustment
-in the topic's protocol or learning plan; preserve completed progress.
+## Adaptation & Self-Improvement
+
+This skill self-improves. After every 5 sessions in the selected topic, briefly review only its logs:
+
+- Which application methods worked best for which concept types?
+- Which concepts needed re-explanation?
+- Is the cluster ordering effective or should it be adjusted?
+- Are sessions the right length?
+- **Check struggle pattern frequencies** (see above)
+- Note improvements in CHANGELOG.md
 
 ---
 
@@ -532,13 +594,46 @@ in the topic's protocol or learning plan; preserve completed progress.
 
 After each session, write a human-readable protocol to `{protocols_dir}/YYYY-MM-DD_concept-slug.md`. This is the learning journal — it captures what worked, what needed correction, and what to revisit. Unlike the execution log (which is operational), the protocol is written for the learner to review later.
 
-Use the vault's `Templates/Session Protocol.md` as the canonical template.
-Fill in the selected topic ID, date, pass, cluster, concept, complexity, duration,
-and comprehension result (`passed`, `partial`, or `needs-revisit`). Describe the
-ideas covered, methods, useful moments, corrections, connections, and next step.
-Include actual recall results (`solid`, `fuzzy`, or `blank`) and qualified links
-to artifacts; omit those sections when there were none. Record only what happened
-in the session, in the learner's configured language.
+```markdown
+---
+date: "YYYY-MM-DD"
+topic: "<selected-topic-id>"
+pass: <1|2|3>
+cluster: <cluster name>
+concept: <concept wikilink slug>
+complexity: <light|medium|heavy>
+duration: ~XX min
+comprehension: <passed|partial|needs-revisit>
+---
+
+# Session: <concept title in plain language>
+
+## Recall checks
+- <concept recalled>: <solid|fuzzy|blank> — <brief note if fuzzy/blank>
+- <omit this section if no recalls were due>
+
+## What we covered
+- <bullet points: key ideas explained>
+
+## How we learned it
+- <which methods were used: conversational explanation, interactive HTML, scenario exercise, writing exercise, connection mapping>
+
+## Artifacts
+- <link to any interactives created, e.g. `[[{interactives_dir}/YYYY-MM-DD_concept-slug.html]]`>
+- <omit this section if no artifacts were created>
+
+## What worked well
+- <which moments, presets, examples, or methods produced "aha" moments>
+
+## Corrections given
+- <any terminology fixes, misconceptions addressed, or gaps filled during the comprehension check>
+
+## Connections made
+- <which concepts the learner linked this to, and how>
+
+## Next up
+- <what concept comes next on the roadmap>
+```
 
 ---
 
@@ -557,15 +652,37 @@ Use Obsidian Flavored Markdown to make learning protocols rich:
 
 After each session, write a log to `{skill_logs_dir}/YYYY-MM-DD_sessionNN.md` (where NN is the next session number):
 
-Read `references/session-log-template.md` for the canonical log schema. Fill
-its fields from the actual session, including the selected topic ID and numeric
-pass. Use `light`, `medium`, or `heavy` for complexity; `html-interactive`,
-`scenario`, `writing`, or `connection-mapping` for the application method; and
-the chosen comprehension format label for `check_format`. Log comprehension as
-`passed`, `partial`, or `needs-revisit`, recall as `solid`, `fuzzy`, or `blank`,
-and status as `completed`, `partial`, or `needs-followup`. Use the struggle tags
-above only for corrections actually observed. Leave unused lists empty and add
-brief session notes about what clicked and what needs a revisit.
+**YAML quoting rule:** Always quote all string values in frontmatter. Unquoted `~20` parses as null, bare `none` parses as null, and strings with colons or dashes can break Obsidian's YAML parser. Only leave numeric and boolean values unquoted.
 
-**YAML quoting rule:** Quote all string values in frontmatter, especially values
-containing colons or dashes. Leave numeric and boolean values unquoted.
+```yaml
+---
+skill: "guided-learning"
+version: "3.1.0-local"
+topic: "<selected-topic-id>"
+trigger: "<how the session was initiated>"
+pass: <1|2|3>
+cluster: "<cluster name>"
+concepts_covered:
+  - "<concept-1>"
+  - "<concept-2>"
+complexity: "<light|medium|heavy>"
+application_method: "<html-interactive|scenario|writing|connection-mapping>"
+check_format: "<conference-pitch|elevator-pitch|predict-outcome|spot-flaw|analogy-check|what-breaks|advisor-pitch|two-concept-bridge|design-decision|devils-advocate|evidence-check|predict-failure|related-work|reviewer-sim|hypothesis-link|counter-argument|teach-it|write-limitation|team-standup|stakeholder-pitch|manager-briefing|cost-benefit|decision-memo|pushback-sim|project-link|write-risk|dinner-table|teach-a-friend|build-something|edge-case|blog-post-opener|skeptic-response|portfolio-link|write-caveat>"
+artifacts_created:
+  - "<path to interactive HTML or other output>"
+comprehension_check: "<passed|partial|needs-revisit>"
+recall_results:
+  - concept: "<concept-slug>"
+    result: "<solid|fuzzy|blank>"
+struggle_tags:
+  - "<implication-gap|terminology-confusion|math-gap|scope-creep|shallow-framing|connection-blind>"
+session_duration_minutes: "<approximate, e.g. ~20>"
+status: "<completed|partial|needs-followup>"
+issues: "<any problems encountered>"
+user_corrections: "<any feedback the learner gave about the process>"
+---
+
+## Session Notes
+
+<Brief narrative: what was covered, what clicked, what needs revisit>
+```

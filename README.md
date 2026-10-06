@@ -119,21 +119,10 @@ Say **Continue [topic]** to resume a course or **I want to learn [new topic]** t
 start a separate subject. Updating your profile does not reset course progress.
 A topic's plan and your current requests take priority over vault defaults.
 
-The [skill instructions](SKILLS/guided-learning/SKILL.md) define the teaching
-flow. The [onboarding research rationale](SKILLS/guided-learning/references/onboarding-evidence.md)
+Read [SHARING.md](SHARING.md) for installation, public-template sharing, and fork
+updates. The [skill instructions](SKILLS/guided-learning/SKILL.md) define the
+teaching flow. The [onboarding research rationale](SKILLS/guided-learning/references/onboarding-evidence.md)
 explains the question design and its limits.
 
-## Share a fresh vault
-
-```sh
-./scripts/install_vault.sh dist/learning-starter --zip dist/learning-starter.zip
-```
-
-The destination and ZIP must be new paths. Send the ZIP to a friend; they extract
-it, open the folder in Obsidian, and start onboarding. The export contains setup
-files, an empty topic registry, and an unconfigured profile. It excludes existing
-courses, journals, learner answers, and Git history. Keep your learning vault
-outside this repository. Deleting working files does not erase old Git commits.
-
 This setup builds on the [WSE Research guided-learning skill](https://github.com/WSE-research/guided-learning-skill).
-Its [MIT license](LICENSE) and pinned upstream attribution are retained.
+Its [MIT license](SKILLS/guided-learning/LICENSE) and upstream attribution are retained.
