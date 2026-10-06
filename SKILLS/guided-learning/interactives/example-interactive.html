@@ -2,784 +2,323 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Example Interactive — Precision-Recall Tradeoff</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Precision & recall · Learning</title>
   <!-- interactive.css:start -->
 <style>
-/* ==========================================================================
-   Learning Interactive — Universal Design System
-
-   Link in every interactive:
-     <link rel="stylesheet" href="interactive.css">
-   ========================================================================== */
-
-/* ---------- Design tokens ---------- */
+/* Shared minimalist styles for standalone learning interactives. */
 :root {
-  /* Background layers (darkest -> lightest) */
-  --bg: #0f1117;
-  --surface: #181b24;
-  --card: #1c2333;
-  --border: #262a36;
-  --border-hover: #363b4a;
-
-  /* Text */
-  --text: #e0e0e0;
-  --text-bright: #ffffff;
-  --muted: #7a8499;
-
-  /* Primary accent (indigo) — UI chrome: active states, buttons, borders */
-  --accent: #6366f1;
-  --accent-hover: #818cf8;
-  --accent-dim: rgba(99, 102, 241, 0.15);
-
-  /* Named colors — use in content via var() or inline style */
-  --cyan: #4fc3f7;
-  --orange: #ff8a65;
-  --green: #4ade80;
-  --red: #f87171;
-  --yellow: #fbbf24;
-  --blue: #60a5fa;
-  --purple: #b39ddb;
-  --pink: #f472b6;
-  --teal: #34d399;
-
-  /* Classification matrix semantic aliases */
+  color-scheme: light;
+  --bg: #fafaf8;
+  --surface: #fff;
+  --card: #f4f5f2;
+  --border: #e2e5df;
+  --border-hover: #a5afa5;
+  --text: #303a33;
+  --text-bright: #18271d;
+  --muted: #687269;
+  --accent: #356747;
+  --accent-hover: #264e35;
+  --accent-dim: #edf3ed;
+  --cyan: #426d75;
+  --orange: #94633f;
+  --green: #356747;
+  --red: #99564c;
+  --yellow: #866b31;
+  --blue: #566c83;
+  --purple: #746181;
+  --pink: #925f78;
+  --teal: #3e7169;
   --tp: var(--green);
-  --tn: var(--blue);
-  --fp: var(--red);
-  --fn: var(--yellow);
-
-  /* Radii */
-  --radius: 8px;
-  --radius-lg: 12px;
-
-  /* Fonts */
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+  --tn: #5c695f;
+  --fp: #94633f;
+  --fn: #866b31;
+  --radius: 6px;
+  --radius-lg: 8px;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'SFMono-Regular', Consolas, monospace;
 }
-
-/* ---------- Reset ---------- */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: var(--font-sans);
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  line-height: 1.5;
-}
-
-/* ---------- Typography ---------- */
-h1 { font-size: 1.4rem; font-weight: 600; color: var(--text-bright); }
-h2 { font-size: 1.1rem; font-weight: 600; color: var(--muted); margin-bottom: 0.5rem; }
-h3 { font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 8px; }
-.subtitle { font-size: 0.9rem; color: var(--muted); margin-bottom: 24px; }
-.explain { font-size: 0.88rem; color: var(--muted); line-height: 1.6; margin: 0.5rem 0; }
-.explain em { color: var(--text); font-style: normal; font-weight: 500; }
-
-/* ---------- Layout ---------- */
-.container { max-width: 1100px; margin: 0 auto; }
-
-/* Sidebar + main */
-.layout {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 24px;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-/* Equal columns */
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-
-@media (max-width: 800px) {
-  .layout { grid-template-columns: 1fr; }
-  .two-col { grid-template-columns: 1fr; }
-}
-
-/* ---------- Surfaces ---------- */
-.panel {
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  border: 1px solid var(--border);
-}
-
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.25rem;
-}
-.card + .card { margin-top: 1rem; }
-
-/* Notice / insight box */
-.notice {
-  background: var(--accent-dim);
-  border: 1px solid rgba(99, 102, 241, 0.25);
-  border-radius: var(--radius);
-  padding: 0.75rem 1rem;
-  margin-top: 1rem;
-  font-size: 0.85rem;
-}
-.notice strong { color: var(--accent-hover); }
-.notice ul { margin-top: 0.3rem; padding-left: 1.2rem; font-size: 0.83rem; }
-.notice em { color: var(--text); }
-
-/* Accent-bar variant (left border instead of full border) */
-.notice--bar {
-  background: var(--surface);
-  border: none;
-  border-left: 3px solid var(--accent);
-  border-radius: 0 var(--radius) var(--radius) 0;
-  padding: 14px 16px;
-  font-size: 0.88rem;
-  line-height: 1.6;
-  color: var(--text);
-}
-.notice--bar strong { color: var(--text-bright); }
-.notice-title {
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--accent);
-  margin-bottom: 6px;
-}
-
-/* ---------- Header & Navigation ---------- */
-.header {
-  background: var(--surface);
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-.header .step {
-  background: var(--accent);
-  color: var(--bg);
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 0.85rem; flex-shrink: 0;
-}
-
-/* Tab navigation */
-.nav {
-  display: flex;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 0 1rem;
-}
-.nav button {
-  background: none; border: none; color: var(--muted);
-  padding: 0.75rem 1.25rem; font-size: 0.85rem; cursor: pointer;
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s; font-family: inherit;
-}
-.nav button:hover { color: var(--text); }
-.nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
-.nav button.completed { color: var(--green); }
-.nav button.completed::before { content: '¹3  '; }
-
-/* Tab content panels */
-.tab-content { display: none; padding: 1.5rem; max-width: 1100px; margin: 0 auto; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-sans); line-height: 1.6; }
+h1, h2, h3, p { margin: 0; }
+h1 { color: var(--text-bright); font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 550; line-height: 1.2; letter-spacing: -.045em; }
+h2 { color: var(--text-bright); font-size: 1rem; font-weight: 600; }
+h3 { font-size: .875rem; font-weight: 600; }
+a { color: var(--accent); text-underline-offset: 3px; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+button, a, input, summary { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
+.subtitle, .explain { color: var(--muted); font-size: .9rem; line-height: 1.7; }
+.subtitle { margin-top: 14px; max-width: 580px; }
+.explain em { color: var(--text); font-style: normal; }
+.container { max-width: 1040px; margin: auto; }
+.layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 48px; max-width: 1040px; margin: auto; }
+.two-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.panel, .card { padding: 24px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }
+.card + .card { margin-top: 12px; }
+.notice, .notice--bar { padding: 16px 0 16px 18px; border-left: 2px solid var(--border-hover); margin-top: 24px; font-size: .875rem; }
+.notice strong, .notice-title { color: var(--text-bright); }
+.notice ul { padding-left: 20px; }
+.notice-title { font-size: .8rem; font-weight: 600; margin-bottom: 8px; }
+.header { max-width: 1040px; padding: 48px 24px 32px; margin: auto; }
+.header .step { color: var(--muted); font-size: .75rem; margin-bottom: 20px; }
+.nav { display: flex; gap: 24px; border-bottom: 1px solid var(--border); }
+.nav button { border: 0; border-bottom: 2px solid transparent; background: none; padding: 12px 0; color: var(--muted); }
+.nav button.active { border-color: var(--accent); color: var(--accent); }
+.nav button.completed::before { content: '\2713  '; }
+.tab-content { display: none; padding: 32px 24px; max-width: 1040px; margin: auto; }
 .tab-content.active { display: block; }
-
-/* Bottom navigation (prev/next) */
-.bottom-nav {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border);
-}
-
-/* ---------- Controls ---------- */
-.control-group { margin-bottom: 20px; }
-.control-group:last-child { margin-bottom: 0; }
-
-.slider-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0.5rem 0;
-}
-.slider-row label {
-  min-width: 100px;
-  font-size: 0.85rem;
-  color: var(--muted);
-}
-.slider-label {
-  width: 28px;
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-align: right;
-}
-.slider-val {
-  min-width: 40px;
-  font-family: var(--font-mono);
-  font-size: 0.95rem;
-  text-align: right;
-  color: var(--text-bright);
-}
-
-/* Range input */
-input[type="range"] {
-  flex: 1;
-  height: 6px;
-  -webkit-appearance: none;
-  appearance: none;
-  background: var(--border);
-  border-radius: 3px;
-  outline: none;
-}
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 18px; height: 18px;
-  border-radius: 50%;
-  background: var(--text-bright);
-  cursor: pointer;
-  border: 2px solid var(--muted);
-}
-
-/* ---------- Buttons ---------- */
-.btn {
-  background: var(--accent);
-  color: var(--text-bright);
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius);
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-  font-family: inherit;
-  transition: opacity 0.2s;
-}
-.btn:hover { opacity: 0.85; }
-.btn-sm { padding: 0.3rem 0.7rem; font-size: 0.8rem; }
-.btn-secondary { background: var(--border); color: var(--text); }
-.btn-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.5rem 0; }
-
-/* Preset buttons */
-.preset-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 16px;
-}
-.preset-btn {
-  background: var(--border);
-  border: 1px solid var(--border-hover);
-  color: var(--muted);
-  padding: 5px 10px;
-  border-radius: 6px;
-  font-size: 0.78rem;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.15s;
-}
-.preset-btn:hover { border-color: var(--accent); color: var(--text); }
-.preset-btn.active { background: var(--accent); border-color: var(--accent-hover); color: var(--text-bright); }
-
-/* ---------- Confusion Matrix ---------- */
-.cm-grid {
-  display: grid;
-  grid-template-columns: auto 1fr 1fr;
-  grid-template-rows: auto 1fr 1fr;
-  gap: 3px;
-  margin: 0.75rem 0;
-}
-.cm-corner { width: 80px; height: 36px; }
-.cm-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 4px 8px;
-}
-.cm-cell {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius);
-  font-family: var(--font-mono);
-  min-width: 70px;
-  padding: 0.6rem;
-  text-align: center;
-  transition: all 0.25s;
-}
-/* Large variant (sidebar confusion matrix) */
-.cm-cell--lg {
-  width: 110px;
-  height: 80px;
-}
-.cm-cell .count { font-size: 1.6rem; font-weight: 700; line-height: 1; }
-.cm-cell .label {
-  font-size: 0.7rem;
-  margin-top: 4px;
-  opacity: 0.7;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-/* Semantic cell colors */
-.cm-tp { background: rgba(74, 222, 128, 0.15); color: var(--tp); }
-.cm-tn { background: rgba(96, 165, 250, 0.15); color: var(--tn); }
-.cm-fp { background: rgba(248, 113, 113, 0.15); color: var(--fp); }
-.cm-fn { background: rgba(251, 191, 36, 0.15); color: var(--fn); }
-
-/* Container for matrix + side metrics */
-.cm-container { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
-
-/* ---------- Metrics (inline display) ---------- */
-.metric {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius);
-  margin: 0.25rem;
-}
-.metric .label {
-  font-size: 0.7rem;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-.metric .value {
-  font-size: 1.3rem;
-  font-weight: 700;
-  font-family: var(--font-mono);
-}
-
-/* ---------- Metrics (bar display) ---------- */
-.metrics-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  flex: 1;
-  min-width: 200px;
-  justify-content: center;
-}
-.metric-row { display: flex; flex-direction: column; gap: 4px; }
+.bottom-nav { display: flex; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 24px; margin-top: 32px; }
+.control-group { margin-bottom: 28px; }
+.slider-row { display: flex; align-items: center; gap: 12px; margin: 16px 0; }
+.slider-row > label { font-size: .85rem; }
+.slider-label, .slider-val { font-variant-numeric: tabular-nums; font-size: .875rem; }
+.slider-val { margin-left: auto; color: var(--text-bright); }
+input[type='range'] { appearance: none; -webkit-appearance: none; width: 100%; min-width: 0; height: 4px; border-radius: 2px; background: var(--border); accent-color: var(--accent); cursor: pointer; }
+input[type='range']::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--accent); }
+input[type='range']::-moz-range-thumb { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--accent); }
+.btn, .preset-btn, .copy-btn { min-height: 40px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: 8px 14px; color: var(--text); font-size: .8rem; }
+.btn { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-secondary { background: var(--surface); color: var(--text); border-color: var(--border); }
+.btn-sm { padding: 6px 10px; }
+.btn:hover { filter: brightness(.95); }
+.preset-btn:hover, .copy-btn:hover { border-color: var(--border-hover); }
+.preset-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.btn-row, .preset-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.cm-grid { display: grid; grid-template-columns: auto 1fr 1fr; gap: 4px; margin: 16px 0; }
+.cm-header { color: var(--muted); font-size: .75rem; text-align: center; padding: 12px; }
+.cm-cell { padding: 20px; text-align: center; border-radius: var(--radius); font-variant-numeric: tabular-nums; }
+.cm-cell .count { display: block; font-size: 1.7rem; font-weight: 500; }
+.cm-cell .label { display: block; font-size: .75rem; }
+.cm-cell--lg { min-height: 80px; }
+.cm-tp { background: var(--accent-dim); color: var(--tp); }
+.cm-tn { background: #f0f2ee; color: var(--tn); }
+.cm-fp { background: #f5f0e9; color: var(--fp); }
+.cm-fn { background: #f7f5ec; color: var(--fn); }
+.cm-container { display: flex; flex-wrap: wrap; gap: 24px; }
+.metric { display: inline-flex; flex-direction: column; padding: 12px; }
+.metric .label, .metric-subtext { color: var(--muted); font-size: .75rem; }
+.metric .value, .metric-value { font-size: 1.75rem; color: var(--text-bright); font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -.035em; }
+.metrics-grid { display: flex; flex-direction: column; gap: 16px; }
 .metric-header { display: flex; justify-content: space-between; align-items: baseline; }
-.metric-name { font-size: 0.85rem; font-weight: 600; }
-.metric-value { font-family: var(--font-mono); font-size: 1.1rem; font-weight: 700; }
-.metric-bar-bg {
-  height: 10px;
-  background: var(--border);
-  border-radius: 5px;
-  overflow: hidden;
-  position: relative;
-}
-.metric-bar-fill {
-  height: 100%;
-  border-radius: 5px;
-  transition: width 0.3s, background 0.3s;
-}
-.metric-bar-zero {
-  position: absolute;
-  left: 50%; top: 0;
-  width: 1px; height: 100%;
-  background: #555;
-}
-.metric-subtext {
-  font-size: 0.72rem;
-  color: #666;
-  font-style: italic;
-}
-
-/* ---------- Population bar ---------- */
-.population-bar {
-  display: flex;
-  height: 24px;
-  border-radius: 6px;
-  overflow: hidden;
-  margin-top: 6px;
-  margin-bottom: 4px;
-}
-.pop-segment {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.65rem;
-  font-weight: 600;
-  transition: width 0.3s;
-  min-width: 0;
-  overflow: hidden;
-}
-.pop-tp { background: rgba(74, 222, 128, 0.35); color: var(--tp); }
-.pop-fp { background: rgba(248, 113, 113, 0.35); color: var(--fp); }
-.pop-fn { background: rgba(251, 191, 36, 0.35); color: var(--fn); }
-.pop-tn { background: rgba(96, 165, 250, 0.35); color: var(--tn); }
-.pop-legend {
-  display: flex;
-  gap: 12px;
-  font-size: 0.7rem;
-  color: var(--muted);
-  margin-bottom: 8px;
-}
-.pop-legend span { display: flex; align-items: center; gap: 4px; }
-.pop-dot {
-  width: 8px; height: 8px;
-  border-radius: 2px;
-  display: inline-block;
-}
-
-/* ---------- Formula ---------- */
-.formula {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 0.75rem 1rem;
-  font-family: var(--font-mono);
-  font-size: 0.9rem;
-  text-align: center;
-  margin: 0.75rem 0;
-  color: var(--yellow);
-}
-
-/* ---------- Canvas ---------- */
-canvas {
-  width: 100%;
-  border-radius: var(--radius);
-  display: block;
-}
-
-/* ---------- Prompt box ---------- */
-.prompt-box {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 16px;
-  position: relative;
-  margin-top: 1.5rem;
-}
-.prompt-box pre {
-  white-space: pre-wrap;
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  line-height: 1.6;
-  color: var(--muted);
-}
-
-.copy-btn {
-  position: absolute;
-  top: 12px; right: 12px;
-  background: var(--border);
-  border: 1px solid var(--border-hover);
-  color: var(--muted);
-  padding: 5px 12px;
-  border-radius: 6px;
-  font-size: 0.78rem;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.15s;
-}
-.copy-btn:hover { background: var(--accent); color: var(--text-bright); border-color: var(--accent); }
-
-/* ---------- Tags ---------- */
-.tag {
-  display: inline-block;
-  background: var(--accent-dim);
-  color: var(--accent);
-  padding: 0.15rem 0.5rem;
-  border-radius: 3px;
-  font-size: 0.75rem;
-  margin-right: 0.3rem;
-}
-
-/* ---------- Utility: page padding for non-tabbed layouts ---------- */
-.page-padding { padding: 24px; }
-
-/* ---------- Color utility classes ---------- */
-.color-tp { color: var(--tp); }
+.metric-name { color: var(--muted); font-size: .8rem; }
+.metric-bar-bg { height: 3px; margin-top: 10px; border-radius: 2px; background: var(--border); overflow: hidden; position: relative; }
+.metric-bar-fill { height: 100%; background: var(--accent); }
+.metric-bar-zero { position: absolute; left: 50%; top: 0; height: 100%; width: 1px; background: var(--muted); }
+.population-bar { display: flex; height: 10px; overflow: hidden; border-radius: 3px; margin: 16px 0; }
+.pop-segment { min-width: 0; overflow: hidden; text-align: center; font-size: .7rem; }
+.pop-tp { background: #477852; color: #fff; }
+.pop-tn { background: #a5b3a3; color: #18271d; }
+.pop-fp { background: #b8a587; color: #18271d; }
+.pop-fn { background: #d6ccb4; color: #18271d; }
+.pop-legend { display: flex; flex-wrap: wrap; gap: 12px 20px; font-size: .75rem; color: var(--muted); }
+.pop-legend > span { display: flex; align-items: center; gap: 6px; }
+.pop-dot { display: inline-block; width: 7px; height: 7px; border-radius: 2px; }
+.formula { border-block: 1px solid var(--border); padding: 16px; font-family: var(--font-mono); text-align: center; font-size: .85rem; margin: 20px 0; }
+canvas { display: block; width: 100%; }
+.prompt-box { position: relative; margin-top: 24px; padding: 24px; background: var(--card); border-radius: var(--radius); }
+.prompt-box pre { white-space: pre-wrap; font-size: .8rem; font-family: var(--font-mono); }
+.copy-btn { position: absolute; top: 12px; right: 12px; }
+.tag { display: inline-block; background: var(--accent-dim); color: var(--accent); border-radius: 4px; padding: 2px 8px; font-size: .75rem; }
+.page-padding { padding: 32px 24px; }
+.color-tp, .color-green { color: var(--tp); }
 .color-tn { color: var(--tn); }
 .color-fp { color: var(--fp); }
 .color-fn { color: var(--fn); }
 .color-accent { color: var(--accent); }
 .color-cyan { color: var(--cyan); }
 .color-orange { color: var(--orange); }
-.color-green { color: var(--green); }
 .color-red { color: var(--red); }
 .color-yellow { color: var(--yellow); }
 .color-purple { color: var(--purple); }
 .color-pink { color: var(--pink); }
 .color-teal { color: var(--teal); }
+@media (max-width: 740px) {
+  .layout, .two-col { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .header { padding-top: 32px; }
+  .panel, .card { padding: 20px; }
+}
 </style>
 <!-- interactive.css:end -->
   <style>
-    /* Page-specific styles go here — interactive.css covers the shared system */
-    .chart-area {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1rem;
-      margin-top: 1rem;
+    .lesson { max-width: 1000px; margin: auto; padding: 36px 40px 48px; }
+    .breadcrumb { display: flex; justify-content: space-between; font-size: .75rem; color: var(--muted); padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .lesson-header { padding: 42px 0 36px; }
+    .eyebrow { color: var(--accent); font-size: .72rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 12px; }
+    .experiment { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 40px; padding: 30px 0 36px; border-block: 1px solid var(--border); }
+    .controls { padding-right: 32px; border-right: 1px solid var(--border); }
+    .section-heading { margin-bottom: 24px; }
+    .control { margin-bottom: 26px; }
+    .control-heading { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; font-size: .8rem; gap: 12px; }
+    .control input { display: block; }
+    .range-ends { display: flex; justify-content: space-between; color: var(--muted); font-size: .68rem; margin-top: 10px; }
+    .preset-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .preset-btn { padding: 8px 5px; font-size: .73rem; }
+    .control-note { font-size: .73rem; color: var(--muted); margin-top: 20px; line-height: 1.7; }
+    .results { min-width: 0; }
+    .results-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 22px; }
+    .sample-count { font-size: .75rem; color: var(--muted); }
+    .metrics-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; margin-bottom: 32px; }
+    .metric-header { display: block; }
+    .metric-name, .metric-value { display: block; }
+    .metric-value { font-size: 2rem; margin-top: 3px; }
+    .metric-subtext { font-size: .68rem; margin-top: 7px; }
+    .matrix { width: 100%; border-spacing: 4px; table-layout: fixed; margin: 12px -4px 24px; width: calc(100% + 8px); }
+    .matrix th { color: var(--muted); font-size: .71rem; font-weight: 400; text-align: center; padding: 6px 0; }
+    .matrix .row-label { width: 75px; text-align: left; }
+    .matrix td { padding: 17px 8px; }
+    .matrix .count { font-size: 1.55rem; }
+    .matrix .label { font-size: .67rem; }
+    .population-label { font-size: .75rem; color: var(--muted); }
+    .summary { margin-top: 24px; font-size: .8rem; color: var(--muted); line-height: 1.8; }
+    .summary strong { color: var(--text); font-weight: 500; }
+    .guide { border-bottom: 1px solid var(--border); }
+    .guide > summary { cursor: pointer; padding: 24px 0; font-size: .875rem; font-weight: 500; }
+    .guide > summary::marker { color: var(--muted); }
+    .guide-intro { color: var(--muted); font-size: .8rem; margin-bottom: 24px; }
+    .experiments { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; padding-bottom: 30px; }
+    .experiment-number { font-size: .7rem; color: var(--muted); margin-bottom: 8px; }
+    .experiments h3 { margin-bottom: 8px; font-size: .8rem; }
+    .experiments p { font-size: .78rem; color: var(--muted); }
+    .footer { display: flex; justify-content: space-between; gap: 24px; padding-top: 24px; color: var(--muted); font-size: .7rem; }
+    @media (max-width: 740px) {
+      .lesson { padding: 24px 22px 32px; }
+      .lesson-header { padding: 32px 0; }
+      .experiment { grid-template-columns: minmax(0, 1fr); gap: 28px; padding-top: 24px; }
+      .controls { border-right: 0; border-bottom: 1px solid var(--border); padding: 0 0 28px; }
+      .preset-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .experiments { grid-template-columns: 1fr; gap: 24px; }
+      .metrics-grid { gap: 14px; }
+      .footer { flex-direction: column; gap: 6px; }
     }
-    .chart-area canvas {
-      height: 300px;
-    }
-    .threshold-display {
-      font-size: 2rem;
-      font-weight: 700;
-      font-family: var(--font-mono);
-      color: var(--accent);
-      text-align: center;
-      margin: 0.5rem 0;
+    @media (max-width: 380px) {
+      .preset-row { grid-template-columns: 1fr 1fr; }
+      .metric-value { font-size: 1.7rem; }
+      .matrix .row-label { width: 60px; }
     }
   </style>
 </head>
 <body>
+<main class="lesson">
+  <div class="breadcrumb"><span>Learning / Interactives</span><span>01</span></div>
+  <header class="lesson-header">
+    <p class="eyebrow">Classification</p>
+    <h1>Precision & recall</h1>
+    <p class="subtitle">How selective should a model be? Adjust the threshold to explore the balance between catching real cases and avoiding false alarms.</p>
+  </header>
 
-<!-- Header -->
-<div class="header">
-  <div class="step">1</div>
-  <div>
-    <h1>Precision-Recall Tradeoff</h1>
-    <div class="subtitle">Explore how the confidence threshold affects what gets flagged for human review</div>
-  </div>
-</div>
-
-<!-- Navigation -->
-<div class="nav">
-  <button class="active" onclick="showTab('explore')">Explore</button>
-  <button onclick="showTab('notice')">What to Notice</button>
-</div>
-
-<!-- Tab: Explore -->
-<div id="explore" class="tab-content active">
-  <div class="layout">
-    <!-- Sidebar: Controls -->
-    <div class="panel">
-      <h3>Parameters</h3>
-
-      <div class="control-group">
-        <div class="slider-row">
-          <label>Threshold</label>
-          <input type="range" id="threshold" min="0" max="100" value="50" oninput="update()">
-          <span class="slider-val" id="threshold-val">0.50</span>
-        </div>
-        <div class="slider-row">
-          <label>Total samples</label>
-          <input type="range" id="samples" min="50" max="500" step="10" value="200" oninput="update()">
-          <span class="slider-val" id="samples-val">200</span>
-        </div>
-        <div class="slider-row">
-          <label>True positive rate</label>
-          <input type="range" id="tpr" min="50" max="99" value="80" oninput="update()">
-          <span class="slider-val" id="tpr-val">0.80</span>
-        </div>
+  <section class="experiment" aria-label="Precision and recall explorer">
+    <div class="controls">
+      <h2 class="section-heading">Adjust the model</h2>
+      <div class="control">
+        <div class="control-heading"><label for="threshold">Threshold</label><output id="threshold-val" for="threshold">0.50</output></div>
+        <input type="range" id="threshold" min="0" max="100" value="50" aria-describedby="threshold-help">
+        <div class="range-ends" id="threshold-help"><span>Catch more</span><span>Be selective</span></div>
       </div>
-
-      <h3>Presets</h3>
-      <div class="preset-row">
-        <button class="preset-btn" onclick="setPreset(0.3, 200, 0.80)">Conservative</button>
-        <button class="preset-btn active" onclick="setPreset(0.5, 200, 0.80)">Balanced</button>
-        <button class="preset-btn" onclick="setPreset(0.8, 200, 0.80)">Aggressive</button>
-        <button class="preset-btn" onclick="setPreset(0.5, 500, 0.95)">High volume</button>
+      <div class="control">
+        <div class="control-heading"><label for="samples">Total samples</label><output id="samples-val" for="samples">200</output></div>
+        <input type="range" id="samples" min="50" max="500" step="10" value="200">
+        <div class="range-ends"><span>50</span><span>500</span></div>
       </div>
+      <div class="control">
+        <div class="control-heading"><label for="tpr">Baseline sensitivity</label><output id="tpr-val" for="tpr">0.80</output></div>
+        <input type="range" id="tpr" min="50" max="99" value="80" aria-describedby="model-note">
+        <div class="range-ends"><span>0.50</span><span>0.99</span></div>
+      </div>
+      <h3>Try a preset</h3>
+      <div class="preset-row" aria-label="Model presets">
+        <button type="button" class="preset-btn" data-values="30,200,80" aria-pressed="false">Catch more</button>
+        <button type="button" class="preset-btn" data-values="50,200,80" aria-pressed="true">Balanced</button>
+        <button type="button" class="preset-btn" data-values="80,200,80" aria-pressed="false">Selective</button>
+        <button type="button" class="preset-btn" data-values="50,500,95" aria-pressed="false">High volume</button>
+      </div>
+      <p class="control-note" id="model-note">A simplified model with equal positive and negative samples. Baseline sensitivity sets recall at a threshold of zero.</p>
+    </div>
 
-      <!-- Metrics -->
-      <h3>Metrics</h3>
+    <div class="results">
+      <div class="results-heading"><h2>See the tradeoff</h2><span class="sample-count"><span id="total-count">200</span> samples</span></div>
       <div class="metrics-grid">
-        <div class="metric-row">
-          <div class="metric-header">
-            <span class="metric-name color-green">Precision</span>
-            <span class="metric-value color-green" id="precision">0.80</span>
-          </div>
-          <div class="metric-bar-bg">
-            <div class="metric-bar-fill" id="precision-bar" style="width:80%; background: var(--green);"></div>
-          </div>
-        </div>
-        <div class="metric-row">
-          <div class="metric-header">
-            <span class="metric-name color-cyan">Recall</span>
-            <span class="metric-value color-cyan" id="recall">0.80</span>
-          </div>
-          <div class="metric-bar-bg">
-            <div class="metric-bar-fill" id="recall-bar" style="width:80%; background: var(--cyan);"></div>
-          </div>
-        </div>
-        <div class="metric-row">
-          <div class="metric-header">
-            <span class="metric-name color-yellow">F1 Score</span>
-            <span class="metric-value color-yellow" id="f1">0.80</span>
-          </div>
-          <div class="metric-bar-bg">
-            <div class="metric-bar-fill" id="f1-bar" style="width:80%; background: var(--yellow);"></div>
-          </div>
-        </div>
+        <div class="metric-row"><div class="metric-header"><span class="metric-name">Precision</span><span class="metric-value" id="precision">—</span></div><div class="metric-bar-bg"><div class="metric-bar-fill" id="precision-bar"></div></div><p class="metric-subtext">Correct among flagged</p></div>
+        <div class="metric-row"><div class="metric-header"><span class="metric-name">Recall</span><span class="metric-value" id="recall">—</span></div><div class="metric-bar-bg"><div class="metric-bar-fill" id="recall-bar"></div></div><p class="metric-subtext">Real cases caught</p></div>
+        <div class="metric-row"><div class="metric-header"><span class="metric-name">F1 score</span><span class="metric-value" id="f1">—</span></div><div class="metric-bar-bg"><div class="metric-bar-fill" id="f1-bar"></div></div><p class="metric-subtext">Balances both rates</p></div>
       </div>
+      <h3>Where the samples go</h3>
+      <table class="matrix" aria-label="Confusion matrix">
+        <thead><tr><td class="row-label"></td><th scope="col">Flagged positive</th><th scope="col">Predicted negative</th></tr></thead>
+        <tbody>
+          <tr><th scope="row" class="row-label">Actually<br>positive</th><td class="cm-cell cm-tp"><span class="count" id="tp">—</span><span class="label">True positives</span></td><td class="cm-cell cm-fn"><span class="count" id="fn">—</span><span class="label">Missed cases</span></td></tr>
+          <tr><th scope="row" class="row-label">Actually<br>negative</th><td class="cm-cell cm-fp"><span class="count" id="fp">—</span><span class="label">False alarms</span></td><td class="cm-cell cm-tn"><span class="count" id="tn">—</span><span class="label">True negatives</span></td></tr>
+        </tbody>
+      </table>
+      <p class="population-label">Share of all samples</p>
+      <div class="population-bar" aria-hidden="true"><div class="pop-segment pop-tp" id="pop-tp"></div><div class="pop-segment pop-fp" id="pop-fp"></div><div class="pop-segment pop-fn" id="pop-fn"></div><div class="pop-segment pop-tn" id="pop-tn"></div></div>
+      <div class="pop-legend"><span><i class="pop-dot pop-tp"></i>Correct positives</span><span><i class="pop-dot pop-fp"></i>False alarms</span><span><i class="pop-dot pop-fn"></i>Missed cases</span><span><i class="pop-dot pop-tn"></i>Correct negatives</span></div>
+      <p class="summary" id="result-summary" aria-live="polite" aria-atomic="true"></p>
     </div>
+  </section>
 
-    <!-- Main: Visualization -->
-    <div>
-      <div class="threshold-display">
-        Threshold: <span id="threshold-big">0.50</span>
-      </div>
-
-      <!-- Confusion matrix -->
-      <div class="cm-container">
-        <div class="cm-grid">
-          <div class="cm-corner"></div>
-          <div class="cm-header">Predicted +</div>
-          <div class="cm-header">Predicted -</div>
-          <div class="cm-header" style="writing-mode: vertical-lr; transform: rotate(180deg);">Actual +</div>
-          <div class="cm-cell cm-tp">
-            <span class="count" id="tp">80</span>
-            <span class="label">TP</span>
-          </div>
-          <div class="cm-cell cm-fn">
-            <span class="count" id="fn">20</span>
-            <span class="label">FN</span>
-          </div>
-          <div class="cm-header" style="writing-mode: vertical-lr; transform: rotate(180deg);">Actual -</div>
-          <div class="cm-cell cm-fp">
-            <span class="count" id="fp">20</span>
-            <span class="label">FP</span>
-          </div>
-          <div class="cm-cell cm-tn">
-            <span class="count" id="tn">80</span>
-            <span class="label">TN</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Population bar -->
-      <h3 style="margin-top: 1.5rem;">Population Distribution</h3>
-      <div class="pop-legend">
-        <span><span class="pop-dot" style="background: rgba(74,222,128,0.5);"></span> TP</span>
-        <span><span class="pop-dot" style="background: rgba(248,113,113,0.5);"></span> FP</span>
-        <span><span class="pop-dot" style="background: rgba(251,191,36,0.5);"></span> FN</span>
-        <span><span class="pop-dot" style="background: rgba(96,165,250,0.5);"></span> TN</span>
-      </div>
-      <div class="population-bar">
-        <div class="pop-segment pop-tp" id="pop-tp" style="width:40%">TP</div>
-        <div class="pop-segment pop-fp" id="pop-fp" style="width:10%">FP</div>
-        <div class="pop-segment pop-fn" id="pop-fn" style="width:10%">FN</div>
-        <div class="pop-segment pop-tn" id="pop-tn" style="width:40%">TN</div>
-      </div>
-
-      <div class="explain" style="margin-top: 1rem;">
-        <em>Drag the threshold slider</em> to see how it shifts the balance between precision and recall.
-        A lower threshold catches more true positives but also lets in more false positives.
-        A higher threshold is more selective but misses more real cases.
-      </div>
+  <details class="guide">
+    <summary>What to notice · 3 small experiments</summary>
+    <p class="guide-intro">Use the controls above to try each experiment. The results update as you go.</p>
+    <div class="experiments">
+      <article><p class="experiment-number">01</p><h3>Sweep the threshold</h3><p>Move from 0 to 1. Watch false alarms decrease while more real cases are missed. Which threshold gives the highest F1 score in this model?</p></article>
+      <article><p class="experiment-number">02</p><h3>Change the cost of errors</h3><p>Try “Catch more” when missing a case is costly. Try “Selective” when false alarms are costly. Which kind of error matters more in your own project?</p></article>
+      <article><p class="experiment-number">03</p><h3>Think about scale</h3><p>Keep the other settings fixed and increase the samples from 50 to 500. Rates stay roughly the same, allowing for rounding. How many more cases now need review?</p></article>
     </div>
-  </div>
-</div>
-
-<!-- Tab: What to Notice -->
-<div id="notice" class="tab-content">
-  <div class="container" style="max-width: 700px;">
-    <div class="notice--bar" style="margin-bottom: 1rem;">
-      <div class="notice-title">Guided Exploration</div>
-      <strong>Try these experiments to build intuition:</strong>
-    </div>
-
-    <div class="card">
-      <h3>Experiment 1: The Threshold Sweep</h3>
-      <p class="explain">
-        Slowly drag the threshold from 0.0 to 1.0. Watch precision and recall move in opposite directions.
-        <em>Where is the "sweet spot" where F1 peaks?</em> Notice that it's not always at 0.50 —
-        it depends on the true positive rate and class balance.
-      </p>
-    </div>
-
-    <div class="card">
-      <h3>Experiment 2: High Stakes vs. Low Stakes</h3>
-      <p class="explain">
-        In a medical screening scenario, you want high recall (catch every case) even if precision drops.
-        Set the threshold to 0.30 — "Conservative" preset. Now imagine this is spam filtering,
-        where false positives are costly. Switch to "Aggressive" (0.80). <em>Same math, different threshold —
-        because the cost of errors is asymmetric.</em>
-      </p>
-    </div>
-
-    <div class="card">
-      <h3>Experiment 3: Scale Effects</h3>
-      <p class="explain">
-        Keep the threshold at 0.50 and change total samples from 50 to 500.
-        The <em>rates</em> stay the same, but the absolute counts change.
-        At scale, even a small FP rate means a lot of false alarms in absolute terms.
-      </p>
-    </div>
-  </div>
-</div>
-
+  </details>
+  <footer class="footer"><span>Explore, observe, then explain it in your own words.</span><span>Guided learning</span></footer>
+</main>
 <script>
-function showTab(id) {
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  event.target.classList.add('active');
-}
-
-function setPreset(threshold, samples, tpr) {
-  document.getElementById('threshold').value = threshold * 100;
-  document.getElementById('samples').value = samples;
-  document.getElementById('tpr').value = tpr * 100;
-  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
-  update();
-}
+const inputs = ['threshold', 'samples', 'tpr'].map(id => document.getElementById(id));
+const presets = [...document.querySelectorAll('.preset-btn')];
+const text = (id, value) => { document.getElementById(id).textContent = value; };
 
 function update() {
-  const threshold = document.getElementById('threshold').value / 100;
-  const samples = parseInt(document.getElementById('samples').value);
-  const tpr = document.getElementById('tpr').value / 100;
-
-  document.getElementById('threshold-val').textContent = threshold.toFixed(2);
-  document.getElementById('samples-val').textContent = samples;
-  document.getElementById('tpr-val').textContent = tpr.toFixed(2);
-  document.getElementById('threshold-big').textContent = threshold.toFixed(2);
+  const [thresholdValue, samples, sensitivityValue] = inputs.map(input => Number(input.value));
+  const threshold = thresholdValue / 100;
+  const sensitivity = sensitivityValue / 100;
+  text('threshold-val', threshold.toFixed(2));
+  text('samples-val', samples);
+  text('tpr-val', sensitivity.toFixed(2));
+  text('total-count', samples);
+  inputs[0].setAttribute('aria-valuetext', threshold.toFixed(2));
+  inputs[2].setAttribute('aria-valuetext', sensitivity.toFixed(2));
 
   const positives = Math.round(samples * 0.5);
   const negatives = samples - positives;
-
-  const recallRate = Math.max(0, Math.min(1, tpr * (1 - threshold * 0.8)));
-  const fprRate = Math.max(0, Math.min(1, (1 - tpr) * (1 - threshold)));
-
+  const recallRate = Math.max(0, Math.min(1, sensitivity * (1 - threshold * 0.8)));
+  const fprRate = Math.max(0, Math.min(1, (1 - sensitivity) * (1 - threshold)));
   const tp = Math.round(positives * recallRate);
   const fn = positives - tp;
   const fp = Math.round(negatives * fprRate);
   const tn = negatives - fp;
-
-  document.getElementById('tp').textContent = tp;
-  document.getElementById('fn').textContent = fn;
-  document.getElementById('fp').textContent = fp;
-  document.getElementById('tn').textContent = tn;
-
   const precision = tp + fp > 0 ? tp / (tp + fp) : 0;
-  const recall = tp + fn > 0 ? tp / (tp + fn) : 0;
+  const recall = tp / positives;
   const f1 = precision + recall > 0 ? 2 * precision * recall / (precision + recall) : 0;
 
-  document.getElementById('precision').textContent = precision.toFixed(2);
-  document.getElementById('recall').textContent = recall.toFixed(2);
-  document.getElementById('f1').textContent = f1.toFixed(2);
-
-  document.getElementById('precision-bar').style.width = (precision * 100) + '%';
-  document.getElementById('recall-bar').style.width = (recall * 100) + '%';
-  document.getElementById('f1-bar').style.width = (f1 * 100) + '%';
-
-  const total = tp + fp + fn + tn;
-  document.getElementById('pop-tp').style.width = (tp / total * 100) + '%';
-  document.getElementById('pop-fp').style.width = (fp / total * 100) + '%';
-  document.getElementById('pop-fn').style.width = (fn / total * 100) + '%';
-  document.getElementById('pop-tn').style.width = (tn / total * 100) + '%';
+  Object.entries({tp, fn, fp, tn}).forEach(([id, count]) => {
+    text(id, count);
+    document.getElementById('pop-' + id).style.width = count / samples * 100 + '%';
+  });
+  Object.entries({precision, recall, f1}).forEach(([id, value]) => {
+    text(id, Math.round(value * 100) + '%');
+    document.getElementById(id + '-bar').style.width = value * 100 + '%';
+  });
+  const values = inputs.map(input => input.value).join(',');
+  presets.forEach(button => {
+    const active = button.dataset.values === values;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', String(active));
+  });
+  text('result-summary', `At this threshold, ${tp + fp} samples are flagged for review. ${tp} are real positives and ${fp} are false alarms. ${fn} real cases are missed.`);
 }
-
+inputs.forEach(input => input.addEventListener('input', update));
+presets.forEach(button => button.addEventListener('click', () => {
+  button.dataset.values.split(',').forEach((value, index) => { inputs[index].value = value; });
+  update();
+}));
 update();
 </script>
-
 </body>
 </html>

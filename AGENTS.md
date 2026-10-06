@@ -1,15 +1,19 @@
-# Learning vault
+# Learning vault setup repository
 
-@/home/bariqmbani/.codex/RTK.md
+This repository contains the installer, reusable guided-learning skill, templates,
+and documentation. Learner profiles and course data belong in a separate vault.
+Do not create topics, roadmaps, recall queues, or session journals in this checkout.
 
-Treat this directory as the vault root. All learning paths are relative to it.
+Read README.md for the installation prompt. Use scripts/create_vault.py or
+scripts/install_vault.sh to create a new vault at a different path. The generator
+creates fresh Obsidian settings, native Codex and Claude Code skill entries,
+an empty topic registry, and an unconfigured learner profile.
 
-For learning, studying, quizzes, papers, topic bootstrapping, or continuing a roadmap, read and follow `SKILLS/guided-learning/SKILL.md`. The project skill is registered through `.agents/skills/guided-learning` and `.claude/skills/guided-learning`.
+Skill source lives under SKILLS/guided-learning/. Interactive source assets live
+under SKILLS/guided-learning/interactives/. Installed vaults receive copies under
+learning/interactives/ for new-topic scaffolding. Topic helpers and onboarding
+operate in installed vaults, not this source checkout.
 
-For `guided-learning onboard`, follow `SKILLS/guided-learning/references/onboarding.md` in chat before topic selection. Onboarding updates only the vault-level learner profile and never changes course progress. Read configured learner preferences when teaching; topic-specific goals and the current conversation take priority over defaults.
-
-Before reading or writing learning files, follow `SKILLS/guided-learning/references/topic-routing.md` and resolve the selected track with `SKILLS/guided-learning/scripts/topics.py`. The Tokenizers and Tokenization course is registered under `topics/tokenizers-and-tokenization/`; preserve its progress, notes, and existing concept filenames. Create unrelated subjects in separate `topics/<topic-id>/` folders. Bootstrap only a selected track with no concept checklist entries, checked or unchecked. Never reset an existing track. Ask for the learner's goal when a new topic is started, and do not mark progress before a real learning session.
-
-Use the selected topic's registered paths for all learning operations. `learning/interactives/interactive.css`, `learning/interactives/build.sh`, and `learning/interactives/example-interactive.html` remain shared templates for new topics; topic-specific interactive pages belong under the selected topic's registered path. Use `topics/README.md` to navigate tracks. Pin the topic ID and paths for each session so switching the active topic elsewhere cannot redirect that session's writes.
-
-Use Obsidian wikilinks for notes. Preserve the learner's existing notes and track progress, recall, and comprehension from actual sessions. After creating or editing interactive HTML, run the selected topic's registered build script from the vault root to inline its stylesheet. Prefix new-topic concept and paper filenames with the topic ID and use vault-relative wikilinks; preserve migrated course filenames and short concept links while updating path-bearing links.
+Keep the repository free of learner data and generated exports. Preserve the
+license and attribution. Run python3 -m unittest discover -s tests -v after
+installer or helper changes, and verify generated vaults remain empty.

@@ -62,8 +62,8 @@ class CreateVaultTests(unittest.TestCase):
             if path.is_file():
                 content = path.read_text(encoding="utf-8")
                 self.assertNotIn(private, content, str(path))
-                self.assertNotIn("/home/bariqmbani", content, str(path))
-                self.assertNotIn("topics/tokenizers-and-tokenization", content, str(path))
+                self.assertNotIn(str(ROOT), content, str(path))
+                self.assertNotIn("topics/private/", content, str(path))
         self.assertIn("# Friend Learning", (destination / "Home.md").read_text())
         self.assertIn("No active topic", self.helper(destination, "resolve", success=False))
         profile = json.loads((destination / "learner-profile.json").read_text())

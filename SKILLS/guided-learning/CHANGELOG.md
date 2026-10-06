@@ -2,6 +2,8 @@
 
 ## Shareable setup — 2026-10-06
 
+- Converted the repository to setup files only: removed learner courses and state, moved reusable interactive assets into the skill, and kept generated vaults separate.
+- Installation prompts clone `main`; generated vaults start with an empty registry and unconfigured profile.
 - First onboarding explicitly asks the preferred teaching language, accepts bilingual preferences, and applies the saved choice throughout learning sessions.
 - Refined onboarding from learning research: three vault prompts for language, time, and optional constraints; per-topic intake for outcomes, starting knowledge, and feasible practice.
 - Default explanations adapt to the task and observed responses. Existing saved styles and aids remain valid; an empty aid list no longer restricts teaching methods. Explicit exclusions stay in text preferences.
@@ -17,7 +19,6 @@
 
 ### Added
 - Independent topic selection and registered paths for multiple learning tracks in one vault.
-- Registered Tokenizers and Tokenization in place; preserved existing roadmap, concepts, recall, glossary, journals, interactives, logs, and links.
 - Non-overwriting topic creation and switching helper; serialized registry updates and atomic saves.
 - Qualified links and topic-prefixed note filenames for new tracks to protect legacy short links.
 - Topic-specific mode detection, recall, journals, execution logs, and learning-history analysis.

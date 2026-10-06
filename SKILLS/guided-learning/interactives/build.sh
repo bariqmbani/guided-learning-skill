@@ -32,9 +32,9 @@ injected_pat = r'<!-- interactive\.css:start -->.*?<!-- interactive\.css:end -->
 style_block = '<!-- interactive.css:start -->\n<style>\n' + css + '\n</style>\n<!-- interactive.css:end -->'
 
 if re.search(injected_pat, html, re.DOTALL):
-  html = re.sub(injected_pat, style_block, html, flags=re.DOTALL)
+  html = re.sub(injected_pat, lambda _: style_block, html, flags=re.DOTALL)
 elif re.search(link_pat, html):
-  html = re.sub(link_pat, style_block, html)
+  html = re.sub(link_pat, lambda _: style_block, html)
 else:
   print(f'  skip: no link tag or injected block found in {sys.argv[2]}', file=sys.stderr)
   sys.exit(0)

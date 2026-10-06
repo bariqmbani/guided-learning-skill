@@ -1,15 +1,54 @@
 # Guided Learning Skill
 
-> [!info] Local setup: multiple learning topics
-> This vault uses version `3.1.0-local`, which adds independent learning tracks. Read [topic-routing.md](references/topic-routing.md) for the installed behavior and open [[topics/README|Learning Topics]] to navigate courses. The upstream installation examples below describe a single-track vault.
+> [!info] Setup repository: multiple learning topics
+> The installed skill uses version `3.1.0-local` with independent learning tracks. This repository contains reusable setup files, not a learner's course data. Follow the installation prompt below to create a separate vault, then read [topic-routing.md](references/topic-routing.md) for the learning flow. The upstream installation examples later in this file describe a single-track vault.
 >
-> Say **Continue [topic]** to resume an existing course, or **I want to learn [a new subject]** to create a separate course. Each track has its own roadmap, recall queue, notes, glossary, journals, and logs. Restart an older agent session or have it reread the installed skill before switching topics. To create an empty vault for someone else, read [[SHARING|the sharing instructions]].
+> In the installed vault, say **Continue [topic]** to resume an existing course, or **I want to learn [a new subject]** to create a separate course. Each track has its own roadmap, recall queue, notes, glossary, journals, and logs. To share the setup, read [the sharing instructions](../../SHARING.md).
 >
 > Start with **$guided-learning onboard** (Codex) or **/guided-learning onboard** (Claude Code) to set teaching language, session time, and optional constraints in chat. Each new topic gets its own goal and starting point. Run onboarding again to update preferences while retaining progress. Read [the research rationale](references/onboarding-evidence.md) for the question design and its limits.
 
 A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill that turns any markdown-based knowledge vault into a structured learning environment. It runs interactive sessions using a **spiral curriculum** — three passes of increasing depth, with spaced recall, comprehension checks, and auto-generated interactive HTML visualizations.
 
 Three ways to start: name a topic and the skill **bootstraps a full roadmap** from scratch, drop a **PDF or URL** and learn from it immediately, or continue an **existing roadmap**. Three domain modes (research, professional, self-study) are detected automatically. Built for anyone who wants to actually retain what they read.
+
+## Install with an agent
+
+Copy this prompt into Codex, Claude Code, or another agent that can run terminal
+commands. Replace `<vault-path>` with your new vault's location, such as
+`~/Documents/my-learning`.
+
+```text
+Create a fresh, empty Obsidian learning vault at <vault-path>, named "My Learning".
+
+1. Check that Git and Python 3.9 or newer are available. Report any missing
+   prerequisite. If the destination already exists, keep it intact and ask me
+   for a different path.
+2. Choose a new temporary directory for <temporary-template-directory>, then
+   clone the setup repository from main there:
+
+   git clone --branch main --single-branch --depth 1 https://github.com/bariqmbani/guided-learning-skill.git <temporary-template-directory>
+
+3. Read the cloned README and installer. Create my vault with:
+
+   python3 "<temporary-template-directory>/scripts/create_vault.py" "<vault-path>" --name "My Learning"
+
+   On Windows, use py -3 if python3 is unavailable. Keep the template checkout
+   separate from my learning vault.
+4. Verify that the vault has Obsidian settings and guided-learning skill entries
+   for Codex and Claude Code. Confirm topics/registry.json has active_topic: null
+   and topics: [], and learner-profile.json has configured: false. Confirm there
+   are no course notes, learning history, or copied Git repository in the vault.
+5. Report the completed vault path and tell me how to open it in Obsidian.
+   Tell me to run Codex or Claude Code from that folder and start with
+   $guided-learning onboard in Codex or /guided-learning onboard in Claude Code.
+
+Leave the learner profile unconfigured until onboarding. Do not create a topic,
+generate a roadmap, or start a lesson during installation.
+```
+
+The clone command selects main, which contains the setup files. The installer
+creates a separate vault with fresh learning data; onboarding happens in your
+learning chat afterward.
 
 ## Onboarding example
 

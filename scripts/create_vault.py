@@ -22,6 +22,7 @@ ASSETS = [
     "scripts/install_vault.sh",
     "SKILLS/guided-learning/scripts/profile.py",
     "SKILLS/guided-learning/references/onboarding.md",
+    "SKILLS/guided-learning/references/installation-prompt.md",
     "SKILLS/guided-learning/references/onboarding-example.md",
     "SKILLS/guided-learning/references/onboarding-evidence.md",
     "SKILLS/guided-learning/references/topic-intake.md",
@@ -35,8 +36,8 @@ ASSETS = [
     "SKILLS/guided-learning/examples/recall-queue.md",
     "SKILLS/guided-learning/examples/session-protocol.md",
     "SKILLS/guided-learning/scripts/topics.py",
-    "learning/interactives/interactive.css",
-    "learning/interactives/build.sh",
+    "SKILLS/guided-learning/interactives/interactive.css",
+    "SKILLS/guided-learning/interactives/build.sh",
 ]
 
 AGENTS = """# Learning vault
@@ -180,7 +181,11 @@ def make_files(source, name):
         if not path.is_file() or path.is_symlink():
             raise ValueError(f"Reusable asset missing or symlinked: {relative}")
         files[relative] = path.read_bytes()
+    # Source assets stay with the skill; installed vaults also need shared templates.
+    for asset_filename in ["interactive.css", "build.sh"]:
+        files[f"learning/interactives/{asset_filename}"] = files[f"SKILLS/guided-learning/interactives/{asset_filename}"]
     onboarding_example = files["SKILLS/guided-learning/references/onboarding-example.md"].decode("utf-8").rstrip("\n")
+    installation_prompt = files["SKILLS/guided-learning/references/installation-prompt.md"].decode("utf-8").rstrip("\n")
     upstream = json.loads((source / "SKILLS/guided-learning/UPSTREAM.json").read_text(encoding="utf-8"))
     metadata = {key: upstream[key] for key in ["repository", "commit", "version"]}
     metadata["local_version"] = upstream.get("local_version", upstream["version"])
@@ -218,6 +223,8 @@ explains the method. This setup builds on the MIT-licensed
 constraints. [Topic intake](references/topic-intake.md) sets a useful outcome and
 starting point for each subject. [Research rationale](references/onboarding-evidence.md)
 explains the evidence and limits of these design choices.
+
+{installation_prompt}
 
 {onboarding_example}
 """,
@@ -262,6 +269,8 @@ Run the skill's **onboard** command again whenever you want to update your prefe
 Open this folder as a vault in Obsidian, then run Claude Code or Codex from the
 same folder. Say **I want to learn about [your topic]**. Read [Home.md](Home.md)
 for the learning flow.
+
+{installation_prompt}
 
 If you cloned this as a public template, first run
 `python3 scripts/create_vault.py ../my-learning` and use that new folder for

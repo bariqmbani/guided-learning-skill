@@ -1,8 +1,20 @@
-.obsidian/workspace.json
-.obsidian/workspace-mobile.json
-.obsidian/cache/
+# Learner data belongs outside this setup repository.
+/topics/
+/learning/
+/concepts/
+/literature/
+/research/
+/logs/
+/attachments/
+/learner-profile.json
+/Learner Profile.md
+/Home.md
+/Templates/
+/.obsidian/
+SKILLS/guided-learning/logs/
+
+# Generated exports and local caches.
+/dist/
+__pycache__/
 .trash/
 .DS_Store
-topics/.registry.lock
-__pycache__/
-/dist/

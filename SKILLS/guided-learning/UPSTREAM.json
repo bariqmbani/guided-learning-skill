@@ -2,20 +2,14 @@
   "repository": "https://github.com/WSE-research/guided-learning-skill",
   "commit": "39108c8bdf3fb7481ad9559e78c3356bc8727c95",
   "version": "3.0.0",
-  "installed_on": "2026-10-06",
   "local_changes": [
-    "learning/interactives/build.sh: use literal regex replacements so CSS backslash escapes survive inlining.",
-    "learning/interactives/example-interactive.html: redesigned Learning Lab with responsive SVG tradeoff chart, accessible controls and tabs, guided exercises, reset and copy actions; original model preserved.",
-    "learning/interactives/interactive.css: minimalist light theme with muted colors and accessible controls.",
-    "learning/interactives/example-interactive.html: responsive single-page explorer, collapsible experiments, labeled controls, and synchronized presets.",
-    "Topic registry, per-topic routing, and non-overwriting creation/selection helper; tokenization course registered in place without modifying learning data.",
-    "Empty-vault generator and ZIP export, portable native skill entries, generalized course instructions, and Windows/POSIX topic locks with UTF-8 metadata.",
-    "Conversational guided-learning onboard with a validated global learner profile, preferred learning extras, and fresh unconfigured profiles in exported vaults.",
-    "Evidence-informed onboarding for language, session budget, and optional constraints; per-topic outcome and prior-knowledge intake, adaptive presentation defaults, and cited research limits.",
-    "Merged fork history under SKILLS/guided-learning with recursive subtree mapping; retained customized skill files and added original upstream interactive examples."
+    "Independent topic routing and non-overwriting course helpers for installed vaults.",
+    "Conversational learner onboarding and per-topic intake informed by learning research.",
+    "Empty-vault generator with portable Codex and Claude Code skill entries.",
+    "Custom interactive source assets stored with the skill; fresh vaults receive shared template copies.",
+    "Setup repository contains no learner profiles, topics, roadmaps, recall records, or session journals.",
+    "Agent installation prompt and Russian-language onboarding example; public setup distributed from main."
   ],
   "local_version": "3.1.0-local",
-  "fork_repository": "https://github.com/bariqmbani/guided-learning-skill",
-  "subtree_remote": "guided-learning-fork",
-  "subtree_prefix": "SKILLS/guided-learning"
+  "fork_repository": "https://github.com/bariqmbani/guided-learning-skill"
 }
