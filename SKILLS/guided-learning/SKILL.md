@@ -44,7 +44,7 @@ This returns the active topic's entry and its vault-relative `paths`. Explicitly
 
 Pin the selected topic ID and paths for the entire session. Every `{roadmap}`, `{recall_queue}`, `{protocols_dir}`, `{interactives_dir}`, `{concepts_dir}`, `{papers_dir}`, `{glossary}`, `{skill_logs_dir}`, `{css_file}`, and `{build_script}` below refers to that selected topic's registry entry. Join directory paths and filenames with exactly one slash. Placeholders must be resolved before file access.
 
-The existing tokenization track uses its original root-level paths. New tracks use `topics/<topic-id>/...`. Never read or update another topic's learning files as a fallback. Never initialize or reset an existing roadmap or recall queue. Older examples and templates must be adapted to the selected track's paths before use.
+The tokenization track uses its registered paths under `topics/tokenizers-and-tokenization/`. New tracks use the same independent layout. The root-level `learning/interactives/interactive.css`, `build.sh`, and example interactive remain shared templates for creating future topics; course-specific interactive pages and their copied CSS/build script belong to the selected topic. Never read or update another topic's learning files as a fallback. Never initialize or reset an existing roadmap or recall queue. Older examples and templates must be adapted to the selected track's paths before use.
 
 For a missing or invalid registry, follow the recovery rules in `references/topic-routing.md` before proceeding; do not invent a subject from generic placeholder files.
 

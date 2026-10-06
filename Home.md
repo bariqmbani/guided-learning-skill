@@ -16,13 +16,14 @@ You can also ask **Teach me this paper: /path/to/paper.pdf**, provide an article
 
 - [[topics/README|All learning topics]] — choose a course or start a new subject.
 
-The links below belong to your existing **Tokenizers and Tokenization** course. Its files remain in their original locations. New subjects have independent folders under `topics/`.
+The links below belong to your existing **Tokenizers and Tokenization** course under `topics/tokenizers-and-tokenization/`. New subjects have independent folders under `topics/`.
 
-- [[learning/learning-roadmap|Learning roadmap]] — topics, clusters, and three passes.
-- [[learning/recall-queue|Recall queue]] — reviews scheduled after sessions.
-- [[research/glossary|Glossary]] — terms collected as you learn.
-- Session journals are saved in `learning/protocols/`.
-- Concept notes are saved in `concepts/`; paper summaries in `literature/papers/`.
+- [[topics/tokenizers-and-tokenization/learning/learning-roadmap|Learning roadmap]] — topics, clusters, and three passes.
+- [[topics/tokenizers-and-tokenization/learning/recall-queue|Recall queue]] — reviews scheduled after sessions.
+- [[topics/tokenizers-and-tokenization/research/glossary|Glossary]] — terms collected as you learn.
+- Session journals are saved in `topics/tokenizers-and-tokenization/learning/protocols/`.
+- Concept notes are saved in `topics/tokenizers-and-tokenization/concepts/`; paper summaries in `topics/tokenizers-and-tokenization/literature/papers/`.
+- [Current interactive: Tokenizers and Their Job](topics/tokenizers-and-tokenization/learning/interactives/2026-10-06_tokenizers-and-their-job.html) — open in a browser to explore.
 - [Example interactive: precision and recall](learning/interactives/example-interactive.html) — open in a browser to explore.
 
 ## Templates and skill
@@ -31,11 +32,10 @@ Use Obsidian's **Templates: Insert template** command for a [[Templates/Concept|
 
 The [guided-learning skill](https://github.com/WSE-research/guided-learning-skill) lives in `SKILLS/guided-learning/`, including its method, references, examples, and license. Both agent skill directories point to this same copy.
 
-For the existing tokenization course, after generating or editing interactive HTML, run:
+For the tokenization course, after generating or editing interactive HTML, run:
 
 ```sh
-cd learning/interactives
-./build.sh
+bash topics/tokenizers-and-tokenization/learning/interactives/build.sh
 ```
 
 This inlines the shared CSS for portable HTML files. Open the files in a browser if your Obsidian setup does not display HTML.

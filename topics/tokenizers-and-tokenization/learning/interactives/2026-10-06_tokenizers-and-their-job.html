@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tokenizers and Their Job</title>
+  <!-- interactive.css:start -->
+<style>
+/* Shared minimalist styles for standalone learning interactives. */
+:root {
+  color-scheme: light;
+  --bg: #fafaf8;
+  --surface: #fff;
+  --card: #f4f5f2;
+  --border: #e2e5df;
+  --border-hover: #a5afa5;
+  --text: #303a33;
+  --text-bright: #18271d;
+  --muted: #687269;
+  --accent: #356747;
+  --accent-hover: #264e35;
+  --accent-dim: #edf3ed;
+  --cyan: #426d75;
+  --orange: #94633f;
+  --green: #356747;
+  --red: #99564c;
+  --yellow: #866b31;
+  --blue: #566c83;
+  --purple: #746181;
+  --pink: #925f78;
+  --teal: #3e7169;
+  --tp: var(--green);
+  --tn: #5c695f;
+  --fp: #94633f;
+  --fn: #866b31;
+  --radius: 6px;
+  --radius-lg: 8px;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'SFMono-Regular', Consolas, monospace;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-sans); line-height: 1.6; }
+h1, h2, h3, p { margin: 0; }
+h1 { color: var(--text-bright); font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 550; line-height: 1.2; letter-spacing: -.045em; }
+h2 { color: var(--text-bright); font-size: 1rem; font-weight: 600; }
+h3 { font-size: .875rem; font-weight: 600; }
+a { color: var(--accent); text-underline-offset: 3px; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+button, a, input, summary { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
+.subtitle, .explain { color: var(--muted); font-size: .9rem; line-height: 1.7; }
+.subtitle { margin-top: 14px; max-width: 580px; }
+.explain em { color: var(--text); font-style: normal; }
+.container { max-width: 1040px; margin: auto; }
+.layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 48px; max-width: 1040px; margin: auto; }
+.two-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.panel, .card { padding: 24px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }
+.card + .card { margin-top: 12px; }
+.notice, .notice--bar { padding: 16px 0 16px 18px; border-left: 2px solid var(--border-hover); margin-top: 24px; font-size: .875rem; }
+.notice strong, .notice-title { color: var(--text-bright); }
+.notice ul { padding-left: 20px; }
+.notice-title { font-size: .8rem; font-weight: 600; margin-bottom: 8px; }
+.header { max-width: 1040px; padding: 48px 24px 32px; margin: auto; }
+.header .step { color: var(--muted); font-size: .75rem; margin-bottom: 20px; }
+.nav { display: flex; gap: 24px; border-bottom: 1px solid var(--border); }
+.nav button { border: 0; border-bottom: 2px solid transparent; background: none; padding: 12px 0; color: var(--muted); }
+.nav button.active { border-color: var(--accent); color: var(--accent); }
+.nav button.completed::before { content: '\2713  '; }
+.tab-content { display: none; padding: 32px 24px; max-width: 1040px; margin: auto; }
+.tab-content.active { display: block; }
+.bottom-nav { display: flex; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 24px; margin-top: 32px; }
+.control-group { margin-bottom: 28px; }
+.slider-row { display: flex; align-items: center; gap: 12px; margin: 16px 0; }
+.slider-row > label { font-size: .85rem; }
+.slider-label, .slider-val { font-variant-numeric: tabular-nums; font-size: .875rem; }
+.slider-val { margin-left: auto; color: var(--text-bright); }
+input[type='range'] { appearance: none; -webkit-appearance: none; width: 100%; min-width: 0; height: 4px; border-radius: 2px; background: var(--border); accent-color: var(--accent); cursor: pointer; }
+input[type='range']::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--accent); }
+input[type='range']::-moz-range-thumb { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--accent); }
+.btn, .preset-btn, .copy-btn { min-height: 40px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: 8px 14px; color: var(--text); font-size: .8rem; }
+.btn { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-secondary { background: var(--surface); color: var(--text); border-color: var(--border); }
+.btn-sm { padding: 6px 10px; }
+.btn:hover { filter: brightness(.95); }
+.preset-btn:hover, .copy-btn:hover { border-color: var(--border-hover); }
+.preset-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.btn-row, .preset-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.cm-grid { display: grid; grid-template-columns: auto 1fr 1fr; gap: 4px; margin: 16px 0; }
+.cm-header { color: var(--muted); font-size: .75rem; text-align: center; padding: 12px; }
+.cm-cell { padding: 20px; text-align: center; border-radius: var(--radius); font-variant-numeric: tabular-nums; }
+.cm-cell .count { display: block; font-size: 1.7rem; font-weight: 500; }
+.cm-cell .label { display: block; font-size: .75rem; }
+.cm-cell--lg { min-height: 80px; }
+.cm-tp { background: var(--accent-dim); color: var(--tp); }
+.cm-tn { background: #f0f2ee; color: var(--tn); }
+.cm-fp { background: #f5f0e9; color: var(--fp); }
+.cm-fn { background: #f7f5ec; color: var(--fn); }
+.cm-container { display: flex; flex-wrap: wrap; gap: 24px; }
+.metric { display: inline-flex; flex-direction: column; padding: 12px; }
+.metric .label, .metric-subtext { color: var(--muted); font-size: .75rem; }
+.metric .value, .metric-value { font-size: 1.75rem; color: var(--text-bright); font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -.035em; }
+.metrics-grid { display: flex; flex-direction: column; gap: 16px; }
+.metric-header { display: flex; justify-content: space-between; align-items: baseline; }
+.metric-name { color: var(--muted); font-size: .8rem; }
+.metric-bar-bg { height: 3px; margin-top: 10px; border-radius: 2px; background: var(--border); overflow: hidden; position: relative; }
+.metric-bar-fill { height: 100%; background: var(--accent); }
+.metric-bar-zero { position: absolute; left: 50%; top: 0; height: 100%; width: 1px; background: var(--muted); }
+.population-bar { display: flex; height: 10px; overflow: hidden; border-radius: 3px; margin: 16px 0; }
+.pop-segment { min-width: 0; overflow: hidden; text-align: center; font-size: .7rem; }
+.pop-tp { background: #477852; color: #fff; }
+.pop-tn { background: #a5b3a3; color: #18271d; }
+.pop-fp { background: #b8a587; color: #18271d; }
+.pop-fn { background: #d6ccb4; color: #18271d; }
+.pop-legend { display: flex; flex-wrap: wrap; gap: 12px 20px; font-size: .75rem; color: var(--muted); }
+.pop-legend > span { display: flex; align-items: center; gap: 6px; }
+.pop-dot { display: inline-block; width: 7px; height: 7px; border-radius: 2px; }
+.formula { border-block: 1px solid var(--border); padding: 16px; font-family: var(--font-mono); text-align: center; font-size: .85rem; margin: 20px 0; }
+canvas { display: block; width: 100%; }
+.prompt-box { position: relative; margin-top: 24px; padding: 24px; background: var(--card); border-radius: var(--radius); }
+.prompt-box pre { white-space: pre-wrap; font-size: .8rem; font-family: var(--font-mono); }
+.copy-btn { position: absolute; top: 12px; right: 12px; }
+.tag { display: inline-block; background: var(--accent-dim); color: var(--accent); border-radius: 4px; padding: 2px 8px; font-size: .75rem; }
+.page-padding { padding: 32px 24px; }
+.color-tp, .color-green { color: var(--tp); }
+.color-tn { color: var(--tn); }
+.color-fp { color: var(--fp); }
+.color-fn { color: var(--fn); }
+.color-accent { color: var(--accent); }
+.color-cyan { color: var(--cyan); }
+.color-orange { color: var(--orange); }
+.color-red { color: var(--red); }
+.color-yellow { color: var(--yellow); }
+.color-purple { color: var(--purple); }
+.color-pink { color: var(--pink); }
+.color-teal { color: var(--teal); }
+@media (max-width: 740px) {
+  .layout, .two-col { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .header { padding-top: 32px; }
+  .panel, .card { padding: 20px; }
+}
+</style>
+<!-- interactive.css:end -->
+  <style>
+    .intro { max-width: 720px; }
+    .pipeline { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 20px 0; }
+    .stage { position: relative; min-width: 0; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+    .stage:not(:last-child)::after { content: "→"; position: absolute; z-index: 1; top: 50%; right: -17px; transform: translateY(-50%); color: var(--muted); }
+    .stage-number { color: var(--muted); font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; }
+    .stage h2 { margin: 5px 0 8px; }
+    .stage-copy { color: var(--muted); font-size: .8rem; line-height: 1.5; }
+    .controls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+    .field label { display: block; margin-bottom: 6px; color: var(--text-bright); font-size: .82rem; font-weight: 600; }
+    .field select, .field textarea { width: 100%; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); padding: 10px 12px; }
+    .field textarea { min-height: 76px; resize: vertical; }
+    .hint { margin-top: 7px; color: var(--muted); font-size: .75rem; }
+    .results { margin-top: 20px; }
+    .result-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .piece-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 10px; }
+    .piece { min-width: 44px; padding: 8px 10px; border: 1px solid #d7e2d7; border-radius: var(--radius); background: var(--accent-dim); color: var(--text-bright); font-family: var(--font-mono); font-size: .82rem; overflow-wrap: anywhere; }
+    .piece small { display: block; margin-top: 3px; color: var(--muted); font-family: var(--font-sans); font-size: .65rem; }
+    .count-line { color: var(--muted); font-size: .8rem; }
+    .id-sequence { overflow-wrap: anywhere; padding: 12px; border-radius: var(--radius); background: var(--card); font-family: var(--font-mono); font-size: .86rem; }
+    .embedding-list { display: grid; gap: 7px; margin-top: 12px; }
+    .embedding-row { display: grid; grid-template-columns: minmax(84px, auto) minmax(0, 1fr); gap: 10px; align-items: baseline; font-family: var(--font-mono); font-size: .76rem; }
+    .embedding-row code { color: var(--accent); }
+    .toy-note { margin-top: 14px; padding: 12px; border-left: 2px solid var(--orange); background: #f8f4ee; color: var(--text); font-size: .8rem; }
+    .notice ul { margin: 0; }
+    .notice li + li { margin-top: 8px; }
+    @media (max-width: 740px) {
+      .pipeline { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+      .stage { padding: 13px 16px; }
+      .stage:not(:last-child)::after { content: "↓"; top: auto; right: auto; bottom: -15px; left: 50%; transform: translateX(-50%); }
+      .controls { grid-template-columns: minmax(0, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="step">PASS 1 · OVERVIEW · SELF-STUDY</div>
+    <h1>Tokenizers and Their Job</h1>
+    <p class="subtitle intro">A language model works with a sequence of token IDs. A tokenizer turns the text you give it into manageable pieces, then looks up an ID for each piece.</p>
+  </header>
+
+  <main class="page-padding container">
+    <section class="pipeline" aria-label="Text-to-model pipeline">
+      <article class="stage">
+        <div class="stage-number">1 · Input</div>
+        <h2>Text</h2>
+        <p class="stage-copy">The sentence you type.</p>
+      </article>
+      <article class="stage">
+        <div class="stage-number">2 · Tokenizer</div>
+        <h2>Token pieces</h2>
+        <p class="stage-copy">Text is divided into pieces. A piece may be a word, part of a word, punctuation, or a character.</p>
+      </article>
+      <article class="stage">
+        <div class="stage-number">3 · Vocabulary lookup</div>
+        <h2>Token IDs</h2>
+        <p class="stage-copy">Each piece is matched to an integer in that tokenizer’s vocabulary.</p>
+      </article>
+      <article class="stage">
+        <div class="stage-number">4 · Model input</div>
+        <h2>Embeddings</h2>
+        <p class="stage-copy">The model uses each ID to look up a learned vector, then processes the vector sequence.</p>
+      </article>
+    </section>
+
+    <section class="card" aria-labelledby="try-title">
+      <h2 id="try-title">Try changing the text and segmentation</h2>
+      <p class="explain" style="margin-top: 6px">These presets are tiny teaching models. They let you see how different boundaries change the length of the sequence.</p>
+      <div class="controls" style="margin-top: 18px">
+        <div class="field">
+          <label for="example">Example sentence</label>
+          <select id="example">
+            <option>Tokenizers turn text into pieces.</option>
+            <option>A tokenizer converts characters into token IDs.</option>
+            <option>Uncommon words can split into smaller pieces.</option>
+          </select>
+          <p class="hint">Choose a sentence, or edit it in the box.</p>
+        </div>
+        <div class="field">
+          <label for="mode">Segmentation preset</label>
+          <select id="mode">
+            <option value="word">Word-like pieces</option>
+            <option value="subword">Subword-like pieces (toy split)</option>
+            <option value="character">Characters</option>
+          </select>
+          <p class="hint" id="mode-hint">Words and punctuation are shown as separate pieces; spaces are attached to the next piece.</p>
+        </div>
+        <div class="field" style="grid-column: 1 / -1">
+          <label for="custom-text">Text to tokenize</label>
+          <textarea id="custom-text" spellcheck="false" aria-describedby="custom-hint">Tokenizers turn text into pieces.</textarea>
+          <p class="hint" id="custom-hint">Spaces appear as ␠ inside a piece so you can see where they go.</p>
+        </div>
+      </div>
+
+      <div class="results" aria-live="polite">
+        <div class="result-heading">
+          <h2>Pieces</h2>
+          <span class="tag" id="piece-count">0 pieces</span>
+        </div>
+        <div class="piece-list" id="pieces" aria-label="Token pieces"></div>
+        <p class="count-line" id="length-note"></p>
+
+        <div class="two-col" style="margin-top: 22px">
+          <section>
+            <h2 style="margin-bottom: 10px">Toy token-ID sequence</h2>
+            <div class="id-sequence" id="ids"></div>
+            <p class="hint">The same piece gets the same toy ID here. These numbers are made up for this demo.</p>
+          </section>
+          <section>
+            <h2 style="margin-bottom: 10px">Then: vector lookup</h2>
+            <p class="stage-copy">An embedding table maps each ID to a vector. Here are a few made-up rows:</p>
+            <div class="embedding-list" id="embeddings"></div>
+          </section>
+        </div>
+        <p class="toy-note"><strong>Keep the distinction:</strong> these IDs and vectors are illustrative. Real tokenizers have their own learned or designed vocabularies, so the same text can get different pieces, IDs, and sequence lengths across models.</p>
+      </div>
+    </section>
+
+    <section class="notice" aria-labelledby="notice-title">
+      <div class="notice-title" id="notice-title">What to notice</div>
+      <ul>
+        <li>Switch from word-like pieces to characters. How much longer does the sequence become?</li>
+        <li>Try a long or uncommon word. Splitting it into pieces can help a model handle words it has not seen as one whole vocabulary item, though it may use more tokens.</li>
+        <li>Token IDs are labels used for lookup. ID 101 does not mean “first,” “important,” or any particular word by itself.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    const exampleSelect = document.getElementById('example');
+    const customText = document.getElementById('custom-text');
+    const modeSelect = document.getElementById('mode');
+    const modeHint = document.getElementById('mode-hint');
+    const piecesEl = document.getElementById('pieces');
+    const countEl = document.getElementById('piece-count');
+    const lengthNote = document.getElementById('length-note');
+    const idsEl = document.getElementById('ids');
+    const embeddingsEl = document.getElementById('embeddings');
+
+    const idByPiece = new Map();
+    const pieceById = new Map();
+    let nextToyId = 101;
+
+    function visibleWhitespace(piece) {
+      return piece.replace(/ /g, '␠').replace(/\t/g, '⇥').replace(/\n/g, '↵');
+    }
+
+    function lexicalPieces(text) {
+      const raw = text.match(/\s+|[\p{L}\p{N}]+|[^\s\p{L}\p{N}]/gu) || [];
+      const pieces = [];
+      let pendingSpace = '';
+      for (const item of raw) {
+        if (/^\s+$/u.test(item)) {
+          pendingSpace += item;
+        } else {
+          pieces.push(pendingSpace + item);
+          pendingSpace = '';
+        }
+      }
+      if (pendingSpace) pieces.push(pendingSpace);
+      return pieces;
+    }
+
+    function splitText(text, mode) {
+      if (!text) return [];
+      if (mode === 'character') {
+        const chars = Array.from(text);
+        const pieces = [];
+        let pendingSpace = '';
+        for (const char of chars) {
+          if (/^\s$/u.test(char)) pendingSpace += char;
+          else {
+            pieces.push(pendingSpace + char);
+            pendingSpace = '';
+          }
+        }
+        if (pendingSpace) pieces.push(pendingSpace);
+        return pieces;
+      }
+
+      const words = lexicalPieces(text);
+      if (mode === 'word') return words;
+
+      // An intentionally simple prefix-plus-remainder rule, not a real tokenizer.
+      const result = [];
+      for (const word of words) {
+        const leadingSpace = word.match(/^\s+/u)?.[0] || '';
+        const content = word.slice(leadingSpace.length);
+        if (/^[\p{L}\p{N}]{7,}$/u.test(content)) {
+          result.push(leadingSpace + Array.from(content).slice(0, 4).join(''));
+          result.push(Array.from(content).slice(4).join(''));
+        } else {
+          result.push(word);
+        }
+      }
+      return result;
+    }
+
+    function idFor(piece) {
+      if (!idByPiece.has(piece)) {
+        while (pieceById.has(nextToyId)) nextToyId += 1;
+        idByPiece.set(piece, nextToyId);
+        pieceById.set(nextToyId, piece);
+        nextToyId += 1;
+      }
+      return idByPiece.get(piece);
+    }
+
+    function toyVector(id) {
+      // Deterministic made-up values, only to visualize an embedding lookup.
+      let value = id * 9301 + 49297;
+      const values = [];
+      for (let i = 0; i < 4; i += 1) {
+        value = (value * 233 + 41) % 10007;
+        values.push(((value % 200) / 100 - 1).toFixed(2));
+      }
+      return `[${values.join(', ')}, …]`;
+    }
+
+    function render() {
+      const text = customText.value;
+      const mode = modeSelect.value;
+      const pieces = splitText(text, mode);
+      const ids = pieces.map(idFor);
+
+      piecesEl.replaceChildren();
+      pieces.forEach((piece, index) => {
+        const chip = document.createElement('span');
+        chip.className = 'piece';
+        chip.append(document.createTextNode(visibleWhitespace(piece) || '∅'));
+        const label = document.createElement('small');
+        label.textContent = `piece ${index + 1}`;
+        chip.append(label);
+        piecesEl.append(chip);
+      });
+
+      countEl.textContent = `${pieces.length} ${pieces.length === 1 ? 'piece' : 'pieces'}`;
+      lengthNote.textContent = `${pieces.length} token positions enter the model for this example. More pieces mean a longer input sequence.`;
+      idsEl.textContent = `[${ids.join(', ')}]`;
+
+      embeddingsEl.replaceChildren();
+      const shownIds = [...new Set(ids)].slice(0, 4);
+      if (shownIds.length === 0) {
+        const empty = document.createElement('span');
+        empty.className = 'hint';
+        empty.textContent = 'Enter some text to see a lookup.';
+        embeddingsEl.append(empty);
+      }
+      for (const id of shownIds) {
+        const row = document.createElement('div');
+        row.className = 'embedding-row';
+        const code = document.createElement('code');
+        code.textContent = `ID ${id} →`;
+        const vector = document.createElement('span');
+        vector.textContent = toyVector(id);
+        row.append(code, vector);
+        embeddingsEl.append(row);
+      }
+      if (new Set(ids).size > 4) {
+        const more = document.createElement('span');
+        more.className = 'hint';
+        more.textContent = `…and ${new Set(ids).size - 4} more distinct toy IDs.`;
+        embeddingsEl.append(more);
+      }
+
+      const hints = {
+        word: 'Words and punctuation are shown as separate pieces; spaces are attached to the next piece.',
+        subword: 'Toy rule: words with 7+ letters split after 4 characters. Real subword tokenizers use their own vocabulary and segmentation rules.',
+        character: 'Each Unicode character is a piece; spaces are attached to the next character.'
+      };
+      modeHint.textContent = hints[mode];
+    }
+
+    exampleSelect.addEventListener('change', () => {
+      customText.value = exampleSelect.value;
+      render();
+    });
+    customText.addEventListener('input', () => {
+      const matchingOption = [...exampleSelect.options].find(option => option.value === customText.value);
+      exampleSelect.value = matchingOption ? matchingOption.value : '';
+      render();
+    });
+    modeSelect.addEventListener('change', render);
+    render();
+  </script>
+</body>
+</html>

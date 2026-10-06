@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Resolve, select, and scaffold independent learning tracks without resetting courses."""
+"""Resolve, select, scaffold, and migrate independent learning tracks without resetting courses."""
 
 import argparse
 from contextlib import contextmanager
@@ -191,6 +191,91 @@ def create(vault, registry, topic_id, title, aliases):
     return topic
 
 
+def migrate(vault, registry, query):
+    """Move an existing root-level course into its independent topic folder."""
+    topic = resolve(registry, query)
+    if topic["layout"] != "legacy":
+        raise ValueError(f"Topic is already using an independent layout: {topic['id']}")
+
+    root_name = f"topics/{topic['id']}"
+    root = inside(vault, root_name)
+    if root.exists() or root.is_symlink():
+        raise ValueError(f"Topic directory already exists; inspect before migrating: {root_name}")
+
+    paths = {key: f"{root_name}/{suffix}" for key, suffix in SUFFIXES.items()}
+    migrated = {**topic, "root": root_name, "layout": "topic", "paths": paths}
+    updated = {**registry, "topics": [
+        migrated if item["id"] == topic["id"] else item
+        for item in registry["topics"]
+    ]}
+    validate(vault, updated)
+
+    move_pairs = []
+    for key in [
+        "roadmap", "recall_queue", "protocols_dir", "concepts_dir",
+        "papers_dir", "glossary", "skill_logs_dir",
+    ]:
+        source = inside(vault, topic["paths"][key])
+        destination = inside(vault, paths[key])
+        if source.is_symlink():
+            raise ValueError(f"Refusing to migrate a symlinked learning path: {source}")
+        if source.exists():
+            if destination.exists():
+                raise ValueError(f"Migration destination already exists: {destination}")
+            move_pairs.append((source, destination))
+
+    source_interactives = inside(vault, topic["paths"]["interactives_dir"])
+    destination_interactives = inside(vault, paths["interactives_dir"])
+    shared_interactive_files = {"interactive.css", "build.sh", "example-interactive.html"}
+    if source_interactives.is_symlink():
+        raise ValueError(f"Refusing to migrate a symlinked interactive directory: {source_interactives}")
+    if source_interactives.exists():
+        for child in source_interactives.iterdir():
+            if child.name in shared_interactive_files:
+                continue
+            if child.is_symlink():
+                raise ValueError(f"Refusing to migrate a symlinked interactive asset: {child}")
+            destination = destination_interactives / child.name
+            if destination.exists() or destination.is_symlink():
+                raise ValueError(f"Migration destination already exists: {destination}")
+            move_pairs.append((child, destination))
+
+    shared_assets = []
+    for key in ["css_file", "build_script"]:
+        source = inside(vault, topic["paths"][key])
+        destination = inside(vault, paths[key])
+        if not source.is_file():
+            raise ValueError(f"Shared interactive template is missing: {source}")
+        shared_assets.append((source, destination))
+
+    moved = []
+    root.mkdir()
+    try:
+        for key, relative in paths.items():
+            if key.endswith("_dir"):
+                inside(vault, relative).mkdir(parents=True, exist_ok=True)
+        inside(vault, paths["glossary"]).parent.mkdir(parents=True, exist_ok=True)
+        for source, destination in move_pairs:
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            source.rename(destination)
+            moved.append((source, destination))
+        for source, destination in shared_assets:
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, destination)
+        save_registry(vault, updated)
+        update_dashboard(vault, updated)
+    except Exception:
+        for source, destination in reversed(moved):
+            source.parent.mkdir(parents=True, exist_ok=True)
+            destination.rename(source)
+        shutil.rmtree(root, ignore_errors=True)
+        if read_registry(vault) == updated:
+            save_registry(vault, registry)
+            update_dashboard(vault, registry)
+        raise
+    return migrated
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--vault", type=Path, default=Path(__file__).resolve().parents[3])
@@ -200,6 +285,8 @@ def main():
     read.add_argument("topic", nargs="?")
     select = commands.add_parser("select")
     select.add_argument("topic")
+    move = commands.add_parser("migrate")
+    move.add_argument("topic")
     new = commands.add_parser("create")
     new.add_argument("id")
     new.add_argument("--title", required=True)
@@ -217,6 +304,8 @@ def main():
                     result = resolve(registry, args.topic)
                     registry["active_topic"] = result["id"]
                     save_registry(vault, registry)
+                elif args.command == "migrate":
+                    result = migrate(vault, registry, args.topic)
                 else:
                     result = create(vault, registry, args.id, args.title, args.alias)
         print(json.dumps(result, indent=2, ensure_ascii=False))

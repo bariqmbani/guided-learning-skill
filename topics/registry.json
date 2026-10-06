@@ -5,20 +5,23 @@
     {
       "id": "tokenizers-and-tokenization",
       "title": "Tokenizers and Tokenization",
-      "aliases": ["tokenizers", "tokenization"],
-      "root": ".",
-      "layout": "legacy",
+      "aliases": [
+        "tokenizers",
+        "tokenization"
+      ],
+      "root": "topics/tokenizers-and-tokenization",
+      "layout": "topic",
       "paths": {
-        "roadmap": "learning/learning-roadmap.md",
-        "recall_queue": "learning/recall-queue.md",
-        "protocols_dir": "learning/protocols/",
-        "interactives_dir": "learning/interactives/",
-        "concepts_dir": "concepts/",
-        "papers_dir": "literature/papers/",
-        "glossary": "research/glossary.md",
-        "skill_logs_dir": "SKILLS/guided-learning/logs/",
-        "css_file": "learning/interactives/interactive.css",
-        "build_script": "learning/interactives/build.sh"
+        "roadmap": "topics/tokenizers-and-tokenization/learning/learning-roadmap.md",
+        "recall_queue": "topics/tokenizers-and-tokenization/learning/recall-queue.md",
+        "protocols_dir": "topics/tokenizers-and-tokenization/learning/protocols/",
+        "interactives_dir": "topics/tokenizers-and-tokenization/learning/interactives/",
+        "concepts_dir": "topics/tokenizers-and-tokenization/concepts/",
+        "papers_dir": "topics/tokenizers-and-tokenization/literature/papers/",
+        "glossary": "topics/tokenizers-and-tokenization/research/glossary.md",
+        "skill_logs_dir": "topics/tokenizers-and-tokenization/logs/",
+        "css_file": "topics/tokenizers-and-tokenization/learning/interactives/interactive.css",
+        "build_script": "topics/tokenizers-and-tokenization/learning/interactives/build.sh"
       }
     }
   ]

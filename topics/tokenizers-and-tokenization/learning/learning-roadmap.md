@@ -21,6 +21,7 @@ This beginner path builds from what a token is to how common tokenizers work and
 
 ### Foundations: What a tokenizer does
 - [ ] [[tokenizers-and-their-job]]
+    - In progress: [[topics/tokenizers-and-tokenization/learning/protocols/2026-10-06_tokenizers-and-their-job|session checkpoint]]
 - [ ] [[token-granularity]]
 - [ ] [[normalization-and-pre-tokenization]]
 

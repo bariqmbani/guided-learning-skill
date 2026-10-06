@@ -5,10 +5,10 @@ Each topic has its own roadmap, recall queue, concept notes, glossary, and journ
 <!-- topics:start -->
 | Topic | Roadmap | Recall | Glossary |
 | --- | --- | --- | --- |
-| Tokenizers and Tokenization | [[learning/learning-roadmap|Roadmap]] | [[learning/recall-queue|Recall queue]] | [[research/glossary|Glossary]] |
+| Tokenizers and Tokenization | [[topics/tokenizers-and-tokenization/learning/learning-roadmap|Roadmap]] | [[topics/tokenizers-and-tokenization/learning/recall-queue|Recall queue]] | [[topics/tokenizers-and-tokenization/research/glossary|Glossary]] |
 <!-- topics:end -->
 
-Your current tokenization course stays in its original folders, preserving its notes and links. New subjects get separate folders under `topics/`.
+The Tokenizers and Tokenization course now lives under `topics/tokenizers-and-tokenization/`, with its existing progress and notes preserved. New subjects also get separate folders under `topics/`. The root-level interactive stylesheet, builder, and example page remain shared templates for new topic scaffolds.
 
 ## Start or continue
 

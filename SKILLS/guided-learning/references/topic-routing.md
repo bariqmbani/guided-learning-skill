@@ -41,7 +41,7 @@ The helper refuses to create a topic in an existing directory or overwrite an ex
 
 Bootstrap only when the **selected** roadmap has no concept checklist entries, checked or unchecked. Existing checked items are progress. Preserve any existing notes, recall rows, glossary, journals, logs, and domain mode; do not rewrite them from a starter template. Missing directories or individual files can be created without resetting existing ones. The learner's goal and domain mode are independent for every topic.
 
-For new topics, concept filenames must be `<topic-id>--<concept-slug>.md`. Prefix newly created paper-note filenames with the topic ID too. This avoids duplicate basenames that could break the current course's short wikilinks. Use full vault-relative wikilinks with readable aliases, such as `[[topics/japanese/concepts/japanese--word-order|Word order]]`. Preserve existing filenames and links in the legacy course. Use qualified links in new roadmap entries, recall rows, glossaries, journals, sources, and interactive references.
+For new topics, concept filenames must be `<topic-id>--<concept-slug>.md`. Prefix newly created paper-note filenames with the topic ID too. This avoids duplicate basenames that could break existing short wikilinks. Use full vault-relative wikilinks with readable aliases, such as `[[topics/japanese/concepts/japanese--word-order|Word order]]`. When migrating an existing course, preserve its filenames and short concept links; update path-bearing links to the new registered locations. Use qualified links in new roadmap entries, recall rows, glossaries, journals, sources, and interactive references.
 
 Recall comes only from the selected topic's queue. Pick the next concept only from its roadmap. Detect domain mode from its own roadmap or recall header. Choose comprehension checks, number logs, count sessions, and analyze struggle patterns using only its logs. Include the topic ID in newly written journal and execution-log frontmatter. Do not backfill old records just to add metadata.
 
@@ -49,11 +49,11 @@ Cross-topic links are allowed when useful. They do not mark another topic's conc
 
 After creating interactive HTML, run `bash "<resolved build_script>"` from the vault root. The builder and CSS live alongside that topic's HTML. Do not run the legacy builder for another topic; skip the build when the selected interactive directory contains no HTML.
 
-## Existing tokenization course
+## Tokenizers and Tokenization course
 
-**Tokenizers and Tokenization** is registered as `tokenizers-and-tokenization`, with `root: "."` and `layout: "legacy"`. Its current files remain in `learning/`, `concepts/`, `literature/papers/`, `research/glossary.md`, and `SKILLS/guided-learning/logs/`. Use its explicit registry mapping rather than deriving a new folder from its ID.
+**Tokenizers and Tokenization** is registered as `tokenizers-and-tokenization`, with `root: "topics/tokenizers-and-tokenization"` and `layout: "topic"`. Its exact paths are in `topics/registry.json`; resolve it with `topics.py` rather than deriving paths from its ID.
 
-This registration preserves existing progress, recall, glossary entries, notes, journals, interactives, and bare wikilinks. Do not move this course into `topics/` without a separate migration request.
+The course was migrated from the root-level layout. Its roadmap progress, recall rows and dates, glossary, notes, journals, logs, and interactive pages were preserved. Existing concept filenames and short concept links remain valid. The shared interactive CSS, builder, and example page remain at `learning/interactives/` as templates copied into new topics.
 
 ## Registry recovery
 
