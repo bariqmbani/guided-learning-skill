@@ -55,7 +55,11 @@ class CreateVaultTests(unittest.TestCase):
         registry = json.loads((destination / "topics/registry.json").read_text())
         self.assertEqual(registry, {"schema_version": 1, "active_topic": None, "topics": []})
         self.assertEqual({p.name for p in (destination / "topics").iterdir()}, {"README.md", "registry.json"})
-        self.assertEqual({p.name for p in (destination / "learning/interactives").iterdir()}, {"build.sh", "interactive.css"})
+        self.assertEqual({p.name for p in (destination / "learning/interactives").iterdir()}, {"build.sh", "interactive.css", "example-interactive.html"})
+        self.assertEqual(
+            (destination / "learning/interactives/example-interactive.html").read_bytes(),
+            (ROOT / "SKILLS/guided-learning/interactives/example-interactive.html").read_bytes(),
+        )
         self.assertFalse((destination / ".git").exists())
         self.assertEqual(list((destination / "attachments").iterdir()), [])
         for path in destination.rglob("*"):
@@ -148,6 +152,7 @@ class CreateVaultTests(unittest.TestCase):
             self.assertIn("first/.agents/skills/guided-learning/SKILL.md", bundle.namelist())
             self.assertIn("first/.claude/skills/guided-learning/SKILL.md", bundle.namelist())
             self.assertIn("first/attachments/", bundle.namelist())
+            self.assertIn("first/learning/interactives/example-interactive.html", bundle.namelist())
             self.assertFalse(any("/.git/" in name for name in bundle.namelist()))
             bundle.extractall(extracted)
         portable = extracted / "first"
@@ -164,6 +169,10 @@ class CreateVaultTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(self.helper(another, "list")["topics"], [])
         self.assertFalse((another / "topics/biology").exists())
+        self.assertEqual(
+            (another / "learning/interactives/example-interactive.html").read_bytes(),
+            (ROOT / "SKILLS/guided-learning/interactives/example-interactive.html").read_bytes(),
+        )
         fresh_profile = json.loads((another / "learner-profile.json").read_text())
         self.assertFalse(fresh_profile["configured"])
         self.assertEqual(fresh_profile["name"], "")

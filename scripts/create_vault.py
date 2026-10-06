@@ -183,7 +183,7 @@ def make_files(source, name):
             raise ValueError(f"Reusable asset missing or symlinked: {relative}")
         files[relative] = path.read_bytes()
     # Source assets stay with the skill; installed vaults also need shared templates.
-    for asset_filename in ["interactive.css", "build.sh"]:
+    for asset_filename in ["interactive.css", "build.sh", "example-interactive.html"]:
         files[f"learning/interactives/{asset_filename}"] = files[f"SKILLS/guided-learning/interactives/{asset_filename}"]
     onboarding_example = files["SKILLS/guided-learning/references/onboarding-example.md"].decode("utf-8").rstrip("\n")
     installation_prompt = files["SKILLS/guided-learning/references/installation-prompt.md"].decode("utf-8").rstrip("\n")
@@ -255,6 +255,7 @@ Every additional subject gets its own folder and progress.
 - [[Learner Profile|Your learner profile]] — language, session time, and practical preferences.
 - [[Templates/Concept|Concept template]]
 - [[Templates/Session Protocol|Session journal template]]
+- [Example interactive](learning/interactives/example-interactive.html) — open in a browser to preview a learning activity.
 - [Setup and sharing instructions](README.md)
 
 In Claude Code, invoke `/guided-learning`; in Codex, use `$guided-learning`.
