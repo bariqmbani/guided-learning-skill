@@ -1,0 +1,12 @@
+{
+  "repository": "https://github.com/WSE-research/guided-learning-skill",
+  "commit": "39108c8bdf3fb7481ad9559e78c3356bc8727c95",
+  "version": "3.0.0",
+  "installed_on": "2026-10-06",
+  "local_changes": [
+    "learning/interactives/build.sh: use literal regex replacements so CSS backslash escapes survive inlining.",
+    "learning/interactives/example-interactive.html: redesigned Learning Lab with responsive SVG tradeoff chart, accessible controls and tabs, guided exercises, reset and copy actions; original model preserved.",
+    "learning/interactives/interactive.css: minimalist light theme with muted colors and accessible controls.",
+    "learning/interactives/example-interactive.html: responsive single-page explorer, collapsible experiments, labeled controls, and synchronized presets."
+  ]
+}
