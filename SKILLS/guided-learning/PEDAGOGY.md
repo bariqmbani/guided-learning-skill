@@ -2,6 +2,13 @@
 
 A pedagogical framework for teaching complex academic concepts through structured revisitation, spaced recall, and adaptive explanation.
 
+The public vault setup uses [short conversational onboarding](references/onboarding.md)
+for language, session time, and practical constraints, then [topic intake](references/topic-intake.md)
+for a useful outcome and starting knowledge. Presentation preferences are adjustable;
+choose methods from the task and observed responses rather than a fixed learner type.
+The [research rationale](references/onboarding-evidence.md) distinguishes supported
+principles from unvalidated choices in this particular tutor.
+
 ---
 
 ## Overview
@@ -62,7 +69,10 @@ After a concept is taught (at any pass level), schedule three recall checks:
 
 - **3 days later:** First check. The concept is still relatively fresh. This catches concepts that seemed clear but did not actually stick.
 - **7 days later:** Second check. Enough time has passed that the learner must genuinely retrieve the concept, not just recognize it.
-- **21 days later:** Third check. If the learner can still recall the core idea after three weeks, the concept is solidly retained.
+- **21 days later:** Third check. Successful recall is evidence at that delay, not proof of permanent retention. Revisit important ideas in later application tasks.
+
+This sequence is a practical heuristic. Suitable spacing depends on the material,
+practice, and retention goal; these particular intervals are not universally optimal.
 
 ### Running a Recall Check
 
@@ -77,7 +87,7 @@ For each item, ask a single recall prompt:
 
 Rate each response using three categories:
 
-**Solid.** The learner nails the core idea without hesitation. They may not remember every detail, but they have the central claim and its significance. Advance to the next interval: 3 days becomes 7, 7 becomes 21, 21 means the concept is retained and leaves the queue.
+**Solid.** The learner accurately recalls the central claim and its significance. Judge the answer rather than response speed or verbal fluency. Advance to the next interval: 3 days becomes 7, 7 becomes 21, and success at 21 completes this queue cycle. It does not establish permanent mastery.
 
 **Fuzzy.** The learner gets the gist but is imprecise or misses a key nuance. Keep the same interval and reschedule. Make a note of what was fuzzy so you can address it next time.
 

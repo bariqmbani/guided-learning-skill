@@ -69,6 +69,10 @@ class CreateVaultTests(unittest.TestCase):
         profile = json.loads((destination / "learner-profile.json").read_text())
         self.assertFalse(profile["configured"])
         self.assertEqual(profile["name"], "")
+        self.assertEqual(profile["explanation_style"], "adaptive")
+        self.assertEqual(profile["preferred_extras"], [])
+        for reference in ["onboarding-evidence.md", "topic-intake.md"]:
+            self.assertTrue((destination / "SKILLS/guided-learning/references" / reference).is_file())
         self.assertIn("$guided-learning onboard", (destination / "Home.md").read_text())
 
     def test_generated_vault_can_create_and_switch_independent_topics(self):
@@ -210,6 +214,43 @@ class CreateVaultTests(unittest.TestCase):
                 setup.profiles.save_profile(vault, invalid)
         for path, contents in before.items():
             self.assertEqual(path.read_bytes(), contents)
+
+    def test_existing_profile_preserves_legacy_preferences_and_bilingual_constraints(self):
+        vault = self.base / "learning"
+        setup.create_vault(ROOT, vault, "Learning")
+        profile = setup.profiles.default_profile()
+        profile.update({
+            "configured": True, "name": "Existing learner",
+            "language": "Bahasa Indonesia with English technical terms",
+            "explanation_style": "step-by-step",
+            "preferred_extras": ["worked_examples", "interactive_visualizations"],
+            "preferences": "Text-only for now; screen reader; no local code execution.",
+        })
+        path = vault / "learner-profile.json"
+        path.write_text(json.dumps(profile, ensure_ascii=False), encoding="utf-8")
+        before = {p: p.read_bytes() for p in vault.rglob('*') if p.is_file()}
+        loaded = setup.profiles.read_profile(vault)
+        self.assertEqual(loaded, profile)
+        for file, content in before.items():
+            self.assertEqual(file.read_bytes(), content, "Reading must not migrate or rewrite files")
+        updated = {**loaded, "session_minutes": 15}
+        saved = setup.profiles.save_profile(vault, updated)
+        self.assertEqual(saved, updated)
+        self.assertEqual(setup.profiles.read_profile(vault), updated)
+        for file, content in before.items():
+            if file.name not in ["learner-profile.json", "Learner Profile.md"]:
+                self.assertEqual(file.read_bytes(), content)
+        markdown = (vault / "Learner Profile.md").read_text(encoding="utf-8")
+        self.assertIn(profile["language"], markdown)
+        self.assertIn(profile["preferences"], markdown)
+
+    def test_absent_profile_read_is_unconfigured_and_does_not_create_files(self):
+        vault = self.base / "learning"
+        vault.mkdir()
+        profile = setup.profiles.read_profile(vault)
+        self.assertEqual(profile, setup.profiles.default_profile())
+        self.assertFalse(profile["configured"])
+        self.assertEqual(list(vault.iterdir()), [])
 
 
 if __name__ == "__main__":

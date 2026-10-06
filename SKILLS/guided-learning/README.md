@@ -5,7 +5,7 @@
 >
 > Say **Continue [topic]** to resume an existing course, or **I want to learn [a new subject]** to create a separate course. Each track has its own roadmap, recall queue, notes, glossary, journals, and logs. Restart an older agent session or have it reread the installed skill before switching topics. To create an empty vault for someone else, read [[SHARING|the sharing instructions]].
 >
-> Start with **$guided-learning onboard** (Codex) or **/guided-learning onboard** (Claude Code) to set your learner profile and preferred learning extras in chat. Run it again to update preferences while retaining learning progress.
+> Start with **$guided-learning onboard** (Codex) or **/guided-learning onboard** (Claude Code) to set teaching language, session time, and optional constraints in chat. Each new topic gets its own goal and starting point. Run onboarding again to update preferences while retaining progress. Read [the research rationale](references/onboarding-evidence.md) for the question design and its limits.
 
 A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill that turns any markdown-based knowledge vault into a structured learning environment. It runs interactive sessions using a **spiral curriculum** — three passes of increasing depth, with spaced recall, comprehension checks, and auto-generated interactive HTML visualizations.
 
@@ -220,9 +220,9 @@ The check pool in Phase 2 can be extended with domain-specific formats. Just add
 
 **Why interactive HTML instead of static diagrams?** Parameter exploration builds intuition that reading can't. When you drag a slider and watch the ROC curve shift, you understand the tradeoff viscerally. The HTML files are self-contained (no server needed) and work in Obsidian's built-in browser.
 
-**Why spaced recall?** Without it, you forget 70% within a week. The 3/7/21-day schedule is a simplified Leitner system that catches forgetting before it compounds.
+**Why spaced recall?** Practice testing and distributed practice support retention across many studied contexts ([Dunlosky et al., 2013](https://doi.org/10.1177/1529100612453266)). The 3/7/21-day schedule is a practical starting heuristic, not a universally optimal schedule or proof of permanent retention.
 
-**Why struggle pattern tracking?** Recurring correction types reveal systematic gaps. If you keep missing implications, the skill preemptively adds "What this means for your system" sections. This is how the skill adapts to your learning style over time.
+**Why struggle pattern tracking?** Recurring correction types help identify gaps. If you keep missing implications, the skill adds concrete application examples. It adapts support from observed responses, without assigning a fixed learning style.
 
 **Why execution logs + session protocols?** Logs are operational (machine-readable YAML for the skill's self-improvement loop). Protocols are human-readable journals for your own review. Both serve different purposes.
 

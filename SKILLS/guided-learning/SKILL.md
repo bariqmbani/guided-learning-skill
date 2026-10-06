@@ -55,11 +55,11 @@ For a missing or invalid registry, follow the recovery rules in `references/topi
 
 ### Learner profile
 
-At the start of a session, read `learner-profile.json` from the vault root if it exists. If `configured` is true, use the learner's preferred language, approximate session length, explanation presentation, and preferred extras. Background and general goals guide examples and prerequisite probing; they do not establish mastery. Use `learning_context` as a default for a **new** topic when it is not `auto`. A selected topic's stored goals and domain mode take priority over global defaults, and explicit requests in the current conversation take priority over all saved preferences.
+At the start of a session, read the vault profile with `python3 SKILLS/guided-learning/scripts/profile.py show`. If `configured` is true, use the preferred teaching language for explanations, recall questions, comprehension checks, exercise prompts, and new lesson prose, including any bilingual preference. Apply the approximate session budget and functional constraints. During first onboarding, explicitly ask the language unless already provided; an unconfigured English placeholder is not an answer. Background and general goals guide examples and prerequisite probing; they do not establish mastery. Use `learning_context` as a default for a **new** topic when it is not `auto`. The selected topic's stored goals and domain mode take priority over global defaults; explicit requests in the current conversation take priority over all saved preferences.
 
-Preferred extras are teaching aids to prioritize when relevant: worked examples, practice exercises, interactive visualizations, code examples, mini projects, writing exercises, and guided source reading. Keep comprehension checks and spaced recall in the session flow. Ask before introducing an unselected optional aid when a profile is configured. Respect the session length when choosing how many concepts or exercises to cover.
+Choose teaching methods by the task, observed responses, and access constraints. `adaptive` is the default presentation; older saved styles remain valid, adjustable preferences rather than fixed learner types. Preferred extras are priorities, not an allowlist; an empty list does not disable practice or visuals. Respect explicit exclusions in `preferences` and provide usable alternatives. Worked examples, practice, feedback, and spaced recall belong in the teaching method when appropriate; no extra approval is needed merely because an aid was not selected. Respect requests to pause or defer checks. Split heavy concepts across sessions instead of exceeding the available time.
 
-If the profile is absent or unconfigured, continue with normal goal and mode detection; offer `$guided-learning onboard` or `/guided-learning onboard` without blocking learning. Ask only for missing topic-specific information; do not repeat questions already answered in a configured profile. Changing preferences does not reset or mark progress in any course.
+If absent or unconfigured, offer `$guided-learning onboard` or `/guided-learning onboard` without blocking learning; ask about teaching language and immediate time constraints when needed. Use `references/topic-intake.md` for missing goals and starting knowledge in a new track. In an existing course, use its plan and recent protocol without rerunning intake. After an early lesson, invite one actionable adjustment to pace, difficulty, or examples if feedback has not already been given. Changing preferences never resets or marks progress.
 
 ### Topic domain mode
 
@@ -73,7 +73,7 @@ The skill supports three domain modes that adapt session framing — comprehensi
 
 The learner can override the mode at any time by saying "switch to professional mode" or similar.
 
-### research (default)
+### research
 
 Academic context: papers, Related Work, reviewer simulation, dissertation argument maps, advisor pitches. Best for PhD students, postdocs, and researchers working through academic literature.
 
@@ -85,7 +85,7 @@ Workplace/industry context: stakeholder presentations, decision memos, team expl
 
 Comprehension checks ask the learner to brief their manager, defend a design decision to a skeptical colleague, write risk assessments, or connect to current projects. Connection mapping prompts reference team knowledge architectures and decision dependencies.
 
-### self-study
+### self-study (default when purpose is unclear)
 
 Personal learning context: teaching analogies, blog post drafts, practical projects, self-assessment. Best for independent learners working through a topic systematically.
 
@@ -113,7 +113,7 @@ One of:
 
 ---
 
-## Bootstrapper — Zero-to-First-Session in 5 Minutes
+## Bootstrapper — Start a New Topic
 
 After topic selection, when the selected track has no concept checklist entries yet, the skill bootstraps everything needed to start learning immediately.
 
@@ -125,13 +125,14 @@ After topic selection, when the selected track has no concept checklist entries 
 
 ### What it does
 
-1. **Ask one clarifying question**: "What's your goal with [topic]? Are you learning this for research, for work, or personal interest?" This also sets the domain mode.
+1. **Gather a short topic plan** using `references/topic-intake.md`: ask only for missing information about a useful outcome, starting knowledge, and realistic practice opportunities. Infer domain mode from the purpose; if unclear, use self-study. Optional deadlines and materials affect scope. Accept exploratory goals and skipped optional answers. Keep these decisions in the selected topic, separate from the global profile.
 
 2. **Generate a starter roadmap** with 10-20 concepts organized into 3-5 clusters:
    - Use the learner's stated goal to pick relevant sub-topics
    - Order clusters by dependency (foundations first)
    - Each concept gets one line in the roadmap checklist
    - Write the roadmap to `{roadmap}`
+   - Include a short **Learning plan** with the outcome, success demonstration, provisional starting point, practice opportunities, and domain mode. Unknowns stay unknown; do not invent a deadline or infer mastery.
 
 3. **Generate stub concept notes** for each concept in the roadmap:
    - Create one file per concept in `{concepts_dir}`. For new tracks, use `<topic-id>--<concept-slug>.md` filenames and vault-relative wikilinks with display titles. Preserve existing legacy filenames and links.
@@ -142,16 +143,16 @@ After topic selection, when the selected track has no concept checklist entries 
 
 5. **Create the glossary** if missing, then add the first few key terms from the topic without replacing any existing entries
 
-6. **Announce what was created**: List the clusters, concept count, and invite the learner to review and adjust before starting. Show the roadmap structure briefly.
+6. **Announce what was created**: Briefly show the outcome, clusters, and concept count. Explain that the learner can adjust the plan as they learn.
 
-7. **Offer to start immediately**: "Your roadmap has [N] concepts in [M] clusters. Want to start with the first one, or review and adjust the roadmap first?"
+7. **Start the first useful lesson** when the learner asked to learn. Give a short prerequisite prompt, explanation, and an attempt with feedback within the available time. Use the response to refine support; do not add a separate entrance test or redundant approval to begin. If they requested only a roadmap, stop after presenting it.
 
 ### Quality guidelines
 
 - **Don't over-generate.** 10-20 concepts is enough for a solid foundation. The learner can always add more later. Breadth over exhaustiveness.
 - **Name concepts clearly.** Use descriptive titles that make sense in isolation: "Cohen's Kappa" not "Metric 3", "Retrieval-Augmented Generation" not "Advanced Technique".
 - **Cluster names should be meaningful.** "Statistical Foundations" not "Cluster 1".
-- **Respect the learner's level.** If someone says "I'm new to this", start with more foundational concepts. If they say "I know the basics, I want the advanced stuff", skip introductory material.
+- **Calibrate the starting point.** Use self-report to choose an initial level, then adjust from a brief prerequisite task and subsequent attempts. A claim to know the basics does not by itself mark foundational concepts mastered. Reuse intake evidence rather than repeating the same probes.
 - **Stub notes should be useful, not empty.** The core claim should be accurate enough that the agent can teach from it in Pass 1. It's OK to use training knowledge for stubs — they'll be enriched with sources later.
 
 ---
@@ -216,7 +217,7 @@ First establish the intended topic using the topic-routing rules. Never silently
 3. Determine which pass we're in (1 = Overview, 2 = Working Understanding, 3 = Fluency)
 4. **Detect or recall domain mode** (see Domain Modes section). On the first session, infer from content or ask. On subsequent sessions, read the stored preference.
 5. Tell the learner: "We're in **Pass X**, Cluster Y: *cluster name*. Next up: *concept name*."
-6. If resuming, briefly recall what was covered last session
+6. If resuming, briefly recall what was covered last session. Use the selected topic's learning plan and current time constraints to choose scope; no new intake is required merely because an older course lacks a plan section.
 
 ### Phase 0.5: Spaced Recall Check (2-5 min)
 
@@ -227,7 +228,7 @@ First establish the intended topic using the topic-routing rules. Never silently
    - "Quick recall — what's the core claim of *[concept name]*?"
    - Or: "In one sentence, why does *[concept name]* matter for your research?"
 3. **Evaluate the response:**
-   - **Solid** — the learner nails the core idea without hesitation. Advance to the next interval (3d -> 7d -> 21d -> done). If already at 21d, remove from the queue — the concept is retained.
+   - **Solid** — the learner accurately recalls the core idea. Judge accuracy and reasoning, not response speed or fluency alone. Advance to the next interval (3d -> 7d -> 21d -> done). If already at 21d, remove from this queue cycle; this is evidence of recall at this delay, not permanent mastery.
    - **Fuzzy** — the learner gets the gist but is imprecise or misses a key nuance. Keep the same interval and reschedule. Add a brief note about what was fuzzy.
    - **Blank** — the learner can't recall the core idea. Reset to 3d interval. Flag the concept for a brief refresher (2-3 sentences) before moving on.
 4. If no items are due, skip this phase silently.
@@ -245,6 +246,8 @@ First establish the intended topic using the topic-routing rules. Never silently
 ```
 
 Intervals: 3d -> 7d -> 21d -> removed. On "fuzzy", repeat same interval. On "blank", reset to 3d.
+
+These intervals are a practical starting heuristic, not universally optimal. Keep existing recall dates intact when applying onboarding preferences. Revisit important ideas in later application and transfer tasks even after a queue cycle is complete.
 
 ### Phase 1: Context & Explain
 
@@ -265,7 +268,7 @@ Before launching into the main concept, identify its 1-3 key prerequisites — t
 the learner must already understand for the explanation to land. Ask a brief warm-up question
 about each prerequisite. If they are shaky on any, cover it first as a mini-module before the main
 explanation. Don't assume familiarity with statistical or mathematical terms even if they seem standard.
-Starting at the right level avoids false-start explanations that need to be rebuilt from scratch.
+Reuse relevant responses already observed during topic intake or this session instead of asking the same questions again. Starting at the right level avoids false-start explanations that need to be rebuilt from scratch.
 
 **Pass 1 (Overview) — adaptive explanation:**
 
@@ -311,6 +314,8 @@ The learner understands the concept and its mechanism. Now they need to wield it
 
 **Immediately after delivering the Phase 1 explanation**, check whether this concept warrants an interactive HTML visualization (see "Choosing the application method" in Phase 3). If yes:
 
+First check the profile's access constraints and available tools. For text-only preferences, inaccessible controls, or a tight session budget, use a static explanation or worked example that serves the same learning goal. A visual presentation preference alone does not make an interactive necessary.
+
 1. **Launch a background subagent** (Agent tool, `run_in_background: true`) to build the interactive HTML file.
    - Pass the subagent the full concept content, the CSS design system path, the build script path, and the output filename.
    - The subagent should follow all Interactive HTML Guidelines below.
@@ -335,7 +340,7 @@ Use the pool matching the configured `domain_mode`. Checks marked "(shared)" are
 
 ---
 
-#### `research` mode (default)
+#### `research` mode
 
 **Pass 1 (any of these):**
 - **Conference pitch**: "Explain this to a fellow researcher at a poster session."
@@ -422,6 +427,11 @@ If gaps appear, re-explain those parts. Don't move on until the core idea clicks
 ### Phase 3: Apply (5-15 min, scaled to complexity)
 
 **Choose the application method based on concept type.**
+
+Apply the topic's outcome, profile constraints, and current time budget before
+choosing a method. These take priority over the preferences below. Use a usable
+alternative when an interactive or tool is inaccessible, excluded, or too costly
+for the available session.
 
 For HTML-interactive concepts where an interactive was already built, Phase 3 becomes **guided deep exploration**: ask the learner to try a specific preset or parameter combination that illustrates a non-obvious insight or edge case, then discuss what they see.
 

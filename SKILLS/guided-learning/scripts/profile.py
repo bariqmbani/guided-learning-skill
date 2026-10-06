@@ -8,7 +8,7 @@ import tempfile
 
 
 CONTEXTS = ["auto", "self-study", "professional", "research"]
-STYLES = ["step-by-step", "concise", "visual", "discussion", "hands-on"]
+STYLES = ["adaptive", "step-by-step", "concise", "visual", "discussion", "hands-on"]
 EXTRAS = {
     "worked_examples": "Worked examples",
     "practice_exercises": "Practice exercises",
@@ -30,8 +30,8 @@ def default_profile():
         "language": "English",
         "learning_context": "auto",
         "session_minutes": 20,
-        "explanation_style": "step-by-step",
-        "preferred_extras": ["worked_examples", "practice_exercises", "interactive_visualizations"],
+        "explanation_style": "adaptive",
+        "preferred_extras": [],
         "preferences": "",
     }
 
@@ -71,16 +71,19 @@ def profile_markdown(profile):
              "Start onboarding in your learning chat with `$guided-learning onboard` (Codex) or `/guided-learning onboard` (Claude Code).")
     values = [
         ("Name", profile["name"] or "Not provided"),
-        ("Background", profile["background"] or "Not provided"),
-        ("Goals", profile["goals"] or "Not provided"),
+        ("General background", profile["background"] or "Not provided"),
+        ("General goals", profile["goals"] or "Not provided; set separately for each topic"),
         ("Teaching language", profile["language"]),
         ("Learning context", profile["learning_context"]),
         ("Session length", f"{profile['session_minutes']} minutes"),
         ("Explanation preference", profile["explanation_style"]),
-        ("Preferred extras", ", ".join(EXTRAS[key] for key in profile["preferred_extras"]) or "None"),
-        ("Other preferences", profile["preferences"] or "Not provided"),
+        ("Preferred aids", ", ".join(EXTRAS[key] for key in profile["preferred_extras"]) or "No priorities specified; tutor chooses when useful"),
+        ("Constraints and other preferences", profile["preferences"] or "Not provided"),
     ]
-    return "# Learner Profile\n\n" + intro + "\n\n" + "\n".join(f"- **{label}:** {value}" for label, value in values) + "\n"
+    return ("# Learner Profile\n\n" + intro + "\n\n"
+            + "\n".join(f"- **{label}:** {value}" for label, value in values)
+            + "\n\nPresentation preferences can change. They do not measure ability or mastery. "
+            "Practice, feedback, and spaced recall are part of the teaching method.\n")
 
 
 def atomic_write(path, content):

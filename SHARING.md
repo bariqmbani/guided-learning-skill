@@ -25,12 +25,18 @@ Obsidian, and run `claude` or `codex` from that folder. Their first prompt can b
 $guided-learning onboard
 ```
 
-In Claude Code use `/guided-learning onboard`. The tutor asks in chat about
-background, goals, teaching language, session length, explanation preferences,
-and preferred extras such as visuals, exercises, code examples, or mini projects.
-It saves a learner profile without creating topics or changing progress.
+In Claude Code use `/guided-learning onboard`. The tutor first asks which
+language the learner wants explanations and questions in, including a bilingual
+option, then asks about typical session time and optional constraints or explicit
+preferences. It saves a learner profile without creating topics or changing progress.
+There is no required style quiz or catalog of extras to select.
 
-After onboarding, start a subject with **I want to learn about [topic]**.
+After onboarding, start a subject with **I want to learn about [topic]**. The tutor
+asks only for missing information about a useful outcome, starting knowledge,
+and realistic opportunities for practice. Those answers stay in that topic's
+learning plan, so different subjects can have different goals and starting points.
+Exploration without a fixed goal or schedule is welcome. Lessons include attempts,
+feedback, and later recall; presentation preferences can be adjusted as you learn.
 Running the onboard command again updates preferences in an existing vault.
 The installer itself creates files without asking learning questions.
 
@@ -63,3 +69,25 @@ produce more empty vaults after your friend has started learning.
 Upstream attribution and the MIT license are retained. Keep those files when
 sharing the setup. The ZIP contains only generated setup files; sharing a clone
 of this repository would also share the courses and history tracked here.
+
+## Preparing a public repository
+
+Publish a generated starter with fresh Git history, rather than changing the
+visibility of this personal learning repository. Generate it into a new directory:
+
+```sh
+./scripts/install_vault.sh dist/learning-public-starter --name "Learning"
+```
+
+Review that folder's files and initialize a new repository there. It contains
+the installer, empty registry, unconfigured profile, skill, examples, research
+rationale, and MIT license; it contains no source-vault Git history. Keep the
+public template checkout separate from your study vault. Someone cloning that
+template should run its installer to create their own vault outside the checkout
+before onboarding or learning.
+
+The question design and evidence limits are documented in
+[onboarding-evidence.md](SKILLS/guided-learning/references/onboarding-evidence.md).
+The research supports teaching principles, not a guarantee that this LLM tutor
+improves learning. Initial user evaluation should check whether answers affect
+teaching and whether learners can later explain or apply their target skill.

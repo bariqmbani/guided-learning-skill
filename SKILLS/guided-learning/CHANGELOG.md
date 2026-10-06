@@ -2,6 +2,10 @@
 
 ## Shareable setup — 2026-10-06
 
+- First onboarding explicitly asks the preferred teaching language, accepts bilingual preferences, and applies the saved choice throughout learning sessions.
+- Refined onboarding from learning research: three vault prompts for language, time, and optional constraints; per-topic intake for outcomes, starting knowledge, and feasible practice.
+- Default explanations adapt to the task and observed responses. Existing saved styles and aids remain valid; an empty aid list no longer restricts teaching methods. Explicit exclusions stay in text preferences.
+- Added a cited research rationale and public-template publishing guidance; clarified that recall intervals and this exact onboarding flow are design choices, not validated guarantees.
 - Added `scripts/create_vault.py` to generate empty vaults and shareable ZIPs from an explicit list of reusable assets.
 - Fresh registries have no active topic; agent instructions and Obsidian settings are generated without account-specific paths or existing course references.
 - Exported setups retain their generator and register both agents without requiring symlinks.
