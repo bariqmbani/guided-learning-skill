@@ -255,6 +255,11 @@ palette, so a token follows the learner's theme. Every page gets a light/dark
 button from the shared runtime. It follows the system initially, remembers a
 manual preference when browser storage is available, and applies one theme to
 the whole page. CSS `light-dark()` keeps both palettes alongside each token.
+Dark mode separates the page, panels, and controls with nearly neutral charcoal
+surfaces and bright secondary labels. Use `--graphic-neutral` for meaningful
+diagram lines and comparison marks, checking at least 3:1 contrast against their
+surface. Success and retry surfaces use `--ok-bg` and `--warn-bg`; classification
+fills belong to classification outcomes.
 
 Use outlined secondary buttons for actions and pill-shaped presets for settings.
 Segmented radio groups use equal-width columns that wrap with the available
@@ -268,6 +273,8 @@ for gallery demonstrations as well as lessons, rather than duplicating its CSS.
 Copy lesson shell, chart, stepper, and feedback markup from a working template
 rather than reconstructing it from memory. Give colors redundant text labels or
 distinct line styles; red and green alone must not encode correctness.
+Matching rows show **Correct** or **Try again** after checking, with feedback
+associated with each select. Editing or resetting clears that feedback.
 
 Default to one page with visible sections. Tabs cost keyboard, focus, and state
 logic; use them only when separating genuinely different views helps, and

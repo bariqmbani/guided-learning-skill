@@ -47,6 +47,46 @@ const allPages = [...templates, ...galleries];
       const style = getComputedStyle(element);
       return style.outlineStyle !== 'none' && parseFloat(style.outlineWidth) > 0;
     };
+    const checkPalette = async (target, name) => {
+      if (name === 'parameter-explorer') {
+        await target.locator('#pin').click();
+        await target.locator('#slope').evaluate(input => {
+          input.value = '2';
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+      }
+      const failedPairs = await target.evaluate(() => {
+        const parse = value => {
+          const channels = value.match(/[\d.]+/g).map(Number);
+          return [...channels.slice(0, 3), channels[3] ?? 1];
+        };
+        const over = (front, back) => [...front.slice(0, 3).map((channel, index) =>
+          channel * front[3] + back[index] * (1 - front[3])), 1];
+        const luminance = color => color.slice(0, 3).map(channel => channel / 255)
+          .map(channel => channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4)
+          .reduce((sum, channel, index) => sum + channel * [.2126, .7152, .0722][index], 0);
+        const failures = [];
+        for (const [selector, property, minimum] of [
+          ['body, .subtitle, .faint, .hint-count, .btn:not(:disabled)', 'color', 4.5],
+          ['.chart-trail, #map .edge', 'stroke', 3]
+        ]) {
+          document.querySelectorAll(selector).forEach(element => {
+            if (!element.getClientRects().length) return;
+            const chain = [];
+            for (let node = element; node; node = node.parentElement) chain.unshift(getComputedStyle(node));
+            let background = [255, 255, 255, 1];
+            chain.forEach(style => { background = over(parse(style.backgroundColor), background); });
+            const foreground = parse(getComputedStyle(element)[property]);
+            foreground[3] *= chain.reduce((opacity, style) => opacity * Number(style.opacity), 1);
+            const values = [luminance(over(foreground, background)), luminance(background)];
+            const ratio = (Math.max(...values) + .05) / (Math.min(...values) + .05);
+            if (ratio < minimum) failures.push({ element: element.id || element.className, ratio, minimum });
+          });
+        }
+        return failures;
+      });
+      assert.deepEqual(failedPairs, [], name + ': rendered palette contrast');
+    };
     const range = (id, value) => page.locator('#' + id).evaluate((element, next) => {
       element.value = next;
       element.dispatchEvent(new Event('input', { bubbles: true }));
@@ -135,6 +175,54 @@ const allPages = [...templates, ...galleries];
       await options.last().check();
       assert.equal(await group.locator('input:checked').count(), 1);
     }
+
+    // Matching feedback must identify each result without relying on color.
+    // Reused pair IDs in separate activities must keep descriptions isolated.
+    await page.evaluate(() => {
+      window.matchingChecks = [];
+      for (const id of ['matching-one', 'matching-two']) {
+        const root = document.createElement('section');
+        root.id = id;
+        root.innerHTML = '<div class="match-grid" data-matching></div><button type="button" data-check>Check matches</button><p class="feedback" data-feedback></p>';
+        document.querySelector('main').append(root);
+        window.matchingChecks.push(LearningUI.mountMatching(root, { pairs: [
+          { id: 'mean', term: 'Mean', match: 'Uses every value' },
+          { id: 'median', term: 'Median', match: 'Uses position' }
+        ] }));
+      }
+    });
+    const firstMatches = page.locator('#matching-one');
+    const secondMatches = page.locator('#matching-two');
+    const visibleVerdicts = root => root.locator('.match-verdict:not([hidden])').allTextContents();
+    assert.deepEqual(await visibleVerdicts(firstMatches), []);
+    assert.equal(await page.locator('.match-grid').evaluateAll(grids => {
+      const ids = grids.flatMap(grid => [...grid.querySelectorAll('[id]')].map(element => element.id));
+      return ids.length === new Set(ids).size && grids.every(grid => [...grid.querySelectorAll('select')].every(select =>
+        select.closest('.match-row').contains(document.getElementById(select.getAttribute('aria-describedby')))));
+    }), true, 'matching feedback descriptions cross between activities');
+    await firstMatches.getByRole('combobox', { name: 'Match for Mean', exact: true }).selectOption('Uses every value');
+    await firstMatches.getByRole('combobox', { name: 'Match for Median', exact: true }).selectOption('Uses every value');
+    await firstMatches.locator('[data-check]').click();
+    assert.deepEqual(await visibleVerdicts(firstMatches), ['Correct', 'Try again']);
+    assert.match(await firstMatches.locator('[data-feedback]').innerText(), /1 of 2 are right/);
+    assert.deepEqual(await visibleVerdicts(secondMatches), []);
+    await secondMatches.getByRole('combobox', { name: 'Match for Mean', exact: true }).selectOption('Uses every value');
+    await secondMatches.getByRole('combobox', { name: 'Match for Median', exact: true }).selectOption('Uses position');
+    await secondMatches.locator('[data-check]').click();
+    assert.deepEqual(await visibleVerdicts(secondMatches), ['Correct', 'Correct']);
+    await firstMatches.getByRole('combobox', { name: 'Match for Median', exact: true }).selectOption('Uses position');
+    assert.deepEqual(await visibleVerdicts(firstMatches), ['Correct']);
+    assert.equal(await firstMatches.locator('[data-feedback]').innerText(), '');
+    assert.equal(await firstMatches.locator('[data-feedback]').getAttribute('data-tone'), null);
+    await firstMatches.locator('[data-check]').click();
+    assert.deepEqual(await visibleVerdicts(firstMatches), ['Correct', 'Correct']);
+    await page.evaluate(() => window.matchingChecks[0].reset());
+    assert.deepEqual(await firstMatches.locator('select').evaluateAll(selects => selects.map(select => select.value)), ['', '']);
+    assert.deepEqual(await firstMatches.locator('.match-verdict').allTextContents(), ['', '']);
+    assert.deepEqual(await visibleVerdicts(firstMatches), []);
+    assert.equal(await firstMatches.locator('[data-verdict]').count(), 0);
+    assert.equal(await firstMatches.locator('[data-feedback]').innerText(), '');
+    assert.deepEqual(await visibleVerdicts(secondMatches), ['Correct', 'Correct']);
 
     await open('parameter-explorer');
     // A pointer does not create the keyboard ring, including while held down.
@@ -401,6 +489,7 @@ const allPages = [...templates, ...galleries];
       darkPage.on('pageerror', error => failures.push(error.message));
       await darkPage.goto(pathToFileURL(path.join(temporary, name + '.html')).href);
       const darkBackground = await darkPage.evaluate(() => getComputedStyle(document.body).backgroundColor);
+      await checkPalette(darkPage, name);
       await darkPage.emulateMedia({ colorScheme: 'light' });
       await darkPage.waitForFunction(previous => getComputedStyle(document.body).backgroundColor !== previous, darkBackground);
       const lightBackground = await darkPage.evaluate(() => getComputedStyle(document.body).backgroundColor);
@@ -415,6 +504,7 @@ const allPages = [...templates, ...galleries];
       assert.equal(await darkPage.evaluate(() => getComputedStyle(document.body).backgroundColor), lightBackground, name + ': manual light theme did not apply');
       await darkPage.emulateMedia({ colorScheme: 'dark' });
       assert.equal(await darkPage.evaluate(() => getComputedStyle(document.body).backgroundColor), lightBackground, name + ': OS replaced the manual light theme');
+      await checkPalette(darkPage, name);
       await darkContext.close();
     }
 
@@ -443,7 +533,7 @@ const allPages = [...templates, ...galleries];
       await staticPage.goto(pathToFileURL(path.join(temporary, name + '.html')).href);
       assert.equal(await staticPage.locator('noscript').isVisible(), true, name + ': missing static fallback');
     }
-    console.log('PASS: 13 standalone pages offline; static checks, MathML notation, desktop/mobile, pointer and keyboard focus, segmented choices, chart cursor, models, reset/retry, playback/reduced motion, quiz layout, map bounds, seeded replay, branches, ordering, theme controls and persistence, restricted storage, and no-JS fallbacks.');
+    console.log('PASS: 13 standalone pages offline; static checks, MathML notation, desktop/mobile, pointer and keyboard focus, segmented choices, matching verdicts and isolated descriptions, chart cursor, models, reset/retry, playback/reduced motion, quiz layout, map bounds, seeded replay, branches, ordering, theme controls and persistence, restricted storage, and no-JS fallbacks.');
   } finally {
     if (browser) await browser.close();
     fs.rmSync(temporary, { recursive: true, force: true });

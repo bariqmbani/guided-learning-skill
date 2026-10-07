@@ -445,6 +445,10 @@ LearningUI.mountMatching($('matching'), {
 ```
 
 Native `<select>` elements carry the choice, so the task needs no drag support.
+After checking, each answered row shows **Correct** or **Try again** beside its select;
+the select also references that feedback as its accessible description. Editing
+an answer or resetting clears the checked feedback so it cannot describe an
+outdated selection.
 
 ---
 
@@ -596,7 +600,7 @@ LearningUI.renderChart($('line-chart'), {
 | `xDomain`, `yDomain` | data extent | Two increasing finite numbers; fix them when comparisons need one scale |
 | `xTicks`, `yTicks` | 4, or 2 when narrow | Target count; actual ticks are rounded to readable steps |
 | `annotations` | none | `vline`/`hline` with `at`, `band` with `from`/`to` and `axis`, `point` with `x`/`y`, `note` |
-| `baseline` | none | Points, or an array of point lists, drawn faintly for comparison |
+| `baseline` | none | Points, or an array of point lists, drawn as neutral dashed lines for comparison |
 | `cursor` | `true` | Focusable chart, arrow-key readout, live region |
 | `animate` | `true` | Short tween for discrete pointer comparisons; skipped for continuous ranges, keyboard actions, resize, and reduced motion |
 | `height` | 300 | Pixels |
@@ -697,6 +701,12 @@ follows the learner's theme. The paired palette uses CSS `light-dark()` with
 `color-scheme: light dark` by default; `data-theme="light"` or `"dark"` on the
 document root selects a manual theme for the whole page.
 
+Dark mode uses lighter, nearly neutral charcoal surfaces with separate page,
+panel, and control levels, plus brighter secondary labels. Use neutral surfaces
+for layout and reserve accent and status colors for meaningful content and
+controls. Meaningful diagram lines use `--graphic-neutral`, not a decorative
+border token; check them against the drawing surface at 3:1 or better.
+
 Every supplied page has a **Dark mode / Light mode** button. The runtime saves
 only this preference under `learning-ui-theme` in local storage. It follows
 system changes until a theme is chosen, and works for the current page even if
@@ -714,11 +724,13 @@ and text instead of another card. Quiz choices always occupy separate rows.
 | --- | --- |
 | `--bg`, `--surface`, `--card`, `--sunken` | Page, panels, control panel, insets |
 | `--border`, `--border-hover`, `--border-strong` | Surfaces, hover, form-field boundaries (3:1) |
+| `--graphic-neutral` | Meaningful neutral diagram lines, node outlines, and comparison marks; target 3:1 against their surface |
 | `--text`, `--text-bright`, `--muted`, `--faint` | Body, headings, secondary, tertiary — all at 4.5:1 or better |
 | `--accent`, `--accent-hover`, `--accent-dim`, `--accent-text`, `--on-accent` | The one accent and its text colors |
 | `--series-1` … `--series-4`, `--series-N-soft` | Chart series and formula terms |
 | `--term-1` … `--term-4`, `--term-N-bg` | Highlighted formula terms |
 | `--ok`, `--warn`, `--info` | Feedback tones |
+| `--ok-bg`, `--warn-bg` | Success and retry/warning surfaces; do not borrow accent or classification fills |
 | `--tp`, `--fp`, `--fn`, `--tn` and `--*-bg` | Classification outcomes |
 | `--radius`, `--radius-lg`, `--radius-pill` | Corners |
 | `--font-sans`, `--font-mono`, `--font-math` | Prose, code, mathematics |

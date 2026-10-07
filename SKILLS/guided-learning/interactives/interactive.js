@@ -890,6 +890,7 @@
   }
 
   /* Match each item to one option using native selects. */
+  let matchingId = 0;
   function mountMatching(root, { pairs, options, seed = 11 } = {}) {
     if (!root) throw new TypeError('mountMatching needs a root element.');
     if (!Array.isArray(pairs) || pairs.length < 2) throw new TypeError('mountMatching needs at least two pairs.');
@@ -901,18 +902,30 @@
     result.setAttribute('aria-live', 'polite');
     const random = seededRandom(seed);
     const choices = random.shuffle(options || pairs.map(pair => pair.match));
+    const instanceId = 'learning-match-' + (++matchingId);
+    function clearResult() {
+      result.textContent = '';
+      delete result.dataset.tone;
+    }
     function paint() {
       grid.replaceChildren();
-      pairs.forEach(pair => {
+      pairs.forEach((pair, index) => {
         const row = doc.createElement('div');
         row.className = 'match-row';
         row.dataset.id = pair.id;
         const term = doc.createElement('span');
         term.textContent = pair.term;
         const select = doc.createElement('select');
-        const selectId = 'match-' + pair.id;
+        const selectId = instanceId + '-' + index;
         select.id = selectId;
         select.setAttribute('aria-label', 'Match for ' + pair.term);
+        select.setAttribute('aria-describedby', selectId + '-verdict');
+        const answer = doc.createElement('div');
+        answer.className = 'match-answer';
+        const verdict = doc.createElement('span');
+        verdict.className = 'match-verdict';
+        verdict.id = selectId + '-verdict';
+        verdict.hidden = true;
         const blank = doc.createElement('option');
         blank.value = '';
         blank.textContent = 'Choose…';
@@ -923,7 +936,14 @@
           option.textContent = choice;
           select.append(option);
         });
-        row.append(term, select);
+        select.addEventListener('change', () => {
+          delete row.dataset.verdict;
+          verdict.textContent = '';
+          verdict.hidden = true;
+          clearResult();
+        });
+        answer.append(select, verdict);
+        row.append(term, answer);
         grid.append(row);
       });
     }
@@ -933,9 +953,17 @@
       [...grid.children].forEach(row => {
         const pair = pairs.find(entry => String(entry.id) === row.dataset.id);
         const select = row.querySelector('select');
-        if (!select.value) { delete row.dataset.verdict; return; }
+        const verdict = row.querySelector('.match-verdict');
+        if (!select.value) {
+          delete row.dataset.verdict;
+          verdict.textContent = '';
+          verdict.hidden = true;
+          return;
+        }
         const isRight = select.value === pair.match;
         row.dataset.verdict = isRight ? 'correct' : 'wrong';
+        verdict.textContent = isRight ? 'Correct' : 'Try again';
+        verdict.hidden = false;
         if (isRight) right += 1;
         else if (pair.why) notes.push(pair.why);
       });
@@ -950,8 +978,7 @@
     });
     function reset() {
       paint();
-      result.textContent = '';
-      delete result.dataset.tone;
+      clearResult();
     }
     paint();
     return { reset };
@@ -1584,7 +1611,7 @@
       }
     }
     /* A baseline is an explicit comparison curve the lesson owns: the reset
-     * defaults, or a setting the learner pinned. It is drawn faintly behind
+     * defaults, or a setting the learner pinned. It is drawn dashed behind
      * the data and is not part of the series palette or the table. */
     const baseline = options.baseline;
     if (!baseline) state.trail = null;
@@ -1690,13 +1717,13 @@
       }
     });
 
-    /* A faint copy of the previous setting, for before-and-after comparison. */
+    /* A neutral copy of the previous setting, for before-and-after comparison. */
     if (state.trail) {
       state.trail.forEach(points => {
         if (points.length < 2) return;
         figure.append(svg.el('polyline', {
           points: points.map(point => x(point.x) + ',' + y(point.y)).join(' '),
-          fill: 'none', stroke: 'var(--border-hover)', 'stroke-width': 2,
+          fill: 'none', stroke: 'var(--graphic-neutral)', 'stroke-width': 2,
           class: 'chart-trail', 'clip-path': 'url(#' + state.clipId + ')'
         }));
       });
@@ -1762,7 +1789,7 @@
     if (state.trail) {
       const entry = node('li');
       const swatch = node('span', undefined, 'chart-swatch');
-      swatch.style.borderColor = 'var(--border-hover)';
+      swatch.style.borderColor = 'var(--graphic-neutral)';
       swatch.style.borderTopStyle = 'dotted';
       swatch.setAttribute('aria-hidden', 'true');
       entry.append(swatch, doc.createTextNode(options.baselineLabel || 'Baseline for comparison'));
@@ -1966,7 +1993,7 @@
         fill.style.height = Math.max(1, (Number(bar.value) / max) * 100) + '%';
         fill.style.width = '100%';
         if (bar.series) fill.style.background = 'var(--series-' + bar.series + ')';
-        if (bar.muted) fill.style.background = 'var(--border-hover)';
+        if (bar.muted) fill.style.background = 'var(--graphic-neutral)';
         fill.title = bar.label + ': ' + format(Number(bar.value));
         const label = node('span', bars.length > (options.labelEvery || 12) && index % Math.ceil(bars.length / 6) !== 0 ? '' : bar.label, 'faint');
         label.style.textAlign = 'center';

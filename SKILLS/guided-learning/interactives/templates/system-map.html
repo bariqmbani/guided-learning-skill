@@ -10,7 +10,7 @@
     .map-region { overflow-x: auto; padding: 4px; }
     #map { display: block; width: 100%; height: auto; }
     #map .node { cursor: pointer; outline: none; }
-    #map .node .node-box { fill: var(--surface); stroke: var(--border-hover); stroke-width: 1.5; }
+    #map .node .node-box { fill: var(--surface); stroke: var(--graphic-neutral); stroke-width: 1.5; }
     #map .node text { font: 600 13px var(--font-sans); fill: var(--text-bright); }
     #map .node .node-focus { fill: none; stroke: var(--accent); stroke-width: 2; opacity: 0; }
     #map .node:focus-visible .node-focus { opacity: 1; }
@@ -18,7 +18,7 @@
     #map .node[data-role='selected'] .node-box { fill: var(--accent-dim); stroke: var(--accent); stroke-width: 3; }
     #map .node[data-role='upstream'] .node-box { stroke: var(--series-2); stroke-dasharray: 5 3; }
     #map .node[data-role='downstream'] .node-box { stroke: var(--series-3); stroke-dasharray: 2 3; }
-    #map .edge { stroke: var(--border-hover); stroke-width: 1.5; fill: none; }
+    #map .edge { stroke: var(--graphic-neutral); stroke-width: 1.5; fill: none; }
     #map .edge[data-role='upstream'] { stroke: var(--series-2); stroke-width: 2.5; }
     #map .edge[data-role='downstream'] { stroke: var(--series-3); stroke-width: 2.5; }
     #map .node .node-role { font: 500 11px var(--font-sans); fill: var(--muted); }
@@ -185,7 +185,7 @@
         class: 'edge', 'aria-hidden': 'true',
         d: 'M' + (start.x + box.width / 2) + ' ' + start.y + ' C' + midX + ' ' + start.y + ', ' + midX + ' ' + end.y + ', ' + (end.x - box.width / 2 - 4) + ' ' + end.y
       });
-      map.append(path, svg.el('circle', { cx: end.x - box.width / 2 - 4, cy: end.y, r: 3, fill: 'var(--border-hover)', 'aria-hidden': 'true' }));
+      map.append(path, svg.el('circle', { cx: end.x - box.width / 2 - 4, cy: end.y, r: 3, fill: 'var(--graphic-neutral)', 'aria-hidden': 'true' }));
       edgeElements.push({ from, to, path });
     });
     content.forEach(({ node, label, note }) => {
