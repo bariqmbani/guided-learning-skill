@@ -319,7 +319,7 @@ attend to what actually happens instead of recognizing it afterwards.
     <button class="btn" type="submit" data-check>Lock in my prediction</button>
     <button class="btn btn-secondary" type="button" data-retry hidden>Predict again</button>
   </div>
-  <p class="predict-record" data-record hidden></p>
+  <p class="feedback" data-tone="info" data-record hidden></p>
   <p class="explain" data-locked>Your prediction stays on this page. Nothing is sent anywhere.</p>
 </form>
 ```
@@ -337,6 +337,11 @@ prediction.reset();
 A free-text `<textarea>` works in place of radios. Without `reveal`, nothing is
 hidden: the prediction is recorded and exploration stays open, which is the
 default the kit prefers.
+
+Render the recorded prediction with `.feedback` and `data-tone="info"`, the
+same inline response surface used by questions. Keep `data-record`: it is the
+prediction helper's required hook, while `data-feedback` belongs to answer
+checking. Recording a prediction does not grade it as correct or incorrect.
 
 ### `mountHints(root, options)`
 
@@ -664,12 +669,12 @@ cells are announced together.
 | `.btn`, `.btn-secondary`, `.btn-ghost`, `.btn-sm`, `.btn-row`, `.preset-row`, `.preset-btn` | Buttons |
 | `.segmented` | Radio group styled as one row |
 | `.choice` | A selectable row wrapping a radio or checkbox |
-| `.feedback` | Answer feedback; `data-tone` is `correct`, `retry`, or `info` |
+| `.feedback` | Inline answer feedback and prediction records; `data-tone` is `correct`, `retry`, or `info` |
 | `.equation`, `.equation--plain`, `.equation-row`, `.term-key`, `var` | Mathematics |
 | `.code-block` | Code and transcripts — never equations |
 | `.data-table`, `.table-wrap` | Tables, with their own scroll container |
 | `.token`, `.token-row` | Sequence and state displays |
-| `.sortable`, `.match-grid`, `.hint-list`, `.predict-record`, `.self-explain` | Component markup |
+| `.sortable`, `.match-grid`, `.hint-list`, `.self-explain` | Component markup |
 | `.step-progress`, `.step-position`, `.step-list`, `.scrubber-row` | Stepper furniture |
 | `.sr-only`, `.skip-link` | Screen-reader text and the skip link |
 

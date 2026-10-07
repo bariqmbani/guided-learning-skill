@@ -621,9 +621,6 @@ details.boxed[open] { padding-bottom: 4px; }
 /* Predict, then reveal */
 .predict { display: flex; flex-direction: column; gap: 14px; }
 .predict-locked { padding: 12px 14px; border: 1px dashed var(--border-hover); border-radius: var(--radius); background: var(--sunken); font-size: .9375rem; }
-.predict-record { padding: 12px 14px; border-left: 3px solid var(--accent); background: var(--accent-dim); border-radius: var(--radius); font-size: .9375rem; }
-.predict-record dt { color: var(--muted); font-size: .8125rem; }
-.predict-record dd { margin: 2px 0 0; color: var(--text-bright); font-weight: 600; }
 /* Free-text explanation */
 .self-explain { display: flex; flex-direction: column; gap: 12px; }
 .self-explain .explain { margin: 0; }

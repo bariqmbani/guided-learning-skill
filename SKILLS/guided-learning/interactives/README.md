@@ -257,6 +257,9 @@ the whole page. CSS `light-dark()` keeps both palettes alongside each token.
 Use outlined secondary buttons for actions and pill-shaped presets for settings.
 Panels nested inside a stage become flat sections with dividers. Answer feedback
 belongs inline within its parent surface, and quiz options occupy separate rows.
+Prediction records also use `.feedback` with `data-tone="info"`; keep their
+`data-record` hook so the prediction helper can show and clear them. Use `.panel`
+for gallery demonstrations as well as lessons, rather than duplicating its CSS.
 
 Copy lesson shell, chart, stepper, and feedback markup from a working template
 rather than reconstructing it from memory. Give colors redundant text labels or

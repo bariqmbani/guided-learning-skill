@@ -5,15 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Precision &amp; recall · Learning</title>
   <link rel="stylesheet" href="interactive.css">
-  <style>
-    .matrix { width: 100%; border-spacing: 4px; table-layout: fixed; margin: 12px 0; }
-    .matrix th { font-size: .8rem; text-align: center; font-weight: 500; padding: 8px 2px; }
-    .matrix .row-label { width: 24%; text-align: left; }
-    .matrix td { padding: 16px 6px; }
-    .matrix .label { font-size: .8rem; }
-    .matrix .count { font-size: 1.65rem; }
-    @media (max-width: 420px) { .matrix th, .matrix .label { font-size: .75rem; } }
-  </style>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to experiment</a>
@@ -52,13 +43,17 @@
         <div class="metric"><span class="metric-name">Recall</span><span class="metric-value" id="recall">75%</span><span class="metric-subtext">Real positives caught</span></div>
         <div class="metric"><span class="metric-name">F1 score</span><span class="metric-value" id="f1">77%</span><span class="metric-subtext">Harmonic mean</span></div>
       </div>
-      <table class="matrix" aria-label="Confusion matrix, counts out of 40 samples">
-        <thead><tr><td class="row-label"></td><th scope="col">Flagged positive</th><th scope="col">Predicted negative</th></tr></thead>
-        <tbody>
-          <tr><th scope="row" class="row-label">Actually positive</th><td class="cm-cell cm-tp"><span class="count" id="tp">15</span><span class="label">True positives</span></td><td class="cm-cell cm-fn"><span class="count" id="fn">5</span><span class="label">Missed cases</span></td></tr>
-          <tr><th scope="row" class="row-label">Actually negative</th><td class="cm-cell cm-fp"><span class="count" id="fp">4</span><span class="label">False alarms</span></td><td class="cm-cell cm-tn"><span class="count" id="tn">16</span><span class="label">True negatives</span></td></tr>
-        </tbody>
-      </table>
+      <div id="confusion-matrix">
+        <!-- Match renderGrid's initial state so the evidence works without JavaScript. -->
+        <div class="table-wrap"><table class="data-table grid-table">
+          <caption>Confusion matrix, counts out of 40 samples</caption>
+          <thead><tr><th scope="col">Actual class</th><th scope="col">Flagged positive</th><th scope="col">Predicted negative</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Actually positive</th><td class="cm-tp"><strong id="tp">15</strong><span class="faint" style="display: block">True positives</span></td><td class="cm-fn"><strong id="fn">5</strong><span class="faint" style="display: block">Missed cases</span></td></tr>
+            <tr><th scope="row">Actually negative</th><td class="cm-fp"><strong id="fp">4</strong><span class="faint" style="display: block">False alarms</span></td><td class="cm-tn"><strong id="tn">16</strong><span class="faint" style="display: block">True negatives</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
       <div><p class="explain">Share of all 40 samples</p>
         <div class="population-bar" aria-hidden="true"><div class="pop-segment pop-tp" id="pop-tp"></div><div class="pop-segment pop-fp" id="pop-fp"></div><div class="pop-segment pop-fn" id="pop-fn"></div><div class="pop-segment pop-tn" id="pop-tn"></div></div>
         <div class="pop-legend"><span><i class="pop-dot pop-tp"></i>True positives</span><span><i class="pop-dot pop-fp"></i>False alarms</span><span><i class="pop-dot pop-fn"></i>Missed cases</span><span><i class="pop-dot pop-tn"></i>True negatives</span></div>
@@ -116,8 +111,19 @@ function update() {
   const precision = tp + fp ? tp / (tp + fp) : null;
   const recall = tp / positives.length;
   const f1 = 2 * tp / (2 * tp + fp + fn);
+  LearningUI.renderGrid(byId('confusion-matrix'), {
+    caption: 'Confusion matrix, counts out of 40 samples',
+    corner: 'Actual class',
+    columns: ['Flagged positive', 'Predicted negative'],
+    rows: ['Actually positive', 'Actually negative'],
+    cells: [
+      [{ value: tp, label: 'True positives', tone: 'tp' }, { value: fn, label: 'Missed cases', tone: 'fn' }],
+      [{ value: fp, label: 'False alarms', tone: 'fp' }, { value: tn, label: 'True negatives', tone: 'tn' }]
+    ],
+    format: LearningUI.fmt.int
+  });
   Object.entries({tp, fp, fn, tn}).forEach(([id, value]) => {
-    setText(id, value);
+    byId('confusion-matrix').querySelector('.cm-' + id + ' strong').id = id;
     byId('pop-' + id).style.width = value / 40 * 100 + '%';
   });
   Object.entries({precision, recall, f1}).forEach(([id, value]) => setText(id, value === null ? 'N/A' : Math.round(value * 100) + '%'));

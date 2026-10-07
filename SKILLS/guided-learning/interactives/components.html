@@ -8,7 +8,6 @@
   <style>
     .gallery-section { padding-top: 8px; border-top: 1px solid var(--border); margin-top: 36px; }
     .gallery-section:first-of-type { border-top: 0; margin-top: 0; }
-    .demo { padding: 20px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }
     .swatch-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
     .swatch-chip { display: flex; align-items: center; gap: 8px; font-size: .8125rem; }
     .swatch-chip i { width: 22px; height: 22px; border: 1px solid var(--border); border-radius: 5px; }
@@ -36,7 +35,7 @@
   <section class="gallery-section stack" id="notation" aria-labelledby="notation-title">
     <h2 id="notation-title">Mathematics</h2>
     <p class="explain">Compiled to native MathML: real layout, the browser's math font, and read aloud as mathematics. <code>\term{n}{…}</code> ties a part of the formula to a control or a series.</p>
-    <div class="demo stack">
+    <div class="panel stack">
       <p class="equation" data-math="x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}" data-math-display="block"></p>
       <div class="equation-row">
         <span data-math="\sum_{i=1}^{n} x_i^2" data-math-display="block"></span>
@@ -63,7 +62,7 @@ LearningUI.math.update($('equation'), `x = ${value}`);</pre>
   <section class="gallery-section stack" id="controls" aria-labelledby="controls-title">
     <h2 id="controls-title">Controls</h2>
     <div class="two-col">
-      <div class="demo stack">
+      <div class="panel stack">
         <h3>Range with an exact entry</h3>
         <div class="control-group">
           <div class="control-heading"><label for="rate">Growth per round, <var>r</var></label><output id="rate-value" for="rate">10%</output></div>
@@ -82,7 +81,7 @@ LearningUI.math.update($('equation'), `x = ${value}`);</pre>
         </div>
         <p class="readout" id="rate-readout">A rate of 10% doubles a balance in about 7 rounds.</p>
       </div>
-      <div class="demo stack">
+      <div class="panel stack">
         <h3>Choice and toggle</h3>
         <div class="segmented" id="view" role="radiogroup" aria-label="How to group the data">
           <label><input type="radio" name="view" value="overall" checked> Everyone</label>
@@ -101,22 +100,22 @@ LearningUI.math.update($('equation'), `x = ${value}`);</pre>
 
   <section class="gallery-section stack" id="figures" aria-labelledby="figures-title">
     <h2 id="figures-title">Figures</h2>
-    <div class="demo stack">
+    <div class="panel stack">
       <h3>Chart: line, area, scatter, annotations, data cursor</h3>
       <div id="demo-chart" class="chart"></div>
       <p class="explain">Hover or focus the chart and use the arrow keys. Points outside the domain are clipped visually and stay in the table.</p>
     </div>
     <div class="two-col">
-      <div class="demo stack">
+      <div class="panel stack">
         <h3>Bars</h3>
         <div id="demo-bars"></div>
       </div>
-      <div class="demo stack">
+      <div class="panel stack">
         <h3>Grid</h3>
         <div id="demo-grid"></div>
       </div>
     </div>
-    <div class="demo stack">
+    <div class="panel stack">
       <h3>Metrics and status</h3>
       <div class="metrics-grid">
         <div class="metric metric--accent"><span class="metric-name">Precision</span><strong class="metric-value" id="demo-metric">79%</strong><span class="metric-subtext">Correct among flagged</span></div>
@@ -173,7 +172,7 @@ LearningUI.math.update($('equation'), `x = ${value}`);</pre>
   <section class="gallery-section stack" id="questions" aria-labelledby="questions-title">
     <h2 id="questions-title">Questions and practice</h2>
     <div class="two-col">
-      <div class="demo stack">
+      <div class="panel stack">
         <h3>One question with feedback</h3>
         <form id="demo-question" class="stack">
           <fieldset>
@@ -188,7 +187,7 @@ LearningUI.math.update($('equation'), `x = ${value}`);</pre>
           <p class="feedback" data-feedback hidden></p>
         </form>
       </div>
-      <div class="demo stack">
+      <div class="panel stack">
         <h3>Predict, then look</h3>
         <form id="demo-predict" class="stack">
           <fieldset>
@@ -200,14 +199,14 @@ LearningUI.math.update($('equation'), `x = ${value}`);</pre>
             <button class="btn" type="submit" data-check>Lock in my prediction</button>
             <button class="btn btn-secondary" type="button" data-retry hidden>Predict again</button>
           </div>
-          <p class="predict-record" data-record hidden></p>
+          <p class="feedback" data-tone="info" data-record hidden></p>
           <p class="explain" data-locked>Nothing is sent anywhere.</p>
           <div id="demo-reveal" hidden class="callout callout--check"><p>Both legs doubling doubles the hypotenuse, because every area is multiplied by four.</p></div>
         </form>
       </div>
     </div>
     <div class="two-col">
-      <div class="demo stack">
+      <div class="panel stack">
         <h3>Ordering, keyboard-first</h3>
         <div id="demo-order" class="stack">
           <ol class="sortable" data-sortable aria-label="Steps to order"></ol>
@@ -218,7 +217,7 @@ LearningUI.math.update($('equation'), `x = ${value}`);</pre>
           <p class="feedback" data-feedback></p>
         </div>
       </div>
-      <div class="demo stack">
+      <div class="panel stack">
         <h3>Matching</h3>
         <div id="demo-match" class="stack">
           <div class="match-grid" data-matching></div>
@@ -228,14 +227,14 @@ LearningUI.math.update($('equation'), `x = ${value}`);</pre>
       </div>
     </div>
     <div class="two-col">
-      <div class="demo stack">
+      <div class="panel stack">
         <h3>Progressive hints</h3>
         <div data-hints class="stack stack--tight">
           <div class="btn-row"><button class="btn btn-secondary btn-sm" type="button" data-hint-next>Show a hint</button><span class="hint-count" data-hint-count></span></div>
           <ol class="hint-list" data-hint-list></ol>
         </div>
       </div>
-      <div class="demo stack">
+      <div class="panel stack">
         <h3>Explain from memory</h3>
         <form id="demo-explain" class="self-explain">
           <label for="demo-answer">Why does one long value pull the mean above the median?</label>
@@ -251,7 +250,7 @@ LearningUI.math.update($('equation'), `x = ${value}`);</pre>
 
   <section class="gallery-section stack" id="construction" aria-labelledby="construction-title">
     <h2 id="construction-title">Drawing your own figure</h2>
-    <div class="demo stack">
+    <div class="panel stack">
       <svg id="demo-svg" viewBox="0 0 420 180" role="img" aria-label="A line from the origin rising to the right, with a marked point" style="width:100%;height:auto;background:var(--card);border-radius:var(--radius)"></svg>
       <p class="explain"><code>svg.create</code>, <code>svg.el</code>, <code>svg.scale</code>, and <code>svg.path</code> are enough for a construction, a circuit, or a network. Pair every drawing with text that says the same thing.</p>
     </div>
@@ -273,7 +272,7 @@ LearningUI.math.update($('equation'), `x = ${value}`);</pre>
     <div class="callout callout--check"><strong>Check.</strong> Something the learner can verify.</div>
     <div class="callout callout--caution"><strong>Caution.</strong> A limit or a common mistake.</div>
     <aside class="notice"><strong>Model limits.</strong> Every lesson ends with what its model does not cover, where its numbers came from, and what it cannot support.</aside>
-    <div class="demo stack">
+    <div class="panel stack">
       <h3>Tokens</h3>
       <div class="swatch-row" id="token-swatches"></div>
       <p class="explain">The same tokens follow your system theme or the light/dark button above. Use the token, never a literal color.</p>
