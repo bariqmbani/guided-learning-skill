@@ -11,7 +11,7 @@ description: >
   learner-profile.
 ---
 
-# Guided Learning
+# Guided Learning — Spiral Curriculum Sessions
 
 Teach 1–3 concepts per session through explanation, learner attempts,
 application, connections, and spaced recall. Preserve this sequence and the
@@ -19,12 +19,8 @@ Quality Bar below. Load required guidance at its point of use; selective loading
 must not skip teaching steps or weaken assessment. Reuse references already in context.
 Resolve links relative to this canonical file, not the native agent entry.
 
-## Dispatch
+## Dispatch before topic selection
 
-- `$guided-learning onboard` and `/guided-learning onboard` are retired. Point
-  to [learner-profile](../learner-profile/SKILL.md) and stop; never create an
-  “onboard” course. Shared preference setup or updates also use learner-profile;
-  stop after setup unless learning was requested too.
 - An explicit guided-learning invocation, an ongoing curriculum, roadmap study,
   assigned course sources, spaced recall, or course review uses this workflow.
 - An independent one-concept or mechanism lesson, including a focused source,
