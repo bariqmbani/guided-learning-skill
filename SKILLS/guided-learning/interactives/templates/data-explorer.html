@@ -16,7 +16,7 @@
     <p class="subtitle">One table, two groupings. The treatment that wins overall is not the treatment that wins in each group.</p>
   </header>
   <section class="prompt-card stack" aria-labelledby="warmup-title">
-    <h2 id="warmup-title">01 · Predict first</h2>
+    <h2 id="warmup-title">01 · Warm up</h2>
     <p><strong>Your goal:</strong> explain how a group can win every subgroup and still lose the total.</p>
     <form id="predict" class="stack">
       <fieldset>
@@ -26,8 +26,8 @@
         <label><input type="radio" name="predict" value="equal"> The overall rates must be equal.</label>
       </fieldset>
       <div class="btn-row">
-        <button class="btn" type="submit" data-check>Lock in my prediction</button>
-        <button class="btn btn-secondary" type="button" data-retry hidden>Predict again</button>
+        <button class="btn" type="submit" data-check>Submit answer</button>
+        <button class="btn btn-secondary" type="button" data-retry hidden>Answer again</button>
       </div>
       <p class="feedback" data-tone="info" data-record hidden></p>
       <p class="explain" data-locked>Answer before you look at the table. The surprise is the point of the lesson.</p>
@@ -159,7 +159,7 @@
     onChange: () => LearningUI.announce($('observation').textContent)
   });
   LearningUI.bindChoice($('grouping'), { onChange: () => { render(); LearningUI.announce($('grouping-note').textContent); } });
-  const prediction = LearningUI.mountPrediction($('predict'), { label: 'Your prediction' });
+  const prediction = LearningUI.mountPrediction($('predict'), { label: 'Your answer' });
   $('reset').addEventListener('click', () => {
     shareControl.set(startingSevereShare * 100, { notify: false });
     document.querySelector('input[name=grouping][value=overall]').checked = true;

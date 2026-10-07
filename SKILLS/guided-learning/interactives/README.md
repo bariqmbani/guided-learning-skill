@@ -149,8 +149,10 @@ the actual lesson requires it. Ask for a new-case explanation after exploration
 instead of treating a correct multiple-choice answer as permanent mastery.
 
 Use **Warm up** for the opening question, **Test your knowledge** for concept
-checks, and **Check answer** for a submit button. Keep questions concrete: ask
-what changes, which step comes next, or which choice fits the case.
+checks, and **Check answer** when a submit button checks correctness. Use
+**Submit answer** for an ungraded warm-up response, **Your answer** for its
+recorded label, and **Answer again** to retry. Keep questions concrete: ask what
+changes, which step comes next, or which choice fits the case.
 
 For beginners, offer one clearly named contrast and a hint. For experienced
 learners, expose a boundary case or competing explanation. Use the learner's
@@ -204,7 +206,7 @@ the reference section you need rather than the whole file.
 | --- | --- |
 | A slider, radio group, or checkbox wired to a model | `bindRange`, `bindChoice`, `bindCheckbox` |
 | A finite trace with Back, Next, Play, a scrubber, and progress | `mountStepper` |
-| A question, a practice set, a prediction, hints, or a written explanation | `mountQuestion`, `mountQuiz`, `mountPrediction`, `mountHints`, `mountSelfExplain` |
+| A question, a practice set, an ungraded warm-up answer, hints, or a written explanation | `mountQuestion`, `mountQuiz`, `mountPrediction`, `mountHints`, `mountSelfExplain` |
 | Ordering or matching, keyboard-first | `mountSortable`, `mountMatching` |
 | Equations, fractions, roots, sums, matrices | `math.render`, `math.tex`, `math.update` |
 | A line, area, step, or scatter chart with a data cursor | `renderChart` |
@@ -257,8 +259,8 @@ the whole page. CSS `light-dark()` keeps both palettes alongside each token.
 Use outlined secondary buttons for actions and pill-shaped presets for settings.
 Panels nested inside a stage become flat sections with dividers. Answer feedback
 belongs inline within its parent surface, and quiz options occupy separate rows.
-Prediction records also use `.feedback` with `data-tone="info"`; keep their
-`data-record` hook so the prediction helper can show and clear them. Use `.panel`
+Recorded warm-up answers also use `.feedback` with `data-tone="info"`; keep their
+`data-record` hook so `mountPrediction` can show and clear them. Use `.panel`
 for gallery demonstrations as well as lessons, rather than duplicating its CSS.
 
 Copy lesson shell, chart, stepper, and feedback markup from a working template
@@ -291,11 +293,11 @@ playback; the same result must remain available through immediate updates or
 manual steps. If adding custom timers, stop them on reset and when the page is
 hidden. A Pause button must actually stop progression.
 
-The shared runtime adds short transitions to pointer-triggered answers, hints,
-predictions, and worked explanations. Keyboard actions and continuous slider
-updates stay immediate. Reduced motion keeps a gentle fade on reveals and
-removes positional motion. Keep mouse focus rings off charts and map nodes,
-while preserving visible keyboard focus.
+The shared runtime adds short transitions to pointer-triggered answer feedback,
+hints, warm-up responses, and worked explanations. Keyboard actions and
+continuous slider updates stay immediate. Reduced motion keeps a gentle fade on
+reveals and removes positional motion. Keep mouse focus rings off charts and map
+nodes, while preserving visible keyboard focus.
 
 Use native `<button>`, `<input>`, `<select>`, `<fieldset>/<legend>`, and
 `<details>/<summary>`. Pair each input with a visible label, provide units and

@@ -618,7 +618,7 @@ details.boxed[open] { padding-bottom: 4px; }
 .hint-list { display: flex; flex-direction: column; gap: 10px; padding: 0; margin: 0; list-style: none; }
 .hint-list li { padding: 12px 14px; border: 1px solid var(--border); border-left: 3px solid var(--info); border-radius: var(--radius); background: var(--surface); font-size: .9375rem; }
 .hint-count { display: inline-flex; align-items: center; align-self: center; color: var(--faint); font-size: .8125rem; }
-/* Predict, then reveal */
+/* Warm up, then reveal */
 .predict { display: flex; flex-direction: column; gap: 14px; }
 .predict-locked { padding: 12px 14px; border: 1px dashed var(--border-hover); border-radius: var(--radius); background: var(--sunken); font-size: .9375rem; }
 /* Free-text explanation */

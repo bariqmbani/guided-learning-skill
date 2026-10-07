@@ -16,7 +16,7 @@
     <p class="subtitle">Put the steps in a workable order, then say which rule forces each one to come before the next.</p>
   </header>
   <section class="prompt-card stack" aria-labelledby="warmup-title">
-    <h2 id="warmup-title">01 · Predict first</h2>
+    <h2 id="warmup-title">01 · Warm up</h2>
     <p><strong>Your goal:</strong> justify an order of operations instead of recalling a remembered sequence.</p>
     <p class="equation" data-math="3(x + 4) = 27" data-math-display="block"></p>
     <form id="predict" class="stack">
@@ -27,11 +27,11 @@
         <label><input type="radio" name="predict" value="either"> Either one; both keep the equation true.</label>
       </fieldset>
       <div class="btn-row">
-        <button class="btn" type="submit" data-check>Lock in my prediction</button>
-        <button class="btn btn-secondary" type="button" data-retry hidden>Predict again</button>
+        <button class="btn" type="submit" data-check>Submit answer</button>
+        <button class="btn btn-secondary" type="button" data-retry hidden>Answer again</button>
       </div>
       <p class="feedback" data-tone="info" data-record hidden></p>
-      <p class="explain" data-locked>Commit to an answer before you look. An incorrect prediction tells you exactly what to watch for.</p>
+      <p class="explain" data-locked>Commit to an answer before you look. Your answer gives you something to check as you work through the steps.</p>
     </form>
   </section>
   <section class="workspace workspace--stage-first" aria-labelledby="order-title">
@@ -105,7 +105,7 @@
     items, correct: order, feedback, seed: 5, checkLabel: 'Check the order',
     onCheck: ({ complete }) => { if (complete) $('worked').hidden = false; }
   });
-  const prediction = LearningUI.mountPrediction($('predict'), { label: 'Your prediction' });
+  const prediction = LearningUI.mountPrediction($('predict'), { label: 'Your answer' });
   const hints = LearningUI.mountHints(document.querySelector('[data-hints]'), {
     hints: [
       'Ask what is attached to the bracket as a whole, and what is attached only to x.',
@@ -118,7 +118,7 @@
     $('worked').hidden = true;
     prediction.reset();
     hints.reset();
-    LearningUI.announce('Activity reset. The steps are shuffled again and your prediction is cleared.');
+    LearningUI.announce('Activity reset. The steps are shuffled again and your answer is cleared.');
   });
   LearningUI.math.render(document);
 })();

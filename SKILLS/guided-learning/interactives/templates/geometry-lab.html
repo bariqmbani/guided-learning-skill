@@ -24,7 +24,7 @@
     <p class="subtitle">Change the two legs and watch three squares. The claim is about areas, not about the lengths you see.</p>
   </header>
   <section class="prompt-card stack" aria-labelledby="warmup-title">
-    <h2 id="warmup-title">01 · Predict first</h2>
+    <h2 id="warmup-title">01 · Warm up</h2>
     <p><strong>Your goal:</strong> explain why the two smaller squares always fill the largest one.</p>
     <form id="predict" class="stack">
       <fieldset>
@@ -34,11 +34,11 @@
         <label><input type="radio" name="predict" value="quadruple"> It quadruples, to 20.</label>
       </fieldset>
       <div class="btn-row">
-        <button class="btn" type="submit" data-check>Lock in my prediction</button>
-        <button class="btn btn-secondary" type="button" data-retry hidden>Predict again</button>
+        <button class="btn" type="submit" data-check>Submit answer</button>
+        <button class="btn btn-secondary" type="button" data-retry hidden>Answer again</button>
       </div>
       <p class="feedback" data-tone="info" data-record hidden></p>
-      <p class="explain" data-locked>Your prediction is recorded on this page only. Nothing is sent anywhere.</p>
+      <p class="explain" data-locked>Your answer is recorded on this page only. Nothing is sent anywhere.</p>
     </form>
   </section>
   <section class="workspace" aria-labelledby="explore-title">
@@ -177,7 +177,7 @@
   const summarize = () => LearningUI.announce($('observation').textContent);
   const legA = LearningUI.bindRange($('leg-a'), $('leg-a-value'), { format: String, onInput: render, onChange: summarize });
   const legB = LearningUI.bindRange($('leg-b'), $('leg-b-value'), { format: String, onInput: render, onChange: summarize });
-  const prediction = LearningUI.mountPrediction($('predict'), { label: 'Your prediction' });
+  const prediction = LearningUI.mountPrediction($('predict'), { label: 'Your answer' });
   const hints = LearningUI.mountHints(document.querySelector('[data-hints]'), {
     hints: [
       'Write down the two areas before doubling and after doubling, then compare each pair.',
@@ -198,7 +198,7 @@
     prediction.reset();
     hints.reset();
     render();
-    LearningUI.announce('Triangle reset to legs 3 and 4. Prediction and hints cleared.');
+    LearningUI.announce('Triangle reset to legs 3 and 4. Answer and hints cleared.');
   });
   math.render(document);
   render();

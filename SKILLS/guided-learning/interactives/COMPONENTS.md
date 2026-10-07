@@ -305,8 +305,8 @@ because a correct selection is not a demonstration of understanding.
 
 ### `mountPrediction(form, options)`
 
-Commit to an answer, then look. Learners who predict before seeing a result
-attend to what actually happens instead of recognizing it afterwards.
+Use `mountPrediction` for an ungraded warm-up question. Invite an initial answer
+before exploration, then let learners compare it with what happens.
 
 ```html
 <form id="predict" class="stack">
@@ -316,18 +316,18 @@ attend to what actually happens instead of recognizing it afterwards.
     <label><input type="radio" name="predict" value="same"> It stays the same</label>
   </fieldset>
   <div class="btn-row">
-    <button class="btn" type="submit" data-check>Lock in my prediction</button>
-    <button class="btn btn-secondary" type="button" data-retry hidden>Predict again</button>
+    <button class="btn" type="submit" data-check>Submit answer</button>
+    <button class="btn btn-secondary" type="button" data-retry hidden>Answer again</button>
   </div>
   <p class="feedback" data-tone="info" data-record hidden></p>
-  <p class="explain" data-locked>Your prediction stays on this page. Nothing is sent anywhere.</p>
+  <p class="explain" data-locked>Your answer stays on this page. Nothing is sent anywhere.</p>
 </form>
 ```
 
 ```js
 const prediction = LearningUI.mountPrediction($('predict'), {
-  label: 'Your prediction',
-  reveal: '#worked-answer',   // optional: content hidden until the prediction is made
+  label: 'Your answer',
+  reveal: '#worked-answer',   // optional: content hidden until the answer is submitted
   gate: false,                // true also disables the form after locking
   onLock: answer => {}
 });
@@ -335,13 +335,13 @@ prediction.reset();
 ```
 
 A free-text `<textarea>` works in place of radios. Without `reveal`, nothing is
-hidden: the prediction is recorded and exploration stays open, which is the
+hidden: the answer is recorded and exploration stays open, which is the
 default the kit prefers.
 
-Render the recorded prediction with `.feedback` and `data-tone="info"`, the
+Render the recorded answer with `.feedback` and `data-tone="info"`, the
 same inline response surface used by questions. Keep `data-record`: it is the
-prediction helper's required hook, while `data-feedback` belongs to answer
-checking. Recording a prediction does not grade it as correct or incorrect.
+warm-up helper's required hook, while `data-feedback` belongs to answer
+checking. Recording a warm-up answer does not grade it as correct or incorrect.
 
 ### `mountHints(root, options)`
 
@@ -669,7 +669,7 @@ cells are announced together.
 | `.btn`, `.btn-secondary`, `.btn-ghost`, `.btn-sm`, `.btn-row`, `.preset-row`, `.preset-btn` | Buttons |
 | `.segmented` | Radio group styled as one row |
 | `.choice` | A selectable row wrapping a radio or checkbox |
-| `.feedback` | Inline answer feedback and prediction records; `data-tone` is `correct`, `retry`, or `info` |
+| `.feedback` | Inline answer feedback and recorded warm-up answers; `data-tone` is `correct`, `retry`, or `info` |
 | `.equation`, `.equation--plain`, `.equation-row`, `.term-key`, `var` | Mathematics |
 | `.code-block` | Code and transcripts — never equations |
 | `.data-table`, `.table-wrap` | Tables, with their own scroll container |

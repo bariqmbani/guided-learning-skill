@@ -188,7 +188,7 @@ LearningUI.math.update($('equation'), `x = ${value}`);</pre>
         </form>
       </div>
       <div class="panel stack">
-        <h3>Predict, then look</h3>
+        <h3>Warm up, then explore</h3>
         <form id="demo-predict" class="stack">
           <fieldset>
             <legend>Doubling both legs of a right triangle does what to the hypotenuse?</legend>
@@ -196,8 +196,8 @@ LearningUI.math.update($('equation'), `x = ${value}`);</pre>
             <label><input type="radio" name="demo-p" value="same"> Leaves it unchanged</label>
           </fieldset>
           <div class="btn-row">
-            <button class="btn" type="submit" data-check>Lock in my prediction</button>
-            <button class="btn btn-secondary" type="button" data-retry hidden>Predict again</button>
+            <button class="btn" type="submit" data-check>Submit answer</button>
+            <button class="btn btn-secondary" type="button" data-retry hidden>Answer again</button>
           </div>
           <p class="feedback" data-tone="info" data-record hidden></p>
           <p class="explain" data-locked>Nothing is sent anywhere.</p>
@@ -390,7 +390,7 @@ LearningUI.math.update($('equation'), `x = ${value}`);</pre>
       same: 'Hold the multiplier at 2 and compare x = 3 with x = 6.'
     }
   });
-  LearningUI.mountPrediction($('demo-predict'), { label: 'Your prediction', reveal: '#demo-reveal' });
+  LearningUI.mountPrediction($('demo-predict'), { label: 'Your answer', reveal: '#demo-reveal' });
   LearningUI.mountSortable($('demo-order'), {
     items: [
       { id: 'read', label: 'Read the input' },

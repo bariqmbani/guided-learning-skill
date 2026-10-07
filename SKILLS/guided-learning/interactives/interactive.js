@@ -630,17 +630,17 @@
     return { reset, position: () => index };
   }
 
-  /* Predict first, then look. Prediction is recorded on the page and compared
+  /* Warm up, then explore. The answer is recorded on the page and compared
    * with the evidence; it does not block exploring the model. Set gate: true
    * only when seeing the result first would spoil the lesson.
    * Required: data-check and data-record inside the form.
    * Optional: reveal, a selector for content that stays hidden until the
-   * prediction is recorded; data-locked, a note shown before that. */
+   * answer is recorded; data-locked, a note shown before that. */
   function mountPrediction(form, { label, gate = false, onLock, reveal } = {}) {
     if (!form) throw new TypeError('mountPrediction needs a form element.');
     const record = form.querySelector('[data-record]');
     const check = form.querySelector('[data-check]');
-    if (!record || !check) throw new Error('Prediction requires data-check and data-record.');
+    if (!record || !check) throw new Error('A warm-up question requires data-check and data-record.');
     const revealed = reveal ? [...doc.querySelectorAll(reveal)] : [];
     const locked = form.querySelector('[data-locked]');
     const retry = form.querySelector('[data-retry]');
@@ -679,14 +679,14 @@
       const answer = readAnswer();
       if (!answer) {
         record.hidden = false;
-        record.textContent = 'Write or choose a prediction first. An incorrect prediction is useful: it shows what to look for.';
+        record.textContent = 'Choose or write an answer first.';
         return;
       }
       record.hidden = false;
-      record.textContent = (label || 'Your prediction') + ': ' + answer;
+      record.textContent = (label || 'Your answer') + ': ' + answer;
       motion.enter(record);
       show(true);
-      announce('Prediction recorded. ' + answer + '. The evidence is now visible below.');
+      announce('Answer recorded. Compare it with the evidence below.');
       if (onLock) onLock(answer);
     });
     if (retry) retry.addEventListener('click', reset);
