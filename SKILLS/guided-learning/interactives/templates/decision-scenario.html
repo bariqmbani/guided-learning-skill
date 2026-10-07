@@ -172,6 +172,8 @@ Unknown: which field reaches the renderer?</pre>
     history.push(choice);
     current = choice.next;
     render(true);
+    LearningUI.motion.enter($('last-consequence'));
+    if (!$('ending').hidden) LearningUI.motion.enter($('ending'));
     LearningUI.announce(choice.consequence);
   });
   function reset() { current = 'start'; history = []; question.reset(); render(true); LearningUI.announce('Scenario restarted. Decision trail and answer cleared.'); }

@@ -47,6 +47,10 @@ const allPages = [...templates, ...galleries];
       const style = getComputedStyle(element);
       return style.outlineStyle !== 'none' && parseFloat(style.outlineWidth) > 0;
     };
+    const revealState = element => {
+      const style = getComputedStyle(element);
+      return { opacity: Number(style.opacity), transform: style.transform };
+    };
     const checkPalette = async (target, name) => {
       if (name === 'parameter-explorer') {
         await target.locator('#pin').click();
@@ -208,7 +212,32 @@ const allPages = [...templates, ...galleries];
     assert.deepEqual(await visibleVerdicts(secondMatches), []);
     await secondMatches.getByRole('combobox', { name: 'Match for Mean', exact: true }).selectOption('Uses every value');
     await secondMatches.getByRole('combobox', { name: 'Match for Median', exact: true }).selectOption('Uses position');
-    await secondMatches.locator('[data-check]').click();
+    // Sample immediately so a fast machine cannot finish the entrance first.
+    const matchingReveal = await secondMatches.evaluate(root => {
+      const button = root.querySelector('[data-check]');
+      button.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+      button.click();
+      const style = getComputedStyle(root.querySelector('[data-feedback]'));
+      return { opacity: Number(style.opacity), transform: style.transform };
+    });
+    assert.ok(matchingReveal.opacity < 1, 'pointer matching feedback has no reveal');
+    assert.notEqual(matchingReveal.transform, 'none');
+    // A key press must settle a pointer reveal even before its queued frames run.
+    await page.keyboard.press('Shift');
+    assert.deepEqual(await secondMatches.locator('[data-feedback]').evaluate(revealState), { opacity: 1, transform: 'none' });
+    const interruptedCues = await secondMatches.locator('[data-feedback]').evaluate(element => {
+      return ['enter', 'mark'].map(cue => {
+        document.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+        LearningUI.motion[cue](element);
+        getComputedStyle(element).opacity;
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift', bubbles: true }));
+        getComputedStyle(element).opacity;
+        document.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+        const style = getComputedStyle(element);
+        return { opacity: Number(style.opacity), transform: style.transform, animations: element.getAnimations().length };
+      });
+    });
+    assert.deepEqual(interruptedCues, Array(2).fill({ opacity: 1, transform: 'none', animations: 0 }), 'returning to a pointer revives an interrupted cue');
     assert.deepEqual(await visibleVerdicts(secondMatches), ['Correct', 'Correct']);
     await firstMatches.getByRole('combobox', { name: 'Match for Median', exact: true }).selectOption('Uses position');
     assert.deepEqual(await visibleVerdicts(firstMatches), ['Correct']);
@@ -331,6 +360,8 @@ const allPages = [...templates, ...galleries];
     assert.equal(await text('#scenario-title'), 'A supported repair, with a clear boundary');
     assert.equal(await page.locator('#decision').isVisible(), false);
     assert.equal(await page.locator('#history li').count(), 2);
+    assert.equal(await page.locator('#last-consequence.motion-enter, #ending.motion-enter').count(), 2);
+    assert.equal(await page.locator('#scenario-title').evaluate(element => element === document.activeElement), true);
     await page.click('#another-path');
     assert.equal(await page.locator('#history li').count(), 0);
     assert.equal(await page.locator('#decision').isVisible(), true);
@@ -341,6 +372,12 @@ const allPages = [...templates, ...galleries];
     await page.click('#decision button[type="submit"]');
     assert.equal(await text('#scenario-title'), 'The stopping rule was too weak');
     await page.click('#reset');
+    assert.equal(await page.locator('#last-consequence').isVisible(), false);
+    assert.equal(await page.locator('#ending').isVisible(), false);
+    await page.check('#decision input[value="0"]');
+    await page.locator('#decision button[type="submit"]').focus();
+    await page.keyboard.press('Enter');
+    assert.deepEqual(await page.locator('#last-consequence').evaluate(revealState), { opacity: 1, transform: 'none' });
 
     await open('practice-set');
     for (const width of [1280, 375, 320]) {
@@ -399,9 +436,69 @@ const allPages = [...templates, ...galleries];
         assert.ok(from > target, 'ordering did not converge');
       }
     }
-    await page.click('#ordering [data-check]');
+    const orderingReveal = await page.locator('#ordering [data-check]').evaluate(button => {
+      button.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+      button.click();
+      return ['#ordering [data-feedback]', '#worked'].map(selector => {
+        const style = getComputedStyle(document.querySelector(selector));
+        return { opacity: Number(style.opacity), transform: style.transform };
+      });
+    });
+    orderingReveal.forEach(state => {
+      assert.ok(state.opacity < 1, 'pointer ordering result has no reveal');
+      assert.notEqual(state.transform, 'none');
+    });
     assert.match(await text('#ordering [data-feedback]'), /Every step is in place/);
     assert.equal(await page.locator('#worked').isVisible(), true);
+    await page.waitForFunction(() => getComputedStyle(document.querySelector('#worked')).opacity === '1');
+    await page.click('#ordering [data-check]');
+    assert.deepEqual(await page.locator('#worked').evaluate(revealState), { opacity: 1, transform: 'none' }, 'rechecking replays an already visible worked answer');
+
+    // Native disclosures must reverse smoothly without delaying keyboard use.
+    const disclosure = page.locator('details').first();
+    const disclosureState = element => {
+      const style = getComputedStyle(element, '::details-content');
+      return { height: parseFloat(style.height), opacity: Number(style.opacity), visibility: style.contentVisibility };
+    };
+    const nativeDisclosureMotion = await page.evaluate(() => CSS.supports('selector(details::details-content)') &&
+      CSS.supports('interpolate-size: allow-keywords') && CSS.supports('transition-behavior: allow-discrete'));
+    await disclosure.locator('summary').focus();
+    await page.keyboard.press('Enter');
+    assert.equal(await disclosure.getAttribute('open'), '');
+    if (nativeDisclosureMotion) {
+      const expanded = await disclosure.evaluate(disclosureState);
+      assert.ok(expanded.height > 0);
+      assert.equal(expanded.opacity, 1, 'keyboard disclosure fades');
+      await page.keyboard.press('Enter');
+      assert.equal((await disclosure.evaluate(disclosureState)).height, 0);
+      // Slow only this test instance to inspect intermediate and reversed frames.
+      await disclosure.evaluate(element => element.style.setProperty('--motion-disclosure', '1000ms'));
+      await disclosure.locator('summary').click();
+      await page.waitForTimeout(50);
+      const opening = await disclosure.evaluate(disclosureState);
+      assert.ok(opening.height > 0 && opening.height < expanded.height, 'disclosure snaps open');
+      await disclosure.locator('summary').evaluate(summary => summary.click());
+      const reversing = await disclosure.evaluate(disclosureState);
+      assert.ok(reversing.height > 0 && reversing.height < expanded.height, 'closing jumps to an endpoint');
+      await disclosure.locator('summary').evaluate(summary => summary.click());
+      await page.keyboard.press('Shift');
+      assert.deepEqual(await disclosure.evaluate(disclosureState), expanded, 'keyboard interruption does not settle disclosure');
+      await page.keyboard.press('Enter');
+      assert.equal((await disclosure.evaluate(disclosureState)).visibility, 'hidden');
+      await disclosure.evaluate(element => element.style.removeProperty('--motion-disclosure'));
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await disclosure.locator('summary').evaluate(summary => {
+        summary.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+        summary.click();
+      });
+      // Native details applies content visibility at paint, after the first RAF.
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      const reduced = await disclosure.evaluate(disclosureState);
+      assert.equal(reduced.height, expanded.height, 'reduced-motion disclosure changes height gradually');
+      assert.ok(reduced.opacity >= .85 && reduced.opacity <= 1);
+      assert.equal(await disclosure.evaluate(element => getComputedStyle(element, '::details-content').transitionProperty.includes('height')), false);
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+    }
 
     await open('system-map');
     const picker = page.locator('#picker');
@@ -532,8 +629,15 @@ const allPages = [...templates, ...galleries];
     for (const name of [...templates, 'example-interactive']) {
       await staticPage.goto(pathToFileURL(path.join(temporary, name + '.html')).href);
       assert.equal(await staticPage.locator('noscript').isVisible(), true, name + ': missing static fallback');
+      const summary = staticPage.locator('details > summary').first();
+      if (await summary.count()) {
+        await summary.click();
+        assert.equal(await summary.locator('..').getAttribute('open'), '', name + ': no-JS disclosure cannot open');
+        await summary.press('Enter');
+        assert.equal(await summary.locator('..').getAttribute('open'), null, name + ': no-JS disclosure cannot close');
+      }
     }
-    console.log('PASS: 13 standalone pages offline; static checks, MathML notation, desktop/mobile, pointer and keyboard focus, segmented choices, matching verdicts and isolated descriptions, chart cursor, models, reset/retry, playback/reduced motion, quiz layout, map bounds, seeded replay, branches, ordering, theme controls and persistence, restricted storage, and no-JS fallbacks.');
+    console.log('PASS: 13 standalone pages offline; static checks, MathML notation, desktop/mobile, pointer and keyboard focus, segmented choices, matching verdicts and isolated descriptions, chart cursor, models, reset/retry, playback/reduced motion, interrupted reveals and native disclosures, quiz layout, map bounds, seeded replay, branches, ordering, theme controls and persistence, restricted storage, and no-JS fallbacks.');
   } finally {
     if (browser) await browser.close();
     fs.rmSync(temporary, { recursive: true, force: true });

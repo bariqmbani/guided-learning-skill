@@ -303,10 +303,16 @@ manual steps. If adding custom timers, stop them on reset and when the page is
 hidden. A Pause button must actually stop progression.
 
 The shared runtime adds short transitions to pointer-triggered answer feedback,
-hints, warm-up responses, and worked explanations. Keyboard actions and
-continuous slider updates stay immediate. Reduced motion keeps a gentle fade on
-reveals and removes positional motion. Keep mouse focus rings off charts and map
-nodes, while preserving visible keyboard focus.
+hints, warm-up responses, and worked explanations. Ordering and matching checks
+use the same feedback reveal; the decision scenario cues each new consequence
+and final explanation. Reveals take 180ms using the shared easing curve. Native
+`<details>` opens and closes over 200ms (`--motion-disclosure`) after a pointer
+action in supporting browsers, with immediate native behavior elsewhere.
+Keyboard actions and continuous slider updates stay immediate. Reduced motion
+keeps a gentle 120ms fade on reveals and disclosures while removing positional
+motion. Starting or resetting the scenario does not replay consequence reveals.
+Keep mouse focus rings off charts and map nodes, while preserving visible
+keyboard focus.
 
 Use native `<button>`, `<input>`, `<select>`, `<fieldset>/<legend>`, and
 `<details>/<summary>`. Pair each input with a visible label, provide units and

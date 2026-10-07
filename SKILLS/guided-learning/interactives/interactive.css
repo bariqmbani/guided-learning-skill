@@ -81,6 +81,7 @@
   --motion-press: 120ms;
   --motion-reveal: 180ms;
   --motion-fade: 120ms;
+  --motion-disclosure: 200ms;
   /* Surfaces and segmented groups 10px, controls 6px, presets pill-shaped. */
   --radius: 6px;
   --radius-lg: 10px;
@@ -762,6 +763,32 @@ canvas { display: block; width: 100%; }
 .motion-enter[data-entering] { opacity: .65; transform: translateY(4px); }
 .motion-mark { transition: opacity var(--motion-fade) var(--ease-out); }
 .motion-mark[data-changed] { opacity: .72; }
+/* Native disclosures keep their summary/open semantics. Intrinsic sizing is
+ * a progressive enhancement; other browsers retain instant native toggles.
+ * Discrete visibility keeps closing content present until the transition ends. */
+@supports selector(details::details-content) and (interpolate-size: allow-keywords) and (transition-behavior: allow-discrete) {
+  details { interpolate-size: allow-keywords; }
+  details::details-content {
+    display: flow-root;
+    overflow: clip;
+    height: 0;
+    opacity: .65;
+  }
+  details[open]::details-content { height: auto; opacity: 1; }
+  :root[data-input-method='pointer'] details::details-content {
+    transition: height var(--motion-disclosure) var(--ease-out),
+      opacity var(--motion-disclosure) var(--ease-out),
+      content-visibility var(--motion-disclosure) allow-discrete;
+  }
+  :root[data-input-method='keyboard'] details::details-content { overflow: visible; transition: none; }
+  @media (prefers-reduced-motion: reduce) {
+    details::details-content { height: auto; opacity: .85; }
+    :root[data-input-method='pointer'] details::details-content {
+      transition: opacity var(--motion-fade) var(--ease-out),
+        content-visibility var(--motion-fade) allow-discrete;
+    }
+  }
+}
 @media (prefers-reduced-motion: no-preference) {
   :root:not([data-input-method='keyboard']) :is(.btn, .preset-btn, .copy-btn, .order-move button):active:not(:disabled) {
     transform: scale(.98);
@@ -799,7 +826,7 @@ canvas { display: block; width: 100%; }
   .motion-enter, .motion-mark { transform: none; transition: opacity var(--motion-fade) var(--ease-out); }
   .motion-enter[data-entering], .motion-mark[data-changed] { opacity: .85; transform: none; }
 }
-:root[data-input-method='keyboard'] :is(.motion-enter, .motion-mark) { transition: none; }
+:root[data-input-method='keyboard'] :is(.motion-enter, .motion-mark) { opacity: 1; transform: none; transition: none; }
 @media (forced-colors: active) {
   input[type='range'] { appearance: auto; -webkit-appearance: auto; }
   .token[data-active='true'], .preset-btn[aria-pressed='true'], .choice:has(input:checked),
@@ -815,4 +842,11 @@ canvas { display: block; width: 100%; }
   .panel, .stage, .prompt-card, .catalog-card { break-inside: avoid; box-shadow: none; }
   details { display: block; }
   details > :not(summary) { display: revert; }
+  :root details::details-content, :root[data-input-method] details::details-content {
+    height: auto;
+    opacity: 1;
+    overflow: visible;
+    content-visibility: visible;
+    transition: none;
+  }
 }

@@ -184,6 +184,12 @@
   function setInputMethod(value) {
     inputMethod = value;
     doc.documentElement.dataset.inputMethod = value;
+    if (value === 'keyboard') {
+      // Clear pending starts as well as settling CSS, so a following pointer
+      // action cannot revive a cue that the keyboard already interrupted.
+      doc.querySelectorAll('.motion-enter[data-entering]').forEach(cancelEnter);
+      doc.querySelectorAll('.motion-mark[data-changed]').forEach(cancelMark);
+    }
   }
   doc.addEventListener('pointerdown', () => setInputMethod('pointer'), true);
   doc.addEventListener('keydown', () => setInputMethod('keyboard'), true);
@@ -200,6 +206,11 @@
     }
     element.removeAttribute('data-entering');
   }
+  function cancelMark(element) {
+    clearTimeout(marking.get(element));
+    marking.delete(element);
+    element.removeAttribute('data-changed');
+  }
   const motion = {
     reduced: () => Boolean(reducedQuery && reducedQuery.matches),
     onChange(handler) {
@@ -211,11 +222,8 @@
     /* A quiet opacity cue for discrete value changes, never slider frames. */
     mark(element) {
       if (!element) return;
-      clearTimeout(marking.get(element));
-      if (inputMethod === 'keyboard' || continuousInput) {
-        element.removeAttribute('data-changed');
-        return;
-      }
+      cancelMark(element);
+      if (inputMethod === 'keyboard' || continuousInput) return;
       element.classList.add('motion-mark');
       element.setAttribute('data-changed', '');
       marking.set(element, setTimeout(() => {
@@ -866,6 +874,7 @@
       result.textContent = placed === order.length
         ? 'Every step is in place. Now say what forces each step to come before the next one.'
         : placed + ' of ' + order.length + ' steps are in place. ' + (notes[0] || 'Use the rule that decides which step must come first.');
+      motion.enter(result);
       announce(result.textContent);
       if (onCheck) onCheck({ placed, total: order.length, complete: placed === order.length });
     });
@@ -974,6 +983,7 @@
         : right === pairs.length
           ? 'All matched. Say what feature decided each pair.'
           : right + ' of ' + pairs.length + ' are right. ' + (notes[0] || 'Compare the two that look closest.');
+      motion.enter(result);
       announce(result.textContent);
     });
     function reset() {

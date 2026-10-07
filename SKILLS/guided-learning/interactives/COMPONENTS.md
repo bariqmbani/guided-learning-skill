@@ -735,7 +735,8 @@ and text instead of another card. Quiz choices always occupy separate rows.
 | `--radius`, `--radius-lg`, `--radius-pill` | Corners |
 | `--font-sans`, `--font-mono`, `--font-math` | Prose, code, mathematics |
 | `--shadow-sm`, `--shadow-md` | Elevation |
-| `--ease-out`, `--motion-press`, `--motion-reveal`, `--motion-fade` | Shared curve and 120/180/120ms durations |
+| `--ease-out` | Shared `cubic-bezier(0.23, 1, 0.32, 1)` curve |
+| `--motion-press`, `--motion-reveal`, `--motion-fade`, `--motion-disclosure` | Press, reveal, gentle fade, and disclosure durations: 120/180/120/200ms |
 
 ---
 
@@ -750,13 +751,23 @@ motion.onChange(handler);         // react when the preference changes
 ```
 
 Use motion for occasional feedback: a checked answer, a revealed hint, or a
-worked explanation. Shared components handle these reveals. CSS transitions
-retarget when interrupted, with no forced layout or animation on initial load.
-Reveals use opacity and a 4px translation over 180ms; pointer presses use
-`scale(.98)` over 120ms. Both use `cubic-bezier(0.23, 1, 0.32, 1)`.
+worked explanation. Shared question, quiz, ordering, and matching components
+handle their feedback reveals. The decision scenario also cues each submitted
+choice's consequence and final explanation; the ordering template reveals its
+worked check only when it first becomes visible. The scenario's initial
+content and resets stay immediate. CSS transitions retarget when interrupted,
+with no forced layout reads. Reveals use opacity and a 4px translation over 180ms; pointer
+presses use `scale(.98)` over 120ms. Both use the shared `--ease-out` curve.
+
+Native `<details>` disclosures need no new JavaScript API or extra markup.
+After a pointer action, supporting browsers transition the content's height
+and opacity on both open and close over `--motion-disclosure` (200ms), using
+the same curve. Height is limited to this disclosure behavior, where content
+must make room for the explanation. Browsers without the required CSS support
+keep immediate native disclosures.
 
 Keyboard actions and continuous range updates are immediate. Under
-`prefers-reduced-motion: reduce`, reveals use only a gentle 120ms opacity change,
-button movement is removed, the stepper disables playback, and charts skip
-tweens. Never make motion the only signal: the resulting state stays visible
-as text, selection, or data.
+`prefers-reduced-motion: reduce`, reveals and disclosures use only a gentle
+120ms opacity change, button movement is removed, the stepper disables
+playback, and charts skip tweens. Never make motion the only signal: the
+resulting state stays visible as text, selection, or data.

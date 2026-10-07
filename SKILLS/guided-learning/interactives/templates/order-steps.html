@@ -103,7 +103,13 @@
   // END EDIT: steps and the rule that orders them.
   const ordering = LearningUI.mountSortable($('ordering'), {
     items, correct: order, feedback, seed: 5, checkLabel: 'Check the order',
-    onCheck: ({ complete }) => { if (complete) $('worked').hidden = false; }
+    onCheck: ({ complete }) => {
+      const worked = $('worked');
+      if (complete && worked.hidden) {
+        worked.hidden = false;
+        LearningUI.motion.enter(worked);
+      }
+    }
   });
   const prediction = LearningUI.mountPrediction($('predict'), { label: 'Your answer' });
   const hints = LearningUI.mountHints(document.querySelector('[data-hints]'), {
