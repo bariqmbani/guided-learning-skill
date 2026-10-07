@@ -65,6 +65,10 @@ Python, offline setup, and shell-specific commands.
 Installation is a one-time copy. The vault keeps its own local skills, helpers,
 and templates and operates independently of this checkout and its remote.
 Later repository changes do not update installed vaults or sync with their data.
+To adopt a newer setup, run `python3 scripts/update_vault.py <vault-path>` from
+an updated checkout. It never changes your profile, courses, or concept sessions,
+and it keeps setup files you edited. See
+[updating an installed vault](INSTALLATION.md#update-an-installed-vault).
 
 The installer remembers Python in `runtime.local.toml` for future sessions.
 See [runtime configuration](INSTALLATION.md#python-in-a-new-session-or-an-existing-vault)

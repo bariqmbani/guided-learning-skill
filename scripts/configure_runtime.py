@@ -25,7 +25,48 @@ def runtime_config():
     )
 
 
-def configure_runtime(vault):
+def read_record(path):
+    """Return the simple `key = JSON value` lines this helper writes."""
+    record = {}
+    if path.is_file():
+        for line in path.read_text(encoding="utf-8").splitlines():
+            key, separator, value = line.partition(" = ")
+            if separator:
+                try:
+                    record[key.strip()] = json.loads(value)
+                except ValueError:
+                    continue
+    return record
+
+
+def format_entries(entries):
+    return "".join(
+        f"{key} = {json.dumps(value, ensure_ascii=False)}\n" for key, value in entries.items() if value is not None
+    )
+
+
+def record_source(vault, commit):
+    """Remember the setup commit a vault was installed or updated from.
+
+    An existing interpreter record is kept; a missing one is configured with
+    the running Python. A None commit removes a stale record.
+    """
+    path = vault.expanduser().resolve() / RUNTIME_FILE
+    record = read_record(path)
+    if not record.get("python"):
+        return configure_runtime(vault, source_commit=commit)
+    if path.is_symlink():
+        raise ValueError("Refusing to update symlinked runtime configuration")
+    record["source_commit"] = commit
+    path.write_text(format_entries(record), encoding="utf-8")
+    return path
+
+
+def configure_runtime(vault, **extra):
+    """Record this interpreter, keeping other entries such as `source_commit`.
+
+    Keyword arguments set additional entries; a value of None removes one.
+    """
     vault = vault.expanduser().resolve()
     for relative in ("AGENTS.md", "topics/registry.json", "SKILLS/learner-profile/SKILL.md"):
         if not (vault / relative).is_file():
@@ -39,7 +80,8 @@ def configure_runtime(vault):
             raise ValueError("Refusing to update symlinked runtime configuration")
     instructions = agents.read_text(encoding="utf-8")
     ignored = ignore.read_text(encoding="utf-8") if ignore.exists() else ""
-    config = runtime_config()
+    kept = {key: value for key, value in read_record(path).items() if key not in ("python", "version")}
+    config = runtime_config() + format_entries({**kept, **extra})
     # Older vaults also need durable discovery instructions and the refresh helper.
     if RUNTIME_FILE not in instructions:
         agents.write_text(RUNTIME_GUIDANCE + "\n" + instructions, encoding="utf-8")

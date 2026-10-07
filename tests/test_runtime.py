@@ -98,6 +98,14 @@ class RuntimeTests(unittest.TestCase):
                 after = {p: p.read_bytes() for p in self.vault.rglob("*") if p.is_file() and p != runtime}
                 self.assertEqual(before, after)
 
+    def test_refresh_keeps_the_recorded_setup_commit(self):
+        setup.create_vault(ROOT, self.vault, "Learning")
+        setup.runtime.record_source(self.vault, "abc123")
+        setup.runtime.configure_runtime(self.vault)
+        record = setup.runtime.read_record(self.vault / "runtime.local.toml")
+        self.assertEqual(record["source_commit"], "abc123")
+        self.assertEqual(record["python"], sys.executable)
+
     def test_zip_has_no_machine_record_and_can_configure_after_extraction(self):
         archive = self.base / "starter.zip"
         setup.create_vault(ROOT, self.vault, "Learning", archive)

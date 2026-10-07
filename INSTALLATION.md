@@ -156,8 +156,53 @@ profile setup and learning begin only when requested.
 
 ## Python in a new session or an existing vault
 
-`runtime.local.toml` stores only `python` (the executable path) and `version`.
-Quote that path when running helpers; PowerShell requires `&` before it.
+`runtime.local.toml` stores `python` (the executable path), `version` (that
+Python's version, not a skill version), and,
+when installed from a Git checkout, the setup's `source_commit` (suffixed
+`-dirty` if the checkout had uncommitted changes). Quote that path when running helpers; PowerShell requires `&` before it.
 If the interpreter moves, or the file is absent after ZIP extraction, verify
 Python as above and use it to run `scripts/configure_runtime.py` from the vault.
 The record is ignored by Git and excluded from generated ZIPs.
+
+## Update an installed vault
+
+Updating is optional and never automatic. Get a newer setup with Git (`git pull`)
+or a fresh source ZIP, then run its updater against the existing vault, using the
+Python recorded in the vault's `runtime.local.toml`:
+
+```sh
+python3 scripts/update_vault.py "/absolute/path/My Learning" --dry-run
+python3 scripts/update_vault.py "/absolute/path/My Learning"
+```
+
+In PowerShell, use `py -3 .\scripts\update_vault.py 'C:\Learning\My Vault'`.
+`--dry-run` lists the planned changes without writing anything.
+
+Installation records a hash of every setup file in `.vault-manifest.json`, so the
+updater can tell your edits apart from changes in the setup:
+
+| Your copy | The setup | Result |
+| --- | --- | --- |
+| Unedited | Changed | Replaced with the new version. |
+| Edited | Unchanged | Your edit is kept. |
+| Edited | Changed | Your edit is kept; the new version is saved under `.vault-updates/<time>/incoming/` for review. |
+| Deleted | Unchanged | Stays deleted. |
+| Deleted | Changed | Stays deleted; the new version is saved for review. |
+| Missing | New file | Added. |
+| Unedited | Removed | Removed; a backup is saved under `.vault-updates/<time>/backup/`. |
+| Edited | Removed | Kept, and no longer tracked as a setup file. |
+
+`--overwrite-modified` replaces edited setup files instead, saving each previous
+copy under `.vault-updates/<time>/backup/`. Symlinked setup files are never
+written through. A vault installed before manifests existed has no baseline:
+every differing file is treated as your edit until you review it or rerun with
+`--overwrite-modified`.
+
+The updater never modifies learner data: `learner-profile.json`,
+`Learner Profile.md`, `topics/`, `concept-sessions/`, `attachments/`,
+`.obsidian/`, your own files under `learning/`, and the interpreter in
+`runtime.local.toml`. It only recreates a missing scaffold such as
+`concept-sessions/README.md`. The vault title in `Home.md` is kept unless you
+pass `--name`. Afterwards, `runtime.local.toml` records the new `source_commit`.
+An interrupted update can be rerun safely. `.vault-updates/` is ignored by Git;
+delete it once you have reviewed its contents.

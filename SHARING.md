@@ -41,7 +41,9 @@ learner concept sessions. Verify all four entries in `.agents/skills/` and
 
 Each installed vault is an independent local copy of the setup at installation
 time. It uses its own skills, helpers, and assets. Changes in this repository or
-its remote do not update the vault, and learner data is not synced back.
+its remote do not update the vault, and learner data is not synced back. A
+learner can opt in to a newer setup with `scripts/update_vault.py`; see
+[updating an installed vault](INSTALLATION.md#update-an-installed-vault).
 
 Open the installed folder in Obsidian and run Codex or Claude Code there. Choose:
 

@@ -2,10 +2,12 @@
 """Create an empty Obsidian learning vault from reusable setup files only."""
 
 import argparse
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
 import shutil
+import subprocess
 import sys
 import zipfile
 
@@ -43,6 +45,7 @@ ASSETS = [
     "scripts/install_vault.sh",
     "scripts/install_vault.ps1",
     "scripts/configure_runtime.py",
+    "scripts/update_vault.py",
     "SKILLS/learner-profile/SKILL.md",
     "SKILLS/learner-profile/LICENSE",
     "SKILLS/learner-profile/CHANGELOG.md",
@@ -89,7 +92,8 @@ AGENTS = """# Learning vault
 
 Treat this directory as the vault root. All learning paths are relative to it.
 This vault is an independent local copy. Use its own skills, helpers, and assets;
-changes in the source setup repository do not update this vault.
+changes in the source setup repository do not update this vault automatically.
+Run a newer setup's `scripts/update_vault.py` only when the learner asks to update.
 
 """ + runtime.RUNTIME_GUIDANCE + """
 
@@ -227,11 +231,55 @@ topics/.registry.lock
 __pycache__/
 /dist/
 /runtime.local.toml
+/.vault-updates/
 """
+
+# Records the installed setup files, so updates can tell learner edits from setup changes.
+MANIFEST_FILE = ".vault-manifest.json"
+# Scaffolds that become learner data or settings after installation. Updates
+# create them when absent and never modify them.
+LEARNER_FILES = ("learner-profile.json", "Learner Profile.md")
+LEARNER_DIRECTORIES = ("topics/", "concept-sessions/", "attachments/", ".obsidian/", "learning/")
 
 
 def json_text(value):
     return json.dumps(value, indent=2, ensure_ascii=False) + "\n"
+
+
+def file_digest(content):
+    return hashlib.sha256(content).hexdigest()
+
+
+def is_managed(relative):
+    """Return whether updates may replace this generated setup file."""
+    if relative in LEARNER_FILES or relative == runtime.RUNTIME_FILE:
+        return False
+    if relative.startswith("learning/interactives/"):
+        return True
+    return not relative.startswith(LEARNER_DIRECTORIES)
+
+
+def manifest_text(files, name):
+    managed = {relative: file_digest(content) for relative, content in sorted(files.items()) if is_managed(relative)}
+    return json_text({"schema_version": 1, "name": name, "files": managed})
+
+
+def source_commit(source):
+    """Return the setup checkout's Git commit, marked when it has local changes."""
+    git = shutil.which("git")
+    # An installed vault may live in the learner's own repository; its commit is not a setup version.
+    if not git or not (source / ".git").exists() or (source / "topics/registry.json").exists():
+        return None
+    try:
+        head = subprocess.run([git, "-C", str(source), "rev-parse", "HEAD"],
+                              capture_output=True, text=True, timeout=10)
+        status = subprocess.run([git, "-C", str(source), "status", "--porcelain", "--untracked-files=no"],
+                                capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if head.returncode or status.returncode or not head.stdout.strip():
+        return None
+    return head.stdout.strip() + ("-dirty" if status.stdout.strip() else "")
 
 
 def make_files(source, name):
@@ -352,6 +400,10 @@ same folder. Read [Home.md](Home.md) to choose a learning workflow:
 Installation is complete. This vault is an independent local copy with its own
 skills, helpers, and templates. It needs no connection to the source checkout or
 repository remote. Later repository changes do not update it or sync its data.
+To adopt a newer setup, run its `scripts/update_vault.py` against this folder;
+see [updating an installed vault](INSTALLATION.md#update-an-installed-vault).
+Your profile, courses, concept sessions, attachments, and Obsidian settings are
+never changed, and setup files you edited are kept.
 
 Python 3.9 or newer is required for setup, helpers, and interactive HTML builds.
 Run `build.py` with the Python recorded in `runtime.local.toml` on any platform.
@@ -471,6 +523,8 @@ def create_vault(source, destination, name, archive=None):
         raise ValueError("Vault name must be a nonempty single line")
     # Read and validate all input assets before creating the destination.
     files = make_files(source, name.strip())
+    files[MANIFEST_FILE] = manifest_text(files, name.strip()).encode("utf-8")
+    commit = source_commit(source)
     destination.mkdir(parents=True)
     archive_created = False
     try:
@@ -481,7 +535,7 @@ def create_vault(source, destination, name, archive=None):
             path.write_bytes(content)
             if path.suffix in {".py", ".sh"}:
                 path.chmod(0o755)
-        runtime.configure_runtime(destination)
+        runtime.configure_runtime(destination, source_commit=commit)
         if archive is not None:
             archive.parent.mkdir(parents=True, exist_ok=True)
             with archive.open("xb") as handle:

@@ -7,8 +7,12 @@ Do not create topics, roadmaps, recall queues, concept-sessions, or session jour
 in this checkout.
 
 Installation creates an independent local copy. Installed vaults use their own
-skills, helpers, and assets; later source or remote changes do not affect them.
-Do not add repository synchronization or upgrade-migration instructions.
+skills, helpers, and assets; later source or remote changes do not affect them
+until the learner explicitly runs scripts/update_vault.py from a newer setup.
+Do not add automatic synchronization. Updates replace only unedited setup files
+recorded in the vault's `.vault-manifest.json`; they never modify learner data
+(profile, topics, concept sessions, attachments, Obsidian settings) and keep
+local edits, staging conflicting incoming files under `.vault-updates/`.
 
 Read README.md for the installation prompt and INSTALLATION.md for missing tools
 and shell-specific setup. Use scripts/create_vault.py, scripts/install_vault.sh,
@@ -27,8 +31,9 @@ roadmaps, and spaced recall. Topic helpers and profile setup operate in installe
 vaults; concept sessions also support a separate learning workspace. None writes
 learner data in this source checkout.
 
-Generated vaults remember Python in `runtime.local.toml`, ignored by Git and
-excluded from ZIPs. `scripts/configure_runtime.py` refreshes installed vaults only.
+Generated vaults remember Python and the setup's `source_commit` in
+`runtime.local.toml`, ignored by Git and excluded from ZIPs.
+`scripts/configure_runtime.py` refreshes installed vaults only and preserves the commit.
 
 Interactive source assets live under SKILLS/learning-interactives/. Installed
 vaults receive copies under learning/interactives/ for activity scaffolding.
@@ -36,4 +41,4 @@ Edit compact .source.html files and build standalone .html delivery files.
 
 Keep the repository free of learner data and generated exports. Preserve the
 license and attribution. Run python3 -m unittest discover -s tests -v after
-installer or helper changes, and verify generated vaults remain empty.
+installer, updater, or helper changes, and verify generated vaults remain empty.
