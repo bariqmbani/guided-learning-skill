@@ -25,7 +25,7 @@
     </form>
   </section>
   <section class="workspace" aria-labelledby="controls-title">
-    <div class="controls stack">
+    <div class="controls stack is-sticky">
       <h2 id="controls-title">02 · Run a fair comparison</h2>
       <p class="explain">Each control applies to both models. No units are added from outside the system.</p>
       <div class="control-group"><div class="control-heading"><label for="initial">Initial budget, P</label><output id="initial-value" for="initial">100 units</output></div><input id="initial" type="range" min="10" max="200" step="10" value="100"><div class="range-ends"><span>10 units</span><span>200 units</span></div></div>
@@ -37,8 +37,8 @@
     <div class="stage stack">
       <h2>03 · Compare the outcomes</h2>
       <div class="two-col">
-        <article class="panel stack"><h3>Fixed addition · simple growth</h3><p>Add the same fraction of the <strong>initial</strong> budget every round.</p><p class="code-block">S(t) = P × (1 + r × t)</p><p class="metric"><span class="metric-name">Total after selected rounds</span><strong class="metric-value" id="simple-total">200.00</strong><span class="metric-subtext">units</span></p><p class="explain" id="simple-addition">Round 10 adds 10.00 units.</p></article>
-        <article class="panel stack"><h3>Repeated scaling · compound growth</h3><p>Add the same fraction of the <strong>current</strong> total every round.</p><p class="code-block">C(t) = P × (1 + r)<sup>t</sup></p><p class="metric"><span class="metric-name">Total after selected rounds</span><strong class="metric-value" id="compound-total">259.37</strong><span class="metric-subtext">units</span></p><p class="explain" id="compound-addition">Round 10 adds 23.58 units.</p></article>
+        <article class="panel stack"><h3>Fixed addition · simple growth</h3><p>Add the same fraction of the <strong>initial</strong> budget every round.</p><p class="equation equation--plain" data-math="S(t) = P(1 + rt)" data-math-display="block"></p><p class="metric"><span class="metric-name">Total after selected rounds</span><strong class="metric-value" id="simple-total">200.00</strong><span class="metric-subtext">units</span></p><p class="explain" id="simple-addition">Round 10 adds 10.00 units.</p></article>
+        <article class="panel stack"><h3>Repeated scaling · compound growth</h3><p>Add the same fraction of the <strong>current</strong> total every round.</p><p class="equation equation--plain" data-math="C(t) = P(1 + r)^t" data-math-display="block"></p><p class="metric"><span class="metric-name">Total after selected rounds</span><strong class="metric-value" id="compound-total">259.37</strong><span class="metric-subtext">units</span></p><p class="explain" id="compound-addition">Round 10 adds 23.58 units.</p></article>
       </div>
       <div id="growth-chart" class="chart" aria-label="Growth comparison graph and data table"></div>
       <p id="observation">After 10 rounds, compound growth has 59.37 more units. Both started with 100.00 units and the same 10% rate.</p>
@@ -57,7 +57,8 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const format = value => value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const { fmt, motion } = LearningUI;
+  const format = value => fmt.fixed(value, 2);
   // EDIT: paired models. Preserve equal units, initial conditions, and time points.
   const simple = (initial, rate, round) => initial * (1 + rate * round);
   const compound = (initial, rate, round) => initial * Math.pow(1 + rate, round);
@@ -67,8 +68,8 @@
     const rounds = Number($('rounds').value);
     const simpleTotal = simple(initial, rate, rounds);
     const compoundTotal = compound(initial, rate, rounds);
-    $('simple-total').textContent = format(simpleTotal);
-    $('compound-total').textContent = format(compoundTotal);
+    motion.setText($('simple-total'), format(simpleTotal));
+    motion.setText($('compound-total'), format(compoundTotal));
     $('simple-addition').textContent = 'Round ' + rounds + ' adds ' + format(initial * rate) + ' units.';
     $('compound-addition').textContent = 'Round ' + rounds + ' adds ' + format(compound(initial, rate, rounds - 1) * rate) + ' units.';
     const difference = Math.max(0, compoundTotal - simpleTotal);
@@ -81,7 +82,7 @@
     const points = fn => Array.from({ length: rounds + 1 }, (_, round) => ({ x: round, y: fn(initial, rate, round) }));
     LearningUI.renderChart($('growth-chart'), {
       series: [{ label: 'Fixed addition', points: points(simple) }, { label: 'Compound growth', points: points(compound) }],
-      xLabel: 'Round', yLabel: 'Total units', xDomain: [0, rounds], yDomain: [0, compoundTotal * 1.1], formatY: value => value.toLocaleString('en-US', { maximumFractionDigits: 2 })
+      xLabel: 'Round', yLabel: 'Total units', xDomain: [0, rounds], yDomain: [0, compoundTotal * 1.1], formatY: value => fmt.num(value)
     });
   }
   // END EDIT: paired models.
@@ -110,6 +111,7 @@
     question.reset();
     LearningUI.announce('Comparison reset to 100 units, 10 percent growth, and 10 rounds. Answer cleared.');
   });
+  LearningUI.math.render(document);
   render();
 })();
 </script>

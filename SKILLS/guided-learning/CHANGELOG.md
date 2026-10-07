@@ -1,5 +1,48 @@
 # Guided Learning — Changelog
 
+## [3.7.1] — 2026-10-07
+
+### Added — Notation, components, and five more activity patterns
+
+- Set mathematics as mathematics: `LearningUI.math` compiles a TeX subset to
+  native MathML, so fractions, exponents, roots, sums, and matrices use the
+  browser's math font and are read aloud as mathematics, with no library and no
+  network. `\term{n}{…}` ties one part of a formula to the control or series that
+  moves it, always alongside a key that names the term in words.
+- Add five templates — practice set, order the steps, system map, data explorer,
+  and geometry lab — covering retrieval, construction, structure, reading data,
+  and justifying a formula. The catalog now offers ten complete activities.
+- Add components for the ways learners actually practise: `mountQuiz`,
+  `mountPrediction`, `mountHints`, `mountSelfExplain`, `mountSortable`, and
+  `mountMatching`, plus `bindChoice`, `bindCheckbox`, and formatting, seeded
+  randomness, and change-highlight helpers.
+- Extend figures: area, step, and scatter series, reference lines and bands, an
+  explicit baseline curve for before-and-after comparison, rounded axis steps,
+  and a chart cursor reachable with the arrow keys that reports values through a
+  live region. Add `renderBars` for counts and `renderGrid` for matrices, truth
+  tables, and heat maps, and `LearningUI.svg` for diagrams drawn by hand.
+- Add `verify.py`, a standard-library checker that reports broken labels,
+  duplicate ids, network requests in an offline page, missing runtime or stepper
+  controls, unrendered notation, and leftover template text, and exits non-zero.
+- Add `COMPONENTS.md`, a full contract for every helper and class, and
+  `components.html`, which shows each one working beside its markup.
+
+### Changed — Readability, motion, and theme
+
+- Rebuild the stylesheet around design tokens and add a dark palette. Measured
+  every rendered text pair in both themes: the secondary text token now reaches
+  4.7:1, and form-field boundaries reach 4.1:1 for the 3:1 non-text criterion.
+- Give the step sequence a progress bar, a scrubber, a step list, and arrow-key
+  stepping; give sliders a filled track and a value chip.
+- Make motion carry meaning only: values flash when they change, charts tween
+  between states, and every effect is skipped under reduced motion.
+- Replace monospace equations across the templates and the worked example with
+  rendered notation, including live fractions in precision and recall.
+- Expand the research note with prediction-before-observation evidence, the
+  MathML decision, and chart text alternatives; expand the taxonomy to the ten
+  patterns. Add verifier tests and extend the optional browser smoke test to
+  twelve pages, the chart cursor, ordering, notation, and the dark palette.
+
 ## [3.7.0] — 2026-10-07
 
 ### Added — Reusable interactive learning toolkit

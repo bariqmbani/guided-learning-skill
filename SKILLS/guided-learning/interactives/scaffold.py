@@ -13,8 +13,19 @@ from pathlib import Path
 import sys
 
 
-TEMPLATES = ("parameter-explorer", "step-sequence", "comparison",
-             "probability-lab", "decision-scenario")
+# One line per template: the pattern name and the question it answers.
+TEMPLATES = {
+    "parameter-explorer": "Change an input and read the relationship it drives.",
+    "step-sequence": "Walk a finite process one inspectable state at a time.",
+    "comparison": "Run two models on shared inputs and shared axes.",
+    "probability-lab": "Sample a seeded process and separate chance from frequency.",
+    "decision-scenario": "Choose an action, see its consequence, and revise.",
+    "practice-set": "Retrieve answers from memory, with hints and an explanation.",
+    "order-steps": "Arrange steps and justify what forces the order.",
+    "system-map": "Select a node and trace what depends on what.",
+    "data-explorer": "Filter a documented dataset and read what grouping changes.",
+    "geometry-lab": "Drag a construction and read the quantity it changes.",
+}
 ASSETS = ("interactive.css", "interactive.js", "build.py")
 KIT = Path(__file__).resolve().parent
 
@@ -77,8 +88,11 @@ def scaffold(template, destination):
 
 def main():
     sys.stdout.reconfigure(errors="backslashreplace")
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("template", choices=TEMPLATES)
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument("template", choices=tuple(TEMPLATES), metavar="template",
+                        help="one of:\n" + "\n".join(f"  {name:<20} {why}"
+                                                      for name, why in TEMPLATES.items()))
     parser.add_argument("destination", type=Path, help="new .html file in a learning workspace")
     args = parser.parse_args()
     try:

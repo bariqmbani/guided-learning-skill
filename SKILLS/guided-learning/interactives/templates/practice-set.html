@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Choosing a summary statistic · Practice set</title>
+  <link rel="stylesheet" href="../interactive.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to lesson</a>
+<main id="main" class="lesson">
+  <!-- EDIT: lesson content. Every item needs a reason, not only a right answer. -->
+  <header class="lesson-header">
+    <p class="eyebrow">Practice set · Statistics</p>
+    <h1>Which average answers the question?</h1>
+    <p class="subtitle">Four cases, one shared dataset. Retrieve the rule from memory first; the explanation matters more than the click.</p>
+  </header>
+  <section class="prompt-card stack" aria-labelledby="dataset-title">
+    <h2 id="dataset-title">01 · The shared dataset</h2>
+    <p>Nine fictional support tickets, each with the minutes it took to close. One ticket ran far longer than the rest.</p>
+    <!-- Keep these initial values in sync with the dataset below. Real content
+         gives the chart its responsive height before JavaScript enhances it. -->
+    <div id="dataset-bars">
+      <div class="bar-chart">
+        <p class="explain">Minutes to close each ticket</p>
+        <div class="bar-row" data-series="1"><span class="bar-label">Ticket 1</span><div class="bar-track"><div class="bar-fill" style="width: 6.153846153846154%"></div></div><span class="bar-value">8 min</span></div>
+        <div class="bar-row" data-series="1"><span class="bar-label">Ticket 2</span><div class="bar-track"><div class="bar-fill" style="width: 6.923076923076923%"></div></div><span class="bar-value">9 min</span></div>
+        <div class="bar-row" data-series="1"><span class="bar-label">Ticket 3</span><div class="bar-track"><div class="bar-fill" style="width: 8.461538461538462%"></div></div><span class="bar-value">11 min</span></div>
+        <div class="bar-row" data-series="1"><span class="bar-label">Ticket 4</span><div class="bar-track"><div class="bar-fill" style="width: 9.230769230769232%"></div></div><span class="bar-value">12 min</span></div>
+        <div class="bar-row" data-series="1"><span class="bar-label">Ticket 5</span><div class="bar-track"><div class="bar-fill" style="width: 9.230769230769232%"></div></div><span class="bar-value">12 min</span></div>
+        <div class="bar-row" data-series="1"><span class="bar-label">Ticket 6</span><div class="bar-track"><div class="bar-fill" style="width: 10.76923076923077%"></div></div><span class="bar-value">14 min</span></div>
+        <div class="bar-row" data-series="1"><span class="bar-label">Ticket 7</span><div class="bar-track"><div class="bar-fill" style="width: 13.846153846153847%"></div></div><span class="bar-value">18 min</span></div>
+        <div class="bar-row" data-series="1"><span class="bar-label">Ticket 8</span><div class="bar-track"><div class="bar-fill" style="width: 16.923076923076923%"></div></div><span class="bar-value">22 min</span></div>
+        <div class="bar-row" data-series="3"><span class="bar-label">Ticket 9</span><div class="bar-track"><div class="bar-fill" style="width: 100%"></div></div><span class="bar-value">130 min</span></div>
+        <p class="explain">Mean: 26 min</p>
+      </div>
+    </div>
+    <div class="stat-strip" role="group" aria-label="Summary values for the nine tickets">
+      <div><span class="k">Mean</span><span class="v" id="stat-mean">26.2</span></div>
+      <div><span class="k">Median</span><span class="v" id="stat-median">12</span></div>
+      <div><span class="k">Mode</span><span class="v" id="stat-mode">12</span></div>
+      <div><span class="k">Range</span><span class="v" id="stat-range">122</span></div>
+    </div>
+    <p class="equation equation--plain" data-math="\text{mean} = \frac{\sum x_i}{n} \qquad \text{median} = \text{middle value when sorted}" data-math-display="block"></p>
+  </section>
+  <section class="workspace workspace--stage-first" aria-labelledby="practice-title">
+    <div class="stage stack">
+      <h2 id="practice-title">02 · Practice</h2>
+      <div id="quiz" class="stack">
+        <div class="spread">
+          <p class="step-position" data-quiz-position>Question 1 of 4</p>
+          <span class="badge badge--neutral">No score is kept</span>
+        </div>
+        <div class="step-progress" data-progress aria-hidden="true"><div class="step-progress-fill"></div></div>
+        <form class="stack">
+          <fieldset>
+            <legend data-quiz-prompt>Loading the first question…</legend>
+            <div data-quiz-choices></div>
+          </fieldset>
+          <p class="explain" data-quiz-note hidden></p>
+          <div class="btn-row">
+            <button class="btn" type="submit" data-check>Check answer</button>
+            <button class="btn btn-secondary" type="button" data-next hidden>Next question</button>
+            <button class="btn btn-secondary" type="button" data-restart>Start over</button>
+          </div>
+          <p class="feedback" data-feedback></p>
+          <p class="callout callout--check" data-quiz-summary hidden></p>
+        </form>
+      </div>
+    </div>
+    <div class="controls stack">
+      <h2>Stuck on one?</h2>
+      <p class="explain">Hints are free and are not counted against you. Use one only after an honest attempt, because the attempt is what makes the answer stick.</p>
+      <div data-hints class="stack stack--tight">
+        <div class="btn-row"><button class="btn btn-secondary btn-sm" type="button" data-hint-next>Show a hint</button><span class="hint-count" data-hint-count></span></div>
+        <ol class="hint-list" data-hint-list></ol>
+      </div>
+    </div>
+  </section>
+  <section class="panel stack" aria-labelledby="explain-title">
+    <h2 id="explain-title">03 · Explain it in your own words</h2>
+    <form id="self-explain" class="self-explain">
+      <label for="answer">One long ticket pulls the mean far above the median. Why does that happen, and what would you report to a team deciding how many staff to schedule?</label>
+      <textarea id="answer" data-answer rows="5" placeholder="Write two or three sentences from memory."></textarea>
+      <p class="char-count" data-count></p>
+      <div class="btn-row"><button class="btn" type="submit" data-check>Compare with a worked answer</button></div>
+      <p class="feedback" data-feedback></p>
+      <div class="callout callout--note" data-reference hidden>
+        <h3>A worked answer</h3>
+        <p>The mean adds every value, so one 130-minute ticket is spread across all nine and lifts the mean well above what a typical ticket costs. The median ignores how far the extreme value sits and reports the middle ticket, so it describes the typical case better. For staffing, report the median for the typical load and the range or the longest case separately, because the rare long ticket is exactly what overruns a shift.</p>
+      </div>
+    </form>
+    <p class="explain">Nothing you type is saved. Refreshing the page clears it, so tell your tutor the version you want recorded.</p>
+  </section>
+  <section class="two-col" aria-label="Transfer">
+    <article class="panel stack">
+      <h2>04 · Transfer the idea</h2>
+      <p>A shop reports a mean basket of 42 units while most baskets are near 15. What kind of value must be in that dataset, and which statistic would you ask for instead?</p>
+    </article>
+    <article class="panel stack">
+      <h2>Make a harder case</h2>
+      <p>Change one number in the dataset so that the mean and the median agree. Which number did you change, and what does that tell you about when the mean is safe to quote?</p>
+    </article>
+  </section>
+  <aside class="notice"><strong>Model limits.</strong> The nine durations are illustrative, not measured data. The lesson is about which statistic answers which question; it is not a claim about real support workloads. The mode is reported here because one value repeats, which is not true of most continuous data.</aside>
+  <noscript><p class="notice">The practice set needs JavaScript. The dataset is 8, 9, 11, 12, 12, 14, 18, 22, 130 minutes. Its mean is 26.2, its median is 12, its mode is 12, and its range is 122. The mean sits above eight of the nine values because the 130-minute ticket pulls it up, so the median is the better summary of a typical ticket.</p></noscript>
+  <footer class="lesson-footer">A correct selection is not an explanation. Say why.</footer>
+  <!-- END EDIT: lesson content. -->
+</main>
+<p class="sr-only" data-announcer role="status" aria-live="polite" aria-atomic="true"></p>
+<script src="../interactive.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const { fmt } = LearningUI;
+  // EDIT: dataset and items. Keep the statistics, the bars, and the feedback in agreement.
+  const minutes = [8, 9, 11, 12, 12, 14, 18, 22, 130];
+  const sorted = minutes.slice().sort((first, second) => first - second);
+  const mean = minutes.reduce((total, value) => total + value, 0) / minutes.length;
+  const middle = Math.floor(sorted.length / 2);
+  const median = sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+  const mode = 12; // The only repeated value in this set; most continuous data has none.
+  const range = sorted[sorted.length - 1] - sorted[0];
+  const items = [
+    {
+      prompt: 'You want a single number for the time a typical ticket takes. Which statistic fits?',
+      choices: [
+        { value: 'mean', label: 'The mean, 26.2 minutes' },
+        { value: 'median', label: 'The median, 12 minutes' },
+        { value: 'range', label: 'The range, 122 minutes' }
+      ],
+      correct: 'median',
+      feedback: {
+        median: 'The median sits in the middle of the sorted values, so one 130-minute ticket cannot drag it.',
+        mean: 'The mean is 26.2, which is longer than eight of the nine tickets. A value no typical ticket resembles is a poor summary of the typical case.',
+        range: 'The range describes spread, not a typical value. It answers "how different can tickets be?"'
+      }
+    },
+    {
+      prompt: 'You must budget the total staff minutes needed for all nine tickets. Which statistic do you need?',
+      choices: [
+        { value: 'mean', label: 'The mean, because mean × count is the total' },
+        { value: 'median', label: 'The median, because it is typical' },
+        { value: 'mode', label: 'The mode, because it happens most often' }
+      ],
+      correct: 'mean',
+      note: 'The same dataset, a different question.',
+      feedback: {
+        mean: 'Yes. The mean is the total shared out evenly, so mean × count returns the total. For totals the extreme value belongs in the number.',
+        median: 'Nine tickets at the median would total 108 minutes, but the real total is 236. The median deliberately ignores how extreme the tail is.',
+        mode: 'The mode tells you which duration repeats. It says nothing about the total.'
+      }
+    },
+    {
+      prompt: 'Which statistic changes most if the 130-minute ticket is corrected to 13 minutes?',
+      choices: [
+        { value: 'mean', label: 'The mean' },
+        { value: 'median', label: 'The median' },
+        { value: 'mode', label: 'The mode' }
+      ],
+      correct: 'mean',
+      feedback: {
+        mean: 'Right: the mean falls from 26.2 to 13.2, while the median stays at 12 and the mode stays 12. The mean is the sensitive one.',
+        median: 'The median is the middle value of the sorted list. Replacing the largest value with 13 barely moves the middle.',
+        mode: 'The mode is the repeated value, 12. Changing one unique value does not change which value repeats.'
+      }
+    },
+    {
+      prompt: 'A manager asks: "Could any single ticket overrun a 30-minute slot?" Which statistic answers that?',
+      choices: [
+        { value: 'max', label: 'The largest value, or the range' },
+        { value: 'mean', label: 'The mean' },
+        { value: 'median', label: 'The median' }
+      ],
+      correct: 'max',
+      feedback: {
+        max: 'Yes. The question is about the extreme case, so report the maximum, 130 minutes, or the range that contains it.',
+        mean: 'An average cannot rule out an extreme case. Two datasets with the same mean can have very different worst cases.',
+        median: 'The median hides the tail by design, which is why it is the wrong tool for a worst-case question.'
+      }
+    }
+  ];
+  // END EDIT: dataset and items.
+  LearningUI.renderBars($('dataset-bars'), {
+    bars: minutes.map((value, index) => ({
+      label: 'Ticket ' + (index + 1),
+      value,
+      series: value === Math.max(...minutes) ? 3 : 1
+    })),
+    format: value => fmt.int(value) + ' min',
+    caption: 'Minutes to close each ticket',
+    target: { value: mean, label: 'Mean' },
+    labelHeading: 'Ticket',
+    valueHeading: 'Minutes'
+  });
+  $('stat-mean').textContent = fmt.fixed(mean, 1);
+  $('stat-median').textContent = fmt.int(median);
+  $('stat-mode').textContent = fmt.int(mode);
+  $('stat-range').textContent = fmt.int(range);
+  LearningUI.math.render(document);
+  LearningUI.mountQuiz($('quiz'), { items });
+  LearningUI.mountHints(document.querySelector('[data-hints]'), {
+    hints: [
+      'Ask what the question needs: a typical case, a total, or a worst case.',
+      'Write the sorted list and mark the middle value. Then add every value and divide by nine.',
+      'Only the mean uses the size of every value, so only the mean moves a long way when one value is extreme.'
+    ]
+  });
+  LearningUI.mountSelfExplain($('self-explain'), { minLength: 40 });
+})();
+</script>
+</body>
+</html>

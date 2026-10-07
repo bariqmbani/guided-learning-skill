@@ -242,9 +242,11 @@ def migrate(vault, registry, query):
 
     source_interactives = inside(vault, topic["paths"]["interactives_dir"])
     destination_interactives = inside(vault, paths["interactives_dir"])
+    # Kit files stay in the shared directory; only learner lessons move.
     shared_interactive_files = {
-        "interactive.css", "interactive.js", "build.py", "scaffold.py",
-        "example-interactive.html", "index.html", "README.md", "templates",
+        "interactive.css", "interactive.js", "build.py", "scaffold.py", "verify.py",
+        "example-interactive.html", "index.html", "components.html",
+        "README.md", "COMPONENTS.md", "templates",
     }
     if source_interactives.is_symlink():
         raise ValueError(f"Refusing to migrate a symlinked interactive directory: {source_interactives}")

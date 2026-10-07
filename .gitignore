@@ -20,3 +20,6 @@ SKILLS/guided-learning/logs/
 __pycache__/
 .trash/
 .DS_Store
+.agents/
+.claude/
+skills-lock.json

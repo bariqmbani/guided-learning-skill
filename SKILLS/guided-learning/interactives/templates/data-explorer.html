@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Grouped rates · Data explorer</title>
+  <link rel="stylesheet" href="../interactive.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to lesson</a>
+<main id="main" class="lesson">
+  <!-- EDIT: lesson content. Name the source, the units, and what the data cannot show. -->
+  <header class="lesson-header">
+    <p class="eyebrow">Data explorer · Rates and groups</p>
+    <h1>Can both answers be right?</h1>
+    <p class="subtitle">One table, two groupings. The treatment that wins overall is not the treatment that wins in each group.</p>
+  </header>
+  <section class="prompt-card stack" aria-labelledby="warmup-title">
+    <h2 id="warmup-title">01 · Predict first</h2>
+    <p><strong>Your goal:</strong> explain how a group can win every subgroup and still lose the total.</p>
+    <form id="predict" class="stack">
+      <fieldset>
+        <legend>Treatment A succeeds more often than B on mild cases <em>and</em> on severe cases. What must be true of the overall rates?</legend>
+        <label><input type="radio" name="predict" value="must" required> A must also lead overall; the parts decide the whole.</label>
+        <label><input type="radio" name="predict" value="can"> B can still lead overall, depending on who received each treatment.</label>
+        <label><input type="radio" name="predict" value="equal"> The overall rates must be equal.</label>
+      </fieldset>
+      <div class="btn-row">
+        <button class="btn" type="submit" data-check>Lock in my prediction</button>
+        <button class="btn btn-secondary" type="button" data-retry hidden>Predict again</button>
+      </div>
+      <p class="predict-record" data-record hidden></p>
+      <p class="explain" data-locked>Answer before you look at the table. The surprise is the point of the lesson.</p>
+    </form>
+  </section>
+  <section class="workspace" aria-labelledby="explore-title">
+    <div class="controls stack is-sticky">
+      <h2 id="explore-title">02 · Choose a grouping</h2>
+      <div class="segmented" id="grouping" role="radiogroup" aria-label="How to group the records">
+        <label><input type="radio" name="grouping" value="overall" checked> Everyone</label>
+        <label><input type="radio" name="grouping" value="severity"> By severity</label>
+      </div>
+      <p class="explain" id="grouping-note">All 700 records are pooled into one rate per treatment.</p>
+      <div class="control-group">
+        <div class="control-heading"><label for="severe-share">Share of A's patients who were severe</label><output id="severe-share-value" for="severe-share">75%</output></div>
+        <input id="severe-share" type="range" min="0" max="100" step="5" value="75" aria-describedby="share-help">
+        <div class="range-ends"><span>0%</span><span>100%</span></div>
+        <p id="share-help" class="explain">Move the severe cases between the treatments. Every success rate within a group stays exactly the same.</p>
+      </div>
+      <button id="reset" class="btn btn-secondary" type="button">Reset to the starting split</button>
+    </div>
+    <div class="stage stack">
+      <h2>03 · Read the rates</h2>
+      <p class="equation equation--plain" data-math="\text{success rate} = \frac{\text{successes}}{\text{cases}}" data-math-display="block"></p>
+      <div id="rate-bars"></div>
+      <div id="rate-grid"></div>
+      <p id="observation">Pooled over everyone, treatment B leads. Within each severity, treatment A leads.</p>
+      <p class="explain">Rates are rounded to whole percentages for display; the model keeps full precision.</p>
+    </div>
+  </section>
+  <section class="two-col" aria-label="Explain and transfer">
+    <article class="panel stack">
+      <h2>04 · Explain it</h2>
+      <p>Set the slider so that both treatments receive the same share of severe cases. Which treatment leads overall now, and what does that tell you about the pooled comparison you started with?</p>
+      <details><summary>Reveal a worked check</summary><p>With equal shares the pooled winner matches the within-group winner, because the groups no longer differ in difficulty. The original pooled result was driven by <em>who</em> received each treatment, not by how well either treatment worked.</p></details>
+    </article>
+    <article class="panel stack">
+      <h2>Transfer the idea</h2>
+      <p>A department reports a higher pass rate than another, and each of its courses has a lower pass rate. What would you need to know about enrolment before quoting either number? Name the grouping variable you would ask for.</p>
+    </article>
+  </section>
+  <aside class="notice"><strong>Data provenance and limits.</strong> These 700 records are <strong>illustrative and fabricated</strong> for this lesson; they are not from a study and must not be quoted as evidence about any treatment. The success rate inside each severity is fixed at 93% and 73% for A and 87% and 69% for B; the slider only changes how many cases of each severity a treatment receives. The pattern they show, a reversal when a grouping variable is ignored, is real and is known as Simpson's paradox. Within-group rates stay fixed as you move the slider, which is a teaching device, not how a real trial behaves. Nothing here supports a causal claim: that needs a design that controls how cases are assigned.</aside>
+  <noscript><p class="notice">The controls need JavaScript. At the starting split, treatment A takes 93 mild cases at a 93% success rate and 257 severe cases at 73%, giving 78% overall. Treatment B takes 264 mild cases at 87% and 86 severe cases at 69%, giving 82% overall. A leads in both groups; B leads overall, because A carries most of the severe cases.</p></noscript>
+  <footer class="lesson-footer">Ask who is in the group before you compare the rates.</footer>
+  <!-- END EDIT: lesson content. -->
+</main>
+<p class="sr-only" data-announcer role="status" aria-live="polite" aria-atomic="true"></p>
+<script src="../interactive.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const { fmt } = LearningUI;
+  // EDIT: the dataset. The rate inside each group is fixed; the slider moves the
+  // case mix between treatments, which is the variable the lesson is about.
+  const groups = {
+    mild: { label: 'Mild cases', total: 357, rate: { A: 81 / 87, B: 234 / 270 } },
+    severe: { label: 'Severe cases', total: 343, rate: { A: 192 / 263, B: 55 / 80 } }
+  };
+  const startingSevereShare = 0.75; // The split the lesson opens with.
+  function split(severeShareOfA) {
+    const severeA = Math.round(groups.severe.total * severeShareOfA);
+    const severeB = groups.severe.total - severeA;
+    // Each treatment keeps 350 patients, so the mild cases make up the rest.
+    const mildA = Math.max(0, 350 - severeA);
+    const mildB = groups.mild.total - mildA;
+    return { mildA, mildB, severeA, severeB };
+  }
+  function cells(counts) {
+    const rows = [];
+    ['A', 'B'].forEach(treatment => {
+      const mild = treatment === 'A' ? counts.mildA : counts.mildB;
+      const severe = treatment === 'A' ? counts.severeA : counts.severeB;
+      const mildWins = mild * groups.mild.rate[treatment];
+      const severeWins = severe * groups.severe.rate[treatment];
+      rows.push({
+        treatment,
+        mild: { cases: mild, rate: groups.mild.rate[treatment] },
+        severe: { cases: severe, rate: groups.severe.rate[treatment] },
+        overall: { cases: mild + severe, rate: (mild + severe) ? (mildWins + severeWins) / (mild + severe) : null }
+      });
+    });
+    return rows;
+  }
+  function render() {
+    const share = Number($('severe-share').value) / 100;
+    const grouping = document.querySelector('input[name=grouping]:checked').value;
+    const rows = cells(split(share));
+    const byTreatment = Object.fromEntries(rows.map(row => [row.treatment, row]));
+    const bars = grouping === 'overall'
+      ? rows.map(row => ({ label: 'Treatment ' + row.treatment, value: row.overall.rate === null ? 0 : row.overall.rate * 100, series: row.treatment === 'A' ? 1 : 2, note: ' (' + fmt.int(row.overall.cases) + ' cases)' }))
+      : rows.flatMap(row => [
+        { label: 'Treatment ' + row.treatment + ' · mild', value: row.mild.rate * 100, series: row.treatment === 'A' ? 1 : 2, note: ' (' + fmt.int(row.mild.cases) + ' cases)' },
+        { label: 'Treatment ' + row.treatment + ' · severe', value: row.severe.rate * 100, series: row.treatment === 'A' ? 1 : 2, note: ' (' + fmt.int(row.severe.cases) + ' cases)' }
+      ]);
+    LearningUI.renderBars($('rate-bars'), {
+      bars, max: 100,
+      format: value => fmt.fixed(value, 0) + '%',
+      caption: grouping === 'overall' ? 'Success rate, everyone pooled' : 'Success rate within each severity',
+      labelHeading: 'Group', valueHeading: 'Success rate'
+    });
+    LearningUI.renderGrid($('rate-grid'), {
+      caption: 'Cases and success rate in each cell',
+      corner: 'Treatment',
+      columns: ['Mild', 'Severe', 'Everyone'],
+      rows: rows.map(row => 'Treatment ' + row.treatment),
+      cells: rows.map(row => [
+        { value: fmt.pct(row.mild.rate, 0), label: fmt.int(row.mild.cases) + ' cases' },
+        { value: fmt.pct(row.severe.rate, 0), label: fmt.int(row.severe.cases) + ' cases' },
+        { value: row.overall.rate === null ? '-' : fmt.pct(row.overall.rate, 0), label: fmt.int(row.overall.cases) + ' cases', tone: 'tp' }
+      ])
+    });
+    const overallLead = byTreatment.A.overall.rate === null || byTreatment.B.overall.rate === null ? null
+      : byTreatment.A.overall.rate > byTreatment.B.overall.rate ? 'A'
+      : byTreatment.B.overall.rate > byTreatment.A.overall.rate ? 'B' : 'neither';
+    $('observation').textContent = 'Within every severity, treatment A has the higher success rate. Pooled over everyone, ' +
+      (overallLead === 'neither' ? 'the two treatments are level.'
+        : overallLead === null ? 'one treatment has no cases, so its pooled rate is undefined.'
+        : 'treatment ' + overallLead + ' leads, at ' + fmt.pct(byTreatment[overallLead].overall.rate, 0) + '.') +
+      ' Treatment A is carrying ' + fmt.pct(share, 0) + ' of the severe cases.';
+    $('grouping-note').textContent = grouping === 'overall'
+      ? 'All 700 records are pooled into one rate per treatment.'
+      : 'Each treatment is split into its mild and severe cases.';
+  }
+  // END EDIT: the dataset.
+  const shareControl = LearningUI.bindRange($('severe-share'), $('severe-share-value'), {
+    format: value => value + '%',
+    onInput: render,
+    onChange: () => LearningUI.announce($('observation').textContent)
+  });
+  LearningUI.bindChoice($('grouping'), { onChange: () => { render(); LearningUI.announce($('grouping-note').textContent); } });
+  const prediction = LearningUI.mountPrediction($('predict'), { label: 'Your prediction' });
+  $('reset').addEventListener('click', () => {
+    shareControl.set(startingSevereShare * 100, { notify: false });
+    document.querySelector('input[name=grouping][value=overall]').checked = true;
+    prediction.reset();
+    render();
+    LearningUI.announce('Reset to the starting split, pooled over everyone.');
+  });
+  LearningUI.math.render(document);
+  render();
+})();
+</script>
+</body>
+</html>

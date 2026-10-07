@@ -42,7 +42,9 @@
       <div class="btn-row"><button class="btn btn-secondary" type="button" data-back>Back</button><button class="btn" type="button" data-next>Next step</button></div>
       <div class="btn-row"><button class="btn btn-secondary" type="button" data-play>Play</button><button class="btn btn-secondary" type="button" data-reset>Reset trace</button></div>
       <label for="speed">Playback speed</label><select id="speed" data-speed><option value="0.5">0.5× · slower</option><option value="1" selected>1×</option><option value="2">2× · faster</option></select>
-      <p data-position>Step 1 of 7</p>
+      <div class="control-group"><div class="control-heading"><label for="scrub">Jump to a step</label><output id="scrub-value" data-scrub-value for="scrub">1 of 7</output></div><input id="scrub" type="range" data-scrub value="0"></div>
+      <div class="step-progress" data-progress aria-hidden="true"><div class="step-progress-fill"></div></div>
+      <p class="step-position" data-position>Step 1 of 7</p>
       <p class="explain">Pause at any point. Back and Next let you inspect every state without animation. Automatic playback is disabled when reduced motion is preferred.</p>
       <details><summary>What the algorithm does</summary><ol class="code-lines"><li data-line="0">Set low and high to the ends.</li><li data-line="1">Compare the middle value.</li><li data-line="2">If too small, move low right.</li><li data-line="3">If too large, move high left.</li><li data-line="4">If equal, return the index.</li></ol></details>
     </div>
@@ -51,9 +53,10 @@
       <ol id="items" class="search-items" aria-label="Sorted array with index and search status">
         <li class="token"><small>Index 0</small><strong>2</strong><small>Candidate</small></li><li class="token"><small>Index 1</small><strong>5</strong><small>Candidate</small></li><li class="token"><small>Index 2</small><strong>8</strong><small>Candidate</small></li><li class="token"><small>Index 3</small><strong>12</strong><small>Candidate</small></li><li class="token"><small>Index 4</small><strong>16</strong><small>Candidate</small></li><li class="token"><small>Index 5</small><strong>23</strong><small>Candidate</small></li><li class="token"><small>Index 6</small><strong>38</strong><small>Candidate</small></li>
       </ol>
-      <div class="metrics-grid"><div class="metric"><span class="metric-name">Low index</span><strong id="low" class="metric-value">0</strong></div><div class="metric"><span class="metric-name">Midpoint index</span><strong id="mid" class="metric-value">—</strong></div><div class="metric"><span class="metric-name">High index</span><strong id="high" class="metric-value">6</strong></div></div>
+      <p class="equation equation--plain" data-math="\text{mid} = \left\lfloor \frac{\text{low} + \text{high}}{2} \right\rfloor" data-math-display="block"></p>
+      <div class="metrics-grid"><div class="metric"><span class="metric-name">Low index</span><strong id="low" class="metric-value">0</strong></div><div class="metric"><span class="metric-name">Midpoint index</span><strong id="mid" class="metric-value">-</strong></div><div class="metric"><span class="metric-name">High index</span><strong id="high" class="metric-value">6</strong></div></div>
       <article class="panel stack"><h3 id="step-title">Start with the whole array</h3><p id="step-explanation" data-step-summary>All seven values are candidates. Because they are sorted in increasing order, a comparison with the midpoint can rule out an entire side.</p><p class="code-block" id="step-evidence">Search range: indices 0 through 6.</p></article>
-      <details><summary>Read the complete trace as a table</summary><div class="table-wrap"><table class="data-table"><caption>Binary search for 16</caption><thead><tr><th scope="col">Comparison</th><th scope="col">Range before</th><th scope="col">Midpoint</th><th scope="col">Result</th></tr></thead><tbody><tr><th scope="row">1</th><td>0–6</td><td>Index 3: 12</td><td>12 &lt; 16 → keep 4–6</td></tr><tr><th scope="row">2</th><td>4–6</td><td>Index 5: 23</td><td>23 &gt; 16 → keep 4–4</td></tr><tr><th scope="row">3</th><td>4–4</td><td>Index 4: 16</td><td>16 = 16 → found at 4</td></tr></tbody></table></div></details>
+      <details><summary>Read the complete trace as a table</summary><div class="table-wrap"><table class="data-table"><caption>Binary search for 16</caption><thead><tr><th scope="col">Comparison</th><th scope="col">Range before</th><th scope="col">Midpoint</th><th scope="col">Result</th></tr></thead><tbody><tr><th scope="row">1</th><td>0-6</td><td>Index 3: 12</td><td>12 &lt; 16 → keep 4-6</td></tr><tr><th scope="row">2</th><td>4-6</td><td>Index 5: 23</td><td>23 &gt; 16 → keep 4-4</td></tr><tr><th scope="row">3</th><td>4-4</td><td>Index 4: 16</td><td>16 = 16 → found at 4</td></tr></tbody></table></div></details>
     </div>
   </section>
   <section class="two-col" aria-label="Explain and transfer"><article class="panel stack"><h2>04 · Explain it</h2><p>When the midpoint is 12, why can we discard 12 itself as well as every smaller value? Use the target and the sorting rule in your answer.</p></article><article class="panel stack"><h2>Transfer the idea</h2><p>Trace a search for 15 on paper. After comparing 16, low becomes 4 and high becomes 3. Why does low &gt; high mean the target is absent?</p><details><summary>Check your trace</summary><p>Compare 12, then 23, then 16. The remaining range becomes empty. Since each exclusion preserved every possible match, there is no 15 in the array.</p></details></article></section>
@@ -82,7 +85,7 @@
   function render(index) {
     const state = steps[index];
     $('low').textContent = state.low;
-    $('mid').textContent = state.mid === null ? '—' : state.mid;
+    $('mid').textContent = state.mid === null ? '-' : state.mid;
     $('high').textContent = state.high;
     $('step-title').textContent = state.title;
     $('step-explanation').textContent = state.explanation;
@@ -102,12 +105,16 @@
   const question = LearningUI.mountQuestion($('warmup'), {
     correct: 'right',
     feedback: {
-      right: 'Yes. 16 is greater than 12, and all values on the left are smaller than 12. Keep indices 4–6.',
+      right: 'Yes. 16 is greater than 12, and all values on the left are smaller than 12. Keep indices 4-6.',
       left: 'Every value on the left is below 12, so none can equal 16. Use the sorted order to choose again.',
       both: 'Both halves would matter in unsorted data. Here, sorted order guarantees that the target cannot be on the smaller side.'
     }
   });
-  LearningUI.mountStepper($('trace'), { count: steps.length, render, interval: 1600 });
+  LearningUI.math.render(document);
+  LearningUI.mountStepper($('trace'), {
+    count: steps.length, render, interval: 1600,
+    labels: steps.map(state => state.title)
+  });
   $('trace').querySelector('[data-reset]').addEventListener('click', () => {
     question.reset();
     $('speed').value = '1';

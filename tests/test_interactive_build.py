@@ -165,6 +165,111 @@ class InteractiveBuildTests(unittest.TestCase):
         self.assertIn("interactive.css:start", self.html.read_text(encoding="utf-8"))
 
 
+class InteractiveVerifyTests(unittest.TestCase):
+    """The static checker must catch contract breaks and stay quiet otherwise."""
+
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory(prefix="interactive verify ")
+        self.addCleanup(temporary.cleanup)
+        self.base = Path(temporary.name)
+
+    def run_verify(self, *paths):
+        return subprocess.run([sys.executable, str(SOURCE / "verify.py"), *map(str, paths)],
+                              cwd=self.base, text=True, capture_output=True)
+
+    def test_every_shipped_page_passes_without_errors(self):
+        pages = sorted((SOURCE / "templates").glob("*.html"))
+        pages += [SOURCE / "example-interactive.html", SOURCE / "index.html", SOURCE / "components.html"]
+        result = self.run_verify(*pages)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("error ", result.stdout)
+
+    def test_bundled_theme_preference_is_allowed_but_lesson_storage_is_rejected(self):
+        page = self.base / "lesson.html"
+        built = subprocess.run(
+            [sys.executable, str(SOURCE / "scaffold.py"), "parameter-explorer", str(page)],
+            cwd=self.base, text=True, capture_output=True)
+        self.assertEqual(built.returncode, 0, built.stdout + built.stderr)
+        html = page.read_text(encoding="utf-8")
+        self.assertIn("global.localStorage.setItem(themeKey, value)", html)
+        result = self.run_verify(page)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+        for storage in ("localStorage", "sessionStorage", "indexedDB"):
+            with self.subTest(storage=storage):
+                page.write_text(html.replace("</body>",
+                    f'<script>{storage}.setItem("answer", "learner response");</script></body>'),
+                    encoding="utf-8")
+                result = self.run_verify(page)
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn("Browser storage", result.stdout)
+
+        page.write_text(html.replace("global.localStorage.setItem(themeKey, value)",
+                                     'global.localStorage.setItem("answer", value)'), encoding="utf-8")
+        result = self.run_verify(page)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("Browser storage", result.stdout)
+
+    def test_runtime_marker_cannot_exempt_authored_storage(self):
+        page = self.base / "forged-runtime.html"
+        page.write_text(
+            '<!DOCTYPE html><html lang="en"><head><title>Lesson</title>'
+            '<meta name="viewport" content="width=device-width"></head><body><h1>Lesson</h1>'
+            '<!-- interactive.js:start --><script>'
+            'const themeKey = "learning-ui-theme"; const value = "learner response";'
+            'global.localStorage.setItem(themeKey, value);'
+            '</script><!-- interactive.js:end --></body></html>', encoding="utf-8")
+        result = self.run_verify(page)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("Browser storage", result.stdout)
+
+    def test_contract_breaks_are_reported_and_fail_the_run(self):
+        broken = self.base / "broken.html"
+        broken.write_text(
+            '<!DOCTYPE html><html><head>'
+            '<meta name="viewport" content="width=device-width, user-scalable=no"></head><body>'
+            '<h1>One</h1><h1>Two</h1>'
+            '<label for="absent">Name</label>'
+            '<input id="same" type="range"><input id="same" type="text">'
+            '<img src="https://example.com/a.png">'
+            '<script src="interactive.js"></script>'
+            '<script>LearningUI.announce("hi"); localStorage.setItem("a", 1);'
+            ' fetch("https://example.com");'
+            ' LearningUI.mountStepper(document.body, {count: 2, render(){}});</script>'
+            '</body></html>', encoding="utf-8")
+        result = self.run_verify(broken)
+        self.assertEqual(result.returncode, 1)
+        for expected in ("lang attribute", "No <title>", "blocks zoom", "<h1> elements",
+                         'Duplicate id "same"', "points at an id that does not exist",
+                         "has no label", "no alt attribute", "over the network",
+                         "fetch()", "Browser storage", "mountStepper needs a [data-back]"):
+            self.assertIn(expected, result.stdout, expected)
+        self.assertIn("announce() is called but no [data-announcer]", result.stdout)
+
+    def test_runtime_order_and_unrendered_notation_are_errors(self):
+        page = self.base / "order.html"
+        page.write_text(
+            '<!DOCTYPE html><html lang="en"><head><title>T</title>'
+            '<meta name="viewport" content="width=device-width"></head><body><h1>H</h1>'
+            '<p data-math="x^2"></p>'
+            '<script>LearningUI.renderChart(document.body, {});</script>'
+            '<script src="interactive.js"></script></body></html>', encoding="utf-8")
+        result = self.run_verify(page)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("used before the runtime is loaded", result.stdout)
+        self.assertIn("math.render() is never called", result.stdout)
+
+    def test_quiet_hides_warnings_and_missing_file_fails(self):
+        page = SOURCE / "templates/parameter-explorer.html"
+        result = subprocess.run([sys.executable, str(SOURCE / "verify.py"), str(page), "--quiet"],
+                                cwd=self.base, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn("warn ", result.stdout)
+        missing = self.run_verify(self.base / "absent.html")
+        self.assertEqual(missing.returncode, 1)
+        self.assertIn("cannot read", missing.stdout)
+
+
 class InteractiveScaffoldTests(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory(prefix="interactive scaffold ")

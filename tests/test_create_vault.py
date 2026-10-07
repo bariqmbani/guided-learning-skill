@@ -229,7 +229,7 @@ class CreateVaultTests(unittest.TestCase):
     def test_skill_versions_and_release_history_survive_installation(self):
         vault = self.base / "versioned"
         setup.create_vault(ROOT, vault, "Versioned")
-        versions = {"guided-learning": "3.7.0", "concept-learning": "1.0.1", "learner-profile": "1.0.2"}
+        versions = {"guided-learning": "3.7.1", "concept-learning": "1.0.1", "learner-profile": "1.0.2"}
         for name, version in versions.items():
             source = ROOT / "SKILLS" / name
             installed = vault / "SKILLS" / name
@@ -326,7 +326,12 @@ class CreateVaultTests(unittest.TestCase):
                 self.assertIn("<!-- interactive.css:start -->", content)
                 self.assertIn("<!-- interactive.js:start -->", content)
                 self.assertNotRegex(content, r'(?:src|href)=[\"\']\.\./interactive\.(?:css|js)[\"\']')
-        self.assertEqual(len(list((shared / "templates").glob("*.html"))), 5)
+        # The installed kit ships exactly the patterns its scaffolder offers.
+        registry = importlib.util.spec_from_file_location("installed_scaffold", shared / "scaffold.py")
+        scaffolder = importlib.util.module_from_spec(registry)
+        registry.loader.exec_module(scaffolder)
+        self.assertEqual({path.stem for path in (shared / "templates").glob("*.html")},
+                         set(scaffolder.TEMPLATES))
         before = {p: p.read_bytes() for p in (vault / "topics").rglob("*") if p.is_file()}
         session = self.session_helper(vault, "create", "state", "--title", "State", "--date", "2026-10-07")
         lesson = vault / session["root"] / "interactive.html"

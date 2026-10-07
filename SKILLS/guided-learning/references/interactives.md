@@ -12,7 +12,7 @@ Start with **Start here** and **Choose the interaction** in the
 [interactive kit guide](../interactives/README.md), then load only the relevant
 working template. Read component recipes or local-asset guidance as needed;
 there is no need to load every example. The [browser catalog](../interactives/index.html)
-previews five patterns:
+previews ten patterns:
 
 | Need | Template |
 | --- | --- |
@@ -21,6 +21,11 @@ previews five patterns:
 | Compare models or tradeoffs under shared conditions | `comparison` |
 | Explore samples, chance, and variability | `probability-lab` |
 | Choose an action and reason about consequences | `decision-scenario` |
+| Practise retrieval with hints and an explanation | `practice-set` |
+| Arrange steps and justify the order | `order-steps` |
+| Select a part and trace what depends on it | `system-map` |
+| Regroup a documented dataset and read the change | `data-explorer` |
+| Drag a construction and read the quantity it changes | `geometry-lab` |
 
 1. Pin `{interactives_dir}`, `{css_file}`, and `{build_script}` from the selected
    topic; inspect existing assets and preserve customizations. Use the Python
@@ -44,13 +49,23 @@ previews five patterns:
    independently of its visual presentation.
 5. The main tutor runs the selected topic's `build.py` for the completed filename
    and checks its exit status, including after delegated work. Filenames are
-   relative to the Python builder's directory.
+   relative to the Python builder's directory. Then run `verify.py` on the built
+   file and fix every error it reports:
+
+   ```sh
+   python3 SKILLS/guided-learning/interactives/verify.py /absolute/pinned/interactives/YYYY-MM-DD_concept-slug.html
+   ```
 6. Open the result in a browser when available. Check baseline/extreme values,
-   reset/retry, keyboard use, narrow-screen layout, reduced motion, and the text
-   or table alternative. Report unavailable checks honestly.
+   reset/retry, keyboard use, narrow-screen layout, reduced motion, notation that
+   renders as mathematics, and the text or table alternative. A clean `verify.py`
+   run checks structure, not teaching or arithmetic. Report unavailable checks
+   honestly.
 
 The installed vault uses its own local kit, independent of the source repository.
-The kit needs no external UI library or JavaScript build tool. Shared CSS and
+The kit needs no external UI library or JavaScript build tool. Set every equation
+with `LearningUI.math`, which compiles a TeX subset to native MathML, and keep
+`.code-block` for code. `COMPONENTS.md` beside the guide lists each helper, its
+markup, and its options; `components.html` shows them running. Shared CSS and
 optional `interactive.js` are inlined by the builder; page-specific styles/code
 stay separate. All learner pages belong in the installed workspace, never this
 source repository. The full guide covers API recipes, domain extensions,

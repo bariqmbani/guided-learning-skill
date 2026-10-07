@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Solving an equation · Order the steps</title>
+  <link rel="stylesheet" href="../interactive.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to lesson</a>
+<main id="main" class="lesson">
+  <!-- EDIT: lesson content. The order must follow a rule the learner can state. -->
+  <header class="lesson-header">
+    <p class="eyebrow">Order the steps · Algebra</p>
+    <h1>What has to happen first?</h1>
+    <p class="subtitle">Put the steps in a workable order, then say which rule forces each one to come before the next.</p>
+  </header>
+  <section class="prompt-card stack" aria-labelledby="warmup-title">
+    <h2 id="warmup-title">01 · Predict first</h2>
+    <p><strong>Your goal:</strong> justify an order of operations instead of recalling a remembered sequence.</p>
+    <p class="equation" data-math="3(x + 4) = 27" data-math-display="block"></p>
+    <form id="predict" class="stack">
+      <fieldset>
+        <legend>Which move can you make first without breaking the equation?</legend>
+        <label><input type="radio" name="predict" value="subtract" required> Subtract 4 from both sides.</label>
+        <label><input type="radio" name="predict" value="divide"> Divide both sides by 3.</label>
+        <label><input type="radio" name="predict" value="either"> Either one; both keep the equation true.</label>
+      </fieldset>
+      <div class="btn-row">
+        <button class="btn" type="submit" data-check>Lock in my prediction</button>
+        <button class="btn btn-secondary" type="button" data-retry hidden>Predict again</button>
+      </div>
+      <p class="predict-record" data-record hidden></p>
+      <p class="explain" data-locked>Commit to an answer before you look. An incorrect prediction tells you exactly what to watch for.</p>
+    </form>
+  </section>
+  <section class="workspace workspace--wide-controls" aria-labelledby="order-title">
+    <div class="stage stack">
+      <h2 id="order-title">02 · Build the solution</h2>
+      <p>Move each step until the list reads as a solution you could hand in. Use the arrows, or drag if you prefer.</p>
+      <div id="ordering" class="stack">
+        <ol class="sortable" data-sortable aria-label="Steps to order"></ol>
+        <div class="btn-row">
+          <button class="btn" type="button" data-check>Check the order</button>
+          <button class="btn btn-secondary" type="button" data-shuffle>Shuffle again</button>
+        </div>
+        <p class="feedback" data-feedback></p>
+      </div>
+      <div id="worked" hidden class="callout callout--check">
+        <h3>The worked solution</h3>
+        <p class="equation equation--plain" data-math="3(x + 4) = 27 \;\Rightarrow\; x + 4 = 9 \;\Rightarrow\; x = 5" data-math-display="block"></p>
+        <p>Dividing first removes the whole bracket in one move, because the bracket is multiplied by 3 as a single quantity. Expanding first also works and takes one extra step.</p>
+      </div>
+    </div>
+    <div class="controls stack">
+      <h2>Why this order?</h2>
+      <p class="explain">Every legal step keeps both sides equal. The useful question is not "what is allowed?" but "what gets <em>x</em> alone fastest?"</p>
+      <div data-hints class="stack stack--tight">
+        <div class="btn-row"><button class="btn btn-secondary btn-sm" type="button" data-hint-next>Show a hint</button><span class="hint-count" data-hint-count></span></div>
+        <ol class="hint-list" data-hint-list></ol>
+      </div>
+      <button id="reset" class="btn btn-secondary" type="button">Reset the activity</button>
+    </div>
+  </section>
+  <section class="two-col" aria-label="Explain and transfer">
+    <article class="panel stack">
+      <h2>03 · Explain it</h2>
+      <p>Subtracting 4 first is legal but unhelpful. Write what the equation becomes if you do it, and say why that leaves more work than dividing first.</p>
+      <details><summary>Reveal a worked check</summary><p>Subtracting 4 from both sides of 3(<var>x</var> + 4) = 27 gives 3(<var>x</var> + 4) − 4 = 23, which is still a bracket times 3 minus 4. Nothing was undone, because the 4 inside the bracket is not a term on its own: it is multiplied by 3 along with <var>x</var>.</p></details>
+    </article>
+    <article class="panel stack">
+      <h2>Transfer the idea</h2>
+      <p>Order the steps for 5(<var>y</var> − 2) = 35 without rebuilding the list. Which step changes, and which stays identical? Then try 3(<var>x</var> + 4) = 28 and say why the answer is no longer a whole number.</p>
+    </article>
+  </section>
+  <aside class="notice"><strong>Model limits.</strong> One accepted order is checked here. Expanding the bracket first reaches the same answer by a longer route and is also correct; this activity rewards the shorter route and asks you to justify it. Equations with the unknown on both sides need a step this list does not contain.</aside>
+  <noscript><p class="notice">The ordering controls need JavaScript. The intended order is: divide both sides by 3; simplify to x + 4 = 9; subtract 4 from both sides; simplify to x = 5; check by substituting 5 back into 3(x + 4). Dividing first removes the multiplier from the whole bracket in a single move.</p></noscript>
+  <footer class="lesson-footer">An order you can justify beats an order you remember.</footer>
+  <!-- END EDIT: lesson content. -->
+</main>
+<p class="sr-only" data-announcer role="status" aria-live="polite" aria-atomic="true"></p>
+<script src="../interactive.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  // EDIT: steps and the rule that orders them. Keep ids stable; order lists them once.
+  const items = [
+    { id: 'divide', label: 'Divide both sides by 3.' },
+    { id: 'simplify', label: 'Write the result: x + 4 = 9.' },
+    { id: 'subtract', label: 'Subtract 4 from both sides.' },
+    { id: 'solution', label: 'Write the result: x = 5.' },
+    { id: 'check', label: 'Check: 3(5 + 4) = 27.' }
+  ];
+  const order = ['divide', 'simplify', 'subtract', 'solution', 'check'];
+  const feedback = {
+    divide: 'The multiplier 3 applies to the whole bracket, so dividing by 3 is the move that removes it in one step.',
+    simplify: 'Record the simplified equation before the next move, so each line follows from the one above it.',
+    subtract: 'Subtracting 4 only helps once the bracket is gone and 4 stands alone as a term.',
+    solution: 'State the solution on its own line before checking it.',
+    check: 'A check belongs last: substituting into the original equation is what confirms the answer.'
+  };
+  // END EDIT: steps and the rule that orders them.
+  const ordering = LearningUI.mountSortable($('ordering'), {
+    items, correct: order, feedback, seed: 5, checkLabel: 'Check the order',
+    onCheck: ({ complete }) => { if (complete) $('worked').hidden = false; }
+  });
+  const prediction = LearningUI.mountPrediction($('predict'), { label: 'Your prediction' });
+  const hints = LearningUI.mountHints(document.querySelector('[data-hints]'), {
+    hints: [
+      'Ask what is attached to the bracket as a whole, and what is attached only to x.',
+      'The 3 multiplies everything inside the bracket, so undoing it clears the bracket in one move.',
+      'After dividing, the equation reads x + 4 = 9, and only then is 4 a term you can subtract on its own.'
+    ]
+  });
+  $('reset').addEventListener('click', () => {
+    ordering.reset();
+    $('worked').hidden = true;
+    prediction.reset();
+    hints.reset();
+    LearningUI.announce('Activity reset. The steps are shuffled again and your prediction is cleared.');
+  });
+  LearningUI.math.render(document);
+})();
+</script>
+</body>
+</html>

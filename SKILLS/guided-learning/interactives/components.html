@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Component gallery · Interactive learning kit</title>
+  <link rel="stylesheet" href="interactive.css">
+  <style>
+    .gallery-section { padding-top: 8px; border-top: 1px solid var(--border); margin-top: 36px; }
+    .gallery-section:first-of-type { border-top: 0; margin-top: 0; }
+    .demo { padding: 20px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }
+    .swatch-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+    .swatch-chip { display: flex; align-items: center; gap: 8px; font-size: .8125rem; }
+    .swatch-chip i { width: 22px; height: 22px; border: 1px solid var(--border); border-radius: 5px; }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to the gallery</a>
+<main id="main" class="lesson">
+  <div class="breadcrumb"><span>Guided learning / Learning lab / Components</span><span>Offline · No dependencies</span></div>
+  <header class="lesson-header">
+    <p class="eyebrow">Component gallery</p>
+    <h1>Every part, working.</h1>
+    <p class="subtitle">One page showing each control, figure, and notation feature in the kit. Each section links to its contract in <a href="COMPONENTS.md">COMPONENTS.md</a>. Copy the markup from a working template rather than from memory.</p>
+  </header>
+  <ul class="stage-nav" aria-label="Jump to a section">
+    <li><a href="#notation">Notation</a></li>
+    <li><a href="#controls">Controls</a></li>
+    <li><a href="#figures">Figures</a></li>
+    <li><a href="#sequence">Sequence</a></li>
+    <li><a href="#questions">Questions</a></li>
+    <li><a href="#construction">Construction</a></li>
+    <li><a href="#surfaces">Surfaces</a></li>
+  </ul>
+
+  <section class="gallery-section stack" id="notation" aria-labelledby="notation-title">
+    <h2 id="notation-title">Mathematics</h2>
+    <p class="explain">Compiled to native MathML: real layout, the browser's math font, and read aloud as mathematics. <code>\term{n}{…}</code> ties a part of the formula to a control or a series.</p>
+    <div class="demo stack">
+      <p class="equation" data-math="x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}" data-math-display="block"></p>
+      <div class="equation-row">
+        <span data-math="\sum_{i=1}^{n} x_i^2" data-math-display="block"></span>
+        <span data-math="\lim_{h \to 0} \frac{f(x+h) - f(x)}{h}" data-math-display="block"></span>
+        <span data-math="P(A \mid B) = \frac{P(B \mid A)P(A)}{P(B)}" data-math-display="block"></span>
+        <span data-math="\begin{bmatrix} a & b \\ c & d \end{bmatrix}" data-math-display="block"></span>
+      </div>
+      <p class="equation equation--sunken" data-math="y = \term{1}{m}x + \term{2}{b}" data-math-display="block"></p>
+      <ul class="term-key" aria-label="Which color marks which term">
+        <li data-term="1"><span class="swatch" aria-hidden="true"></span>Slope <var>m</var></li>
+        <li data-term="2"><span class="swatch" aria-hidden="true"></span>Intercept <var>b</var></li>
+      </ul>
+      <p>In prose, a symbol uses <code>&lt;var&gt;</code>: the rate <var>r</var> applies once per round.</p>
+    </div>
+    <details class="boxed">
+      <summary>Markup and call</summary>
+      <pre class="code-block">&lt;p class="equation" data-math="x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}" data-math-display="block"&gt;&lt;/p&gt;
+
+LearningUI.math.render(document);
+LearningUI.math.update($('equation'), `x = ${value}`);</pre>
+    </details>
+  </section>
+
+  <section class="gallery-section stack" id="controls" aria-labelledby="controls-title">
+    <h2 id="controls-title">Controls</h2>
+    <div class="two-col">
+      <div class="demo stack">
+        <h3>Range with an exact entry</h3>
+        <div class="control-group">
+          <div class="control-heading"><label for="rate">Growth per round, <var>r</var></label><output id="rate-value" for="rate">10%</output></div>
+          <input id="rate" type="range" min="0" max="20" step="1" value="10" aria-describedby="rate-help">
+          <div class="range-ends"><span>0%</span><span>20%</span></div>
+          <p id="rate-help" class="explain">The starting amount stays fixed.</p>
+        </div>
+        <div class="cluster">
+          <label for="rate-exact">Exact value</label>
+          <input id="rate-exact" type="number" min="0" max="20" step="1" value="10" style="width: 7rem">
+        </div>
+        <div class="preset-row">
+          <button class="preset-btn" type="button" data-rate="0">Zero</button>
+          <button class="preset-btn" type="button" data-rate="10">Ten</button>
+          <button class="preset-btn" type="button" data-rate="20">Twenty</button>
+        </div>
+        <p class="readout" id="rate-readout">A rate of 10% doubles a balance in about 7 rounds.</p>
+      </div>
+      <div class="demo stack">
+        <h3>Choice and toggle</h3>
+        <div class="segmented" id="view" role="radiogroup" aria-label="How to group the data">
+          <label><input type="radio" name="view" value="overall" checked> Everyone</label>
+          <label><input type="radio" name="view" value="split"> By group</label>
+        </div>
+        <label class="choice" for="show-grid"><input id="show-grid" type="checkbox" checked> Show the reference line</label>
+        <fieldset>
+          <legend>A selectable row</legend>
+          <label><input type="radio" name="demo-choice" value="a" checked> Rows highlight when chosen</label>
+          <label><input type="radio" name="demo-choice" value="b"> The whole row is the target</label>
+        </fieldset>
+        <p class="readout" id="choice-readout">Grouping: everyone. Reference line: shown.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="gallery-section stack" id="figures" aria-labelledby="figures-title">
+    <h2 id="figures-title">Figures</h2>
+    <div class="demo stack">
+      <h3>Chart: line, area, scatter, annotations, data cursor</h3>
+      <div id="demo-chart" class="chart"></div>
+      <p class="explain">Hover or focus the chart and use the arrow keys. Points outside the domain are clipped visually and stay in the table.</p>
+    </div>
+    <div class="two-col">
+      <div class="demo stack">
+        <h3>Bars</h3>
+        <div id="demo-bars"></div>
+      </div>
+      <div class="demo stack">
+        <h3>Grid</h3>
+        <div id="demo-grid"></div>
+      </div>
+    </div>
+    <div class="demo stack">
+      <h3>Metrics and status</h3>
+      <div class="metrics-grid">
+        <div class="metric metric--accent"><span class="metric-name">Precision</span><strong class="metric-value" id="demo-metric">79%</strong><span class="metric-subtext">Correct among flagged</span></div>
+        <div class="metric"><span class="metric-name">Recall</span><strong class="metric-value">75%</strong><span class="metric-subtext">Real positives caught</span></div>
+        <div class="metric metric--boxed"><span class="metric-name">Rounds</span><strong class="metric-value metric-value--sm">10</strong><span class="metric-subtext">Fixed for this run</span></div>
+      </div>
+      <dl class="stat-strip">
+        <div><dt>Mean</dt><dd>26.2</dd></div>
+        <div><dt>Median</dt><dd>12</dd></div>
+        <div><dt>Range</dt><dd>122</dd></div>
+      </dl>
+      <div class="btn-row"><button class="btn btn-secondary btn-sm" type="button" id="demo-change">Change the value</button></div>
+      <p class="explain">The button updates the metric with <code>motion.setText</code>, which briefly fades it when a pointer action changes the value. Keyboard updates stay immediate.</p>
+    </div>
+  </section>
+
+  <section class="gallery-section stack" id="sequence" aria-labelledby="sequence-title">
+    <h2 id="sequence-title">Sequence</h2>
+    <section id="demo-trace" class="workspace" aria-labelledby="trace-title">
+      <div class="controls stack">
+        <h3 id="trace-title">Finite playback</h3>
+        <div class="btn-row">
+          <button class="btn btn-secondary" type="button" data-back>Back</button>
+          <button class="btn" type="button" data-next>Next step</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" type="button" data-play>Play</button>
+          <button class="btn btn-secondary" type="button" data-reset>Reset</button>
+        </div>
+        <label for="demo-speed">Playback speed</label>
+        <select id="demo-speed" data-speed><option value="0.5">0.5× · slower</option><option value="1" selected>1×</option><option value="2">2× · faster</option></select>
+        <div class="control-group">
+          <div class="control-heading"><label for="demo-scrub">Jump to a step</label><output id="demo-scrub-value" data-scrub-value for="demo-scrub">1 of 4</output></div>
+          <input id="demo-scrub" type="range" data-scrub value="0">
+        </div>
+        <div class="step-progress" data-progress aria-hidden="true"><div class="step-progress-fill"></div></div>
+        <p class="step-position" data-position>Step 1 of 4</p>
+      </div>
+      <div class="stage stack">
+        <ol class="step-list" data-step-list>
+          <li>Read the input</li>
+          <li>Apply the rule</li>
+          <li>Record the result</li>
+          <li>Check the result</li>
+        </ol>
+        <div class="token-row" id="demo-tokens">
+          <span class="token">4</span><span class="token">2</span><span class="token">7</span><span class="token">1</span>
+        </div>
+        <p id="demo-step-text" data-step-summary>Every value is still a candidate.</p>
+      </div>
+    </section>
+  </section>
+
+  <section class="gallery-section stack" id="questions" aria-labelledby="questions-title">
+    <h2 id="questions-title">Questions and practice</h2>
+    <div class="two-col">
+      <div class="demo stack">
+        <h3>One question with feedback</h3>
+        <form id="demo-question" class="stack">
+          <fieldset>
+            <legend>With <span data-math="y = 2x"></span>, what happens to <var>y</var> when <var>x</var> doubles?</legend>
+            <label><input type="radio" name="demo-q" value="double" required> It doubles</label>
+            <label><input type="radio" name="demo-q" value="same"> It stays the same</label>
+          </fieldset>
+          <div class="btn-row">
+            <button class="btn" type="submit" data-check>Check answer</button>
+            <button class="btn btn-secondary" type="button" data-retry>Try again</button>
+          </div>
+          <p class="feedback" data-feedback hidden></p>
+        </form>
+      </div>
+      <div class="demo stack">
+        <h3>Predict, then look</h3>
+        <form id="demo-predict" class="stack">
+          <fieldset>
+            <legend>Doubling both legs of a right triangle does what to the hypotenuse?</legend>
+            <label><input type="radio" name="demo-p" value="double" required> Doubles it</label>
+            <label><input type="radio" name="demo-p" value="same"> Leaves it unchanged</label>
+          </fieldset>
+          <div class="btn-row">
+            <button class="btn" type="submit" data-check>Lock in my prediction</button>
+            <button class="btn btn-secondary" type="button" data-retry hidden>Predict again</button>
+          </div>
+          <p class="predict-record" data-record hidden></p>
+          <p class="explain" data-locked>Nothing is sent anywhere.</p>
+          <div id="demo-reveal" hidden class="callout callout--check"><p>Both legs doubling doubles the hypotenuse, because every area is multiplied by four.</p></div>
+        </form>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="demo stack">
+        <h3>Ordering, keyboard-first</h3>
+        <div id="demo-order" class="stack">
+          <ol class="sortable" data-sortable aria-label="Steps to order"></ol>
+          <div class="btn-row">
+            <button class="btn" type="button" data-check>Check the order</button>
+            <button class="btn btn-secondary" type="button" data-shuffle>Shuffle</button>
+          </div>
+          <p class="feedback" data-feedback></p>
+        </div>
+      </div>
+      <div class="demo stack">
+        <h3>Matching</h3>
+        <div id="demo-match" class="stack">
+          <div class="match-grid" data-matching></div>
+          <div class="btn-row"><button class="btn" type="button" data-check>Check the matches</button></div>
+          <p class="feedback" data-feedback></p>
+        </div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="demo stack">
+        <h3>Progressive hints</h3>
+        <div data-hints class="stack stack--tight">
+          <div class="btn-row"><button class="btn btn-secondary btn-sm" type="button" data-hint-next>Show a hint</button><span class="hint-count" data-hint-count></span></div>
+          <ol class="hint-list" data-hint-list></ol>
+        </div>
+      </div>
+      <div class="demo stack">
+        <h3>Explain from memory</h3>
+        <form id="demo-explain" class="self-explain">
+          <label for="demo-answer">Why does one long value pull the mean above the median?</label>
+          <textarea id="demo-answer" data-answer rows="3"></textarea>
+          <p class="char-count" data-count></p>
+          <div class="btn-row"><button class="btn" type="submit" data-check>Compare with a worked answer</button></div>
+          <p class="feedback" data-feedback></p>
+          <div class="callout callout--note" data-reference hidden><p>The mean adds every value, so one extreme value is spread across the whole set; the median only cares about position.</p></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="gallery-section stack" id="construction" aria-labelledby="construction-title">
+    <h2 id="construction-title">Drawing your own figure</h2>
+    <div class="demo stack">
+      <svg id="demo-svg" viewBox="0 0 420 180" role="img" aria-label="A line from the origin rising to the right, with a marked point" style="width:100%;height:auto;background:var(--card);border-radius:var(--radius)"></svg>
+      <p class="explain"><code>svg.create</code>, <code>svg.el</code>, <code>svg.scale</code>, and <code>svg.path</code> are enough for a construction, a circuit, or a network. Pair every drawing with text that says the same thing.</p>
+    </div>
+  </section>
+
+  <section class="gallery-section stack" id="surfaces" aria-labelledby="surfaces-title">
+    <h2 id="surfaces-title">Surfaces, tone, and tokens</h2>
+    <div class="two-col">
+      <div class="prompt-card stack">
+        <h3>Prompt card</h3>
+        <p>Holds the question that opens a lesson.</p>
+      </div>
+      <div class="panel stack">
+        <h3>Panel</h3>
+        <p>Holds explanation, transfer, and worked checks.</p>
+      </div>
+    </div>
+    <div class="callout callout--note"><strong>Note.</strong> A side remark that is not part of the model.</div>
+    <div class="callout callout--check"><strong>Check.</strong> Something the learner can verify.</div>
+    <div class="callout callout--caution"><strong>Caution.</strong> A limit or a common mistake.</div>
+    <aside class="notice"><strong>Model limits.</strong> Every lesson ends with what its model does not cover, where its numbers came from, and what it cannot support.</aside>
+    <div class="demo stack">
+      <h3>Tokens</h3>
+      <div class="swatch-row" id="token-swatches"></div>
+      <p class="explain">The same tokens follow your system theme or the light/dark button above. Use the token, never a literal color.</p>
+    </div>
+  </section>
+
+  <noscript><p class="notice">This gallery runs the components live, so it needs JavaScript. The same contracts are written out, with their markup and options, in <a href="COMPONENTS.md">COMPONENTS.md</a>.</p></noscript>
+  <footer class="lesson-footer"><span>Native HTML, CSS, and JavaScript. No account or server required.</span><span><a href="README.md">Authoring guide</a> · <a href="COMPONENTS.md">Component reference</a> · <a href="index.html">Template catalog</a></span></footer>
+</main>
+<p class="sr-only" data-announcer role="status" aria-live="polite" aria-atomic="true"></p>
+<script src="interactive.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const { fmt, math, motion, svg } = LearningUI;
+  math.render(document);
+
+  // --- controls ---------------------------------------------------------
+  const rate = LearningUI.bindRange($('rate'), $('rate-value'), {
+    format: value => value + '%',
+    mirror: $('rate-exact'),
+    onInput: value => {
+      $('rate-readout').textContent = value === 0
+        ? 'A rate of 0% never doubles the balance.'
+        : 'A rate of ' + value + '% doubles a balance in about ' + fmt.fixed(Math.log(2) / Math.log(1 + value / 100), 1) + ' rounds.';
+      document.querySelectorAll('[data-rate]').forEach(button => {
+        const active = Number(button.dataset.rate) === value;
+        button.setAttribute('aria-pressed', String(active));
+      });
+    }
+  });
+  document.querySelectorAll('[data-rate]').forEach(button =>
+    button.addEventListener('click', () => rate.set(Number(button.dataset.rate))));
+  rate.set(10);
+
+  const describeChoice = () => {
+    $('choice-readout').textContent = 'Grouping: ' + (view.get() === 'overall' ? 'everyone' : 'by group') +
+      '. Reference line: ' + (grid.get() ? 'shown' : 'hidden') + '.';
+    drawChart();
+  };
+  const view = LearningUI.bindChoice($('view'), { onChange: describeChoice });
+  const grid = LearningUI.bindCheckbox($('show-grid'), { onChange: describeChoice });
+
+  // --- figures ----------------------------------------------------------
+  const curve = Array.from({ length: 11 }, (_, index) => ({ x: index, y: 100 * Math.pow(1.1, index) }));
+  const flat = Array.from({ length: 11 }, (_, index) => ({ x: index, y: 100 + 10 * index }));
+  function drawChart() {
+    LearningUI.renderChart($('demo-chart'), {
+      series: view.get() === 'overall'
+        ? [{ label: 'Compound growth', type: 'area', points: curve }]
+        : [
+          { label: 'Compound growth', points: curve },
+          { label: 'Fixed addition', points: flat },
+          { label: 'Round 10', type: 'scatter', points: [{ x: 10, y: curve[10].y }] }
+        ],
+      xLabel: 'Round', yLabel: 'Total units',
+      xDomain: [0, 10], yDomain: [0, 280],
+      annotations: grid.get() ? [{ type: 'hline', at: 200, label: 'Target' }] : [],
+      formatY: value => fmt.num(value)
+    });
+  }
+  drawChart();
+  LearningUI.renderBars($('demo-bars'), {
+    bars: [
+      { label: 'Heads', value: 7 },
+      { label: 'Tails', value: 3, series: 3 }
+    ],
+    max: 10,
+    format: value => fmt.int(value) + ' of 10',
+    caption: 'Counts in this run',
+    target: { value: 5, label: 'Expected heads' }
+  });
+  LearningUI.renderGrid($('demo-grid'), {
+    caption: 'Predicted against actual',
+    corner: 'Actual',
+    columns: ['Flagged', 'Not flagged'],
+    rows: ['Positive', 'Negative'],
+    cells: [
+      [{ value: 15, label: 'True positives', tone: 'tp' }, { value: 5, label: 'Missed', tone: 'fn' }],
+      [{ value: 4, label: 'False alarms', tone: 'fp' }, { value: 16, label: 'True negatives', tone: 'tn' }]
+    ]
+  });
+  let swapped = false;
+  $('demo-change').addEventListener('click', () => {
+    swapped = !swapped;
+    motion.setText($('demo-metric'), swapped ? '83%' : '79%');
+  });
+
+  // --- sequence ---------------------------------------------------------
+  const steps = [
+    'Every value is still a candidate.',
+    'The rule applies to the second value.',
+    'The result is recorded.',
+    'The result is checked against the input.'
+  ];
+  LearningUI.mountStepper($('demo-trace'), {
+    count: steps.length,
+    interval: 1200,
+    labels: steps,
+    render(index) {
+      $('demo-step-text').textContent = steps[index];
+      [...$('demo-tokens').children].forEach((token, position) => {
+        token.dataset.active = String(position === index);
+        token.dataset.state = position < index ? 'done' : '';
+      });
+    }
+  });
+
+  // --- questions --------------------------------------------------------
+  LearningUI.mountQuestion($('demo-question'), {
+    correct: 'double',
+    feedback: {
+      double: 'Yes. Multiplying x by 2 multiplies 2x by 2.',
+      same: 'Hold the multiplier at 2 and compare x = 3 with x = 6.'
+    }
+  });
+  LearningUI.mountPrediction($('demo-predict'), { label: 'Your prediction', reveal: '#demo-reveal' });
+  LearningUI.mountSortable($('demo-order'), {
+    items: [
+      { id: 'read', label: 'Read the input' },
+      { id: 'apply', label: 'Apply the rule' },
+      { id: 'record', label: 'Record the result' }
+    ],
+    correct: ['read', 'apply', 'record'],
+    feedback: { read: 'Nothing can be applied before the input is read.' },
+    seed: 3
+  });
+  LearningUI.mountMatching($('demo-match'), {
+    pairs: [
+      { id: 'mean', term: 'Mean', match: 'Moves when one value is extreme', why: 'Only the mean uses every value’s size.' },
+      { id: 'median', term: 'Median', match: 'Depends only on position' },
+      { id: 'range', term: 'Range', match: 'Describes spread, not a typical value' }
+    ],
+    seed: 11
+  });
+  LearningUI.mountHints(document.querySelector('[data-hints]'), {
+    hints: [
+      'Start from what the question actually asks for.',
+      'Write the sorted values and mark the middle one.',
+      'Only the mean uses the size of every value.'
+    ]
+  });
+  LearningUI.mountSelfExplain($('demo-explain'), { minLength: 20 });
+
+  // --- drawing ----------------------------------------------------------
+  const figure = $('demo-svg');
+  const x = svg.scale({ domain: [0, 10], range: [40, 390] });
+  const y = svg.scale({ domain: [0, 10], range: [150, 24] });
+  figure.append(svg.el('line', { x1: x(0), y1: y(0), x2: x(10), y2: y(0), stroke: 'var(--border-hover)' }));
+  figure.append(svg.el('path', {
+    d: svg.path([{ x: x(0), y: y(0) }, { x: x(10), y: y(8) }]),
+    fill: 'none', stroke: 'var(--accent)', 'stroke-width': 2.5
+  }));
+  figure.append(svg.el('circle', { cx: x(5), cy: y(4), r: 6, fill: 'var(--surface)', stroke: 'var(--accent)', 'stroke-width': 2.5 }));
+  figure.append(svg.el('text', { x: x(5) + 12, y: y(4) - 6, fill: 'var(--muted)', style: 'font: 12px var(--font-sans)' }, 'Halfway'));
+
+  // --- tokens -----------------------------------------------------------
+  const tokens = ['--bg', '--surface', '--card', '--border', '--border-strong', '--text', '--muted',
+    '--faint', '--accent', '--accent-dim', '--series-1', '--series-2', '--series-3', '--series-4'];
+  $('token-swatches').replaceChildren(...tokens.map(token => {
+    const chip = document.createElement('span');
+    chip.className = 'swatch-chip';
+    const colour = document.createElement('i');
+    colour.style.background = 'var(' + token + ')';
+    chip.append(colour, document.createTextNode(token));
+    return chip;
+  }));
+  describeChoice();
+})();
+</script>
+</body>
+</html>

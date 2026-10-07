@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Right triangles · Geometry lab</title>
+  <link rel="stylesheet" href="../interactive.css">
+  <style>
+    /* EDIT: only the drawing needs page-specific styling. */
+    #figure { width: 100%; height: auto; background: var(--card); border-radius: var(--radius); }
+    .leg-a { fill: var(--series-1); }
+    .leg-b { fill: var(--series-2); }
+    .leg-c { fill: var(--series-3); }
+    #figure text { font: 600 13px var(--font-sans); fill: var(--text-bright); }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to lesson</a>
+<main id="main" class="lesson">
+  <!-- EDIT: lesson content. Keep the drawing, the numbers, and the claim in agreement. -->
+  <header class="lesson-header">
+    <p class="eyebrow">Geometry lab · Right triangles</p>
+    <h1>Where does a² + b² come from?</h1>
+    <p class="subtitle">Change the two legs and watch three squares. The claim is about areas, not about the lengths you see.</p>
+  </header>
+  <section class="prompt-card stack" aria-labelledby="warmup-title">
+    <h2 id="warmup-title">01 · Predict first</h2>
+    <p><strong>Your goal:</strong> explain why the two smaller squares always fill the largest one.</p>
+    <form id="predict" class="stack">
+      <fieldset>
+        <legend>Legs of 3 and 4 give a hypotenuse of 5. If both legs double, to 6 and 8, what happens to the hypotenuse?</legend>
+        <label><input type="radio" name="predict" value="same" required> It stays 5; only the legs changed.</label>
+        <label><input type="radio" name="predict" value="double"> It doubles, to 10.</label>
+        <label><input type="radio" name="predict" value="quadruple"> It quadruples, to 20.</label>
+      </fieldset>
+      <div class="btn-row">
+        <button class="btn" type="submit" data-check>Lock in my prediction</button>
+        <button class="btn btn-secondary" type="button" data-retry hidden>Predict again</button>
+      </div>
+      <p class="predict-record" data-record hidden></p>
+      <p class="explain" data-locked>Your prediction is recorded on this page only. Nothing is sent anywhere.</p>
+    </form>
+  </section>
+  <section class="workspace" aria-labelledby="explore-title">
+    <div class="controls stack is-sticky">
+      <h2 id="explore-title">02 · Change one leg at a time</h2>
+      <div class="control-group">
+        <div class="control-heading"><label for="leg-a">Leg <var>a</var></label><output id="leg-a-value" for="leg-a">3</output></div>
+        <input id="leg-a" type="range" min="1" max="8" step="1" value="3">
+        <div class="range-ends"><span>1</span><span>8</span></div>
+      </div>
+      <div class="control-group">
+        <div class="control-heading"><label for="leg-b">Leg <var>b</var></label><output id="leg-b-value" for="leg-b">4</output></div>
+        <input id="leg-b" type="range" min="1" max="8" step="1" value="4">
+        <div class="range-ends"><span>1</span><span>8</span></div>
+      </div>
+      <ul class="term-key" aria-label="Which color marks which square">
+        <li data-term="1"><span class="swatch" aria-hidden="true"></span>Square on <var>a</var></li>
+        <li data-term="2"><span class="swatch" aria-hidden="true"></span>Square on <var>b</var></li>
+        <li data-term="3"><span class="swatch" aria-hidden="true"></span>Square on <var>c</var></li>
+      </ul>
+      <div class="preset-row">
+        <button class="preset-btn" type="button" data-preset="3,4">3 and 4</button>
+        <button class="preset-btn" type="button" data-preset="6,8">6 and 8</button>
+        <button class="preset-btn" type="button" data-preset="5,5">5 and 5</button>
+      </div>
+      <button id="reset" class="btn btn-secondary" type="button">Reset the triangle</button>
+    </div>
+    <div class="stage stack">
+      <h2>03 · Read the areas</h2>
+      <svg id="figure" viewBox="0 0 420 300" role="img" aria-labelledby="figure-title" aria-describedby="figure-desc"></svg>
+      <h3 id="figure-title" class="sr-only">Right triangle with a square drawn on each side</h3>
+      <p id="figure-desc" class="explain">The squares are drawn to scale. Compare the two shaded areas with the third.</p>
+      <p class="equation" id="equation" data-math="\term{1}{3^2} + \term{2}{4^2} = \term{3}{5^2}" data-math-display="block"></p>
+      <div class="metrics-grid">
+        <div class="metric metric--accent"><span class="metric-name">Area on <var>a</var></span><strong class="metric-value" id="area-a">9</strong><span class="metric-subtext">square units</span></div>
+        <div class="metric"><span class="metric-name">Area on <var>b</var></span><strong class="metric-value" id="area-b">16</strong><span class="metric-subtext">square units</span></div>
+        <div class="metric"><span class="metric-name">Area on <var>c</var></span><strong class="metric-value" id="area-c">25</strong><span class="metric-subtext">square units</span></div>
+      </div>
+      <p id="observation">9 + 16 = 25, so the hypotenuse is exactly 5.</p>
+      <p class="explain">Lengths are rounded for display; the model keeps full precision. A hypotenuse is irrational unless the legs form a Pythagorean triple.</p>
+    </div>
+  </section>
+  <section class="two-col" aria-label="Explain and transfer">
+    <article class="panel stack">
+      <h2>04 · Explain it</h2>
+      <p>Set the legs to 6 and 8 and compare with 3 and 4. The lengths doubled. What happened to each <em>area</em>, and why does the hypotenuse still land on a whole number?</p>
+      <div data-hints class="stack stack--tight">
+        <div class="btn-row"><button class="btn btn-secondary btn-sm" type="button" data-hint-next>Show a hint</button><span class="hint-count" data-hint-count></span></div>
+        <ol class="hint-list" data-hint-list></ol>
+      </div>
+    </article>
+    <article class="panel stack">
+      <h2>Transfer the idea</h2>
+      <p>A screen is 16 units wide and 9 units tall. Which quantity does the diagonal correspond to, and which two quantities are squared and added? Try the same reasoning with a right-angled path across a park.</p>
+      <details><summary>Reveal a worked check</summary><p>The diagonal is the hypotenuse: 16² + 9² = 256 + 81 = 337, so the diagonal is √337, about 18.36. It is not 25, because areas add, not lengths.</p></details>
+    </article>
+  </section>
+  <aside class="notice"><strong>Model limits.</strong> This drawing shows one right triangle with whole-number legs between 1 and 8. The relationship holds for every right triangle in Euclidean geometry, including non-integer legs; it fails for triangles without a right angle and on curved surfaces. The picture is evidence for the claim, not a proof of it.</aside>
+  <noscript><p class="notice">The sliders need JavaScript. Worked example: legs of 3 and 4 give squares of area 9 and 16. Their total, 25, is the area of the square on the hypotenuse, so the hypotenuse is 5. Doubling both legs to 6 and 8 gives areas 36 and 64, totalling 100, so the hypotenuse is 10: the lengths doubled while the areas quadrupled.</p></noscript>
+  <footer class="lesson-footer">Areas add. Lengths do not.</footer>
+  <!-- END EDIT: lesson content. -->
+</main>
+<p class="sr-only" data-announcer role="status" aria-live="polite" aria-atomic="true"></p>
+<script src="../interactive.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const { svg, math, fmt, motion } = LearningUI;
+  const round = value => LearningUI.round(value, 2);
+  // EDIT: geometry model. Keep the drawing, the metrics, and the equation in one render.
+  function draw(a, b) {
+    const c = Math.sqrt(a * a + b * b);
+    // Model coordinates with y upward; the right angle sits at the origin.
+    const squares = [
+      { className: 'leg-a', area: a * a, points: [[0, 0], [0, a], [-a, a], [-a, 0]] },
+      { className: 'leg-b', area: b * b, points: [[0, 0], [b, 0], [b, -b], [0, -b]] },
+      // The square on the hypotenuse grows along the outward normal (a, b).
+      { className: 'leg-c', area: c * c, points: [[b, 0], [0, a], [a, a + b], [a + b, b]] }
+    ];
+    const triangle = [[0, 0], [b, 0], [0, a]];
+    const all = squares.flatMap(square => square.points).concat(triangle);
+    const xs = all.map(point => point[0]), ys = all.map(point => point[1]);
+    const pad = 22;
+    const spanX = Math.max(...xs) - Math.min(...xs), spanY = Math.max(...ys) - Math.min(...ys);
+    const scale = Math.min((420 - 2 * pad) / spanX, (300 - 2 * pad) / spanY);
+    const width = spanX * scale + 2 * pad, height = spanY * scale + 2 * pad;
+    const at = ([x, y]) => ({
+      x: (x - Math.min(...xs)) * scale + pad,
+      y: (Math.max(...ys) - y) * scale + pad
+    });
+    const figure = $('figure');
+    figure.setAttribute('viewBox', '0 0 ' + round(width) + ' ' + round(height));
+    figure.replaceChildren();
+    squares.forEach(square => {
+      const corners = square.points.map(at);
+      figure.append(svg.el('polygon', {
+        points: corners.map(point => round(point.x) + ',' + round(point.y)).join(' '),
+        class: square.className, 'fill-opacity': '.25', stroke: 'currentColor'
+      }));
+      const centre = corners.reduce((total, point) => ({ x: total.x + point.x / 4, y: total.y + point.y / 4 }), { x: 0, y: 0 });
+      figure.append(svg.el('text', { x: round(centre.x), y: round(centre.y + 4), 'text-anchor': 'middle' }, fmt.fixed(square.area, 0)));
+    });
+    figure.append(svg.el('polygon', {
+      points: triangle.map(at).map(point => round(point.x) + ',' + round(point.y)).join(' '),
+      fill: 'var(--surface)', stroke: 'var(--text-bright)', 'stroke-width': 2
+    }));
+    const corner = at([0, 0]);
+    figure.append(svg.el('path', {
+      d: 'M' + round(corner.x + 11) + ' ' + round(corner.y) + ' L' + round(corner.x + 11) + ' ' + round(corner.y - 11) +
+         ' L' + round(corner.x) + ' ' + round(corner.y - 11),
+      fill: 'none', stroke: 'var(--muted)'
+    }));
+    return c;
+  }
+  function render() {
+    const a = Number($('leg-a').value);
+    const b = Number($('leg-b').value);
+    const c = draw(a, b);
+    math.update($('equation'), String.raw`\term{1}{${a}^2} + \term{2}{${b}^2} = \term{3}{${fmt.fixed(c * c, 0)}}`);
+    motion.setText($('area-a'), fmt.int(a * a));
+    motion.setText($('area-b'), fmt.int(b * b));
+    motion.setText($('area-c'), fmt.fixed(c * c, 0));
+    const exact = Number.isInteger(c);
+    $('observation').textContent = a * a + ' + ' + b * b + ' = ' + (a * a + b * b) + ', so the hypotenuse is ' +
+      (exact ? 'exactly ' + c + '.' : 'about ' + fmt.fixed(c, 3) + ', which is not a whole number.');
+    $('figure-desc').textContent = 'A right triangle with legs ' + a + ' and ' + b + '. The squares on the legs cover ' +
+      (a * a) + ' and ' + (b * b) + ' square units; the square on the hypotenuse covers ' + (a * a + b * b) + '.';
+    document.querySelectorAll('[data-preset]').forEach(button => {
+      const active = button.dataset.preset === a + ',' + b;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+  }
+  // END EDIT: geometry model.
+  const summarize = () => LearningUI.announce($('observation').textContent);
+  const legA = LearningUI.bindRange($('leg-a'), $('leg-a-value'), { format: String, onInput: render, onChange: summarize });
+  const legB = LearningUI.bindRange($('leg-b'), $('leg-b-value'), { format: String, onInput: render, onChange: summarize });
+  const prediction = LearningUI.mountPrediction($('predict'), { label: 'Your prediction' });
+  const hints = LearningUI.mountHints(document.querySelector('[data-hints]'), {
+    hints: [
+      'Write down the two areas before doubling and after doubling, then compare each pair.',
+      'Doubling a length multiplies the area of its square by four, because both sides of that square doubled.',
+      'If every area is multiplied by four, the total is too, and the square root of four times an area is twice the original length.'
+    ]
+  });
+  document.querySelectorAll('[data-preset]').forEach(button => button.addEventListener('click', () => {
+    const [a, b] = button.dataset.preset.split(',').map(Number);
+    legA.set(a, { notify: false });
+    legB.set(b, { notify: false });
+    render();
+    summarize();
+  }));
+  $('reset').addEventListener('click', () => {
+    legA.set(3, { notify: false });
+    legB.set(4, { notify: false });
+    prediction.reset();
+    hints.reset();
+    render();
+    LearningUI.announce('Triangle reset to legs 3 and 4. Prediction and hints cleared.');
+  });
+  math.render(document);
+  render();
+})();
+</script>
+</body>
+</html>

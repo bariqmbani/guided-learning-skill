@@ -64,7 +64,10 @@
         <div class="pop-legend"><span><i class="pop-dot pop-tp"></i>True positives</span><span><i class="pop-dot pop-fp"></i>False alarms</span><span><i class="pop-dot pop-fn"></i>Missed cases</span><span><i class="pop-dot pop-tn"></i>True negatives</span></div>
       </div>
       <p id="result-summary">19 samples are flagged: 15 true positives and 4 false alarms. 5 real positives are missed.</p>
-      <p class="formula" id="formula">Precision = 15 / 19; recall = 15 / 20.</p>
+      <div class="equation-row">
+          <p class="equation equation--plain" id="precision-formula" data-math="\text{precision} = \frac{15}{19}" data-math-display="block"></p>
+          <p class="equation equation--plain" id="recall-formula" data-math="\text{recall} = \frac{15}{20}" data-math-display="block"></p>
+        </div>
     </section>
   </div>
   <section class="two-col">
@@ -120,7 +123,11 @@ function update() {
   Object.entries({precision, recall, f1}).forEach(([id, value]) => setText(id, value === null ? 'N/A' : Math.round(value * 100) + '%'));
   const summary = `${tp + fp} samples are flagged: ${tp} true positives and ${fp} false alarms. ${fn} real positives are missed.`;
   setText('result-summary', summary);
-  setText('formula', `Precision = ${tp + fp ? `${tp} / ${tp + fp}` : 'undefined (no flagged samples)'}; recall = ${tp} / 20.`);
+  // The denominators are the lesson, so show them as fractions, not as text.
+  LearningUI.math.update(byId('precision-formula'), tp + fp
+    ? String.raw`\text{precision} = \frac{${tp}}{${tp + fp}}`
+    : String.raw`\text{precision} = \frac{${tp}}{0} \text{ is undefined}`);
+  LearningUI.math.update(byId('recall-formula'), String.raw`\text{recall} = \frac{${tp}}{20}`);
   presets.forEach(button => button.setAttribute('aria-pressed', String(Number(button.dataset.value) === threshold)));
 }
 const control = LearningUI.bindRange(byId('threshold'), byId('threshold-value'), {
@@ -134,6 +141,7 @@ const question = LearningUI.mountQuestion(byId('check'), { correct: 'six', feedb
   recall: 'Missed positives are needed for recall. Precision asks only about the ten flagged samples.'
 }});
 byId('reset').addEventListener('click', () => { control.reset(); question.reset(); LearningUI.announce('Reset to threshold 50. ' + byId('result-summary').textContent); });
+LearningUI.math.render(document);
 update();
 </script>
 </body>

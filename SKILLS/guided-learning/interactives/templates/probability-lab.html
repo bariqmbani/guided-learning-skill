@@ -40,10 +40,13 @@
     <div class="stage stack">
       <h2>03 · Sample and observe</h2>
       <p id="run-label">Current run: 50% chance of heads · seed 42.</p>
+      <p class="equation equation--plain" data-math="E[\text{heads}] = n \cdot p" data-math-display="block"></p>
+      <p class="explain">The expected count is the sample size times the chance of heads. A sample rarely lands exactly on it.</p>
       <div class="btn-row"><button id="toss-one" class="btn" type="button">Toss once</button><button id="toss-ten" class="btn btn-secondary" type="button">Toss 10</button></div>
       <p class="explain" id="limit-note">Up to 200 tosses per run. Near the limit, Toss 10 adds only the remaining tosses.</p>
-      <div class="metrics-grid"><div class="metric"><span class="metric-name">Tosses</span><strong id="toss-count" class="metric-value">0</strong></div><div class="metric"><span class="metric-name">Heads</span><strong id="heads-count" class="metric-value">0</strong></div><div class="metric"><span class="metric-name">Observed heads</span><strong id="observed" class="metric-value">—</strong><span class="metric-subtext">No sample yet</span></div></div>
+      <div class="metrics-grid"><div class="metric"><span class="metric-name">Tosses</span><strong id="toss-count" class="metric-value">0</strong></div><div class="metric"><span class="metric-name">Heads</span><strong id="heads-count" class="metric-value">0</strong></div><div class="metric"><span class="metric-name">Observed heads</span><strong id="observed" class="metric-value">-</strong><span class="metric-subtext">No sample yet</span></div></div>
       <div class="stack"><h3 id="history-title">Most recent tosses · H = heads, T = tails</h3><ol id="history" class="coin-history" aria-labelledby="history-title"></ol><p id="empty-history" class="explain">Toss the coin to begin. Up to the last 12 outcomes appear here, oldest first.</p></div>
+      <div id="outcome-bars" aria-label="Counts of heads and tails in this run"></div>
       <div id="frequency-chart" class="chart" aria-label="Expected and observed heads proportion graph and data table"></div>
       <p id="observation">The expected proportion is 50%. There is no observed proportion until the first toss.</p>
     </div>
@@ -62,14 +65,11 @@
   const $ = id => document.getElementById(id);
   // EDIT: simulation model. Reset sampling whenever probability or seed changes.
   const limit = 200;
+  const { fmt, motion } = LearningUI;
   let seed = 42;
   let chance = 0.5;
-  let randomState = seed;
+  let random = LearningUI.seededRandom(seed);
   let outcomes = [];
-  function random() {
-    randomState = (Math.imul(1664525, randomState) + 1013904223) >>> 0;
-    return randomState / 4294967296;
-  }
   function render() {
     const count = outcomes.length;
     const heads = outcomes.reduce((total, heads) => total + Number(heads), 0);
@@ -77,7 +77,7 @@
     $('run-label').textContent = 'Current run: ' + Math.round(chance * 100) + '% chance of heads · seed ' + seed + '.';
     $('toss-count').textContent = count;
     $('heads-count').textContent = heads;
-    $('observed').textContent = observed === null ? '—' : (observed * 100).toFixed(1) + '%';
+    $('observed').textContent = observed === null ? '-' : (observed * 100).toFixed(1) + '%';
     $('observed').nextElementSibling.textContent = count ? heads + ' of ' + count + ' tosses' : 'No sample yet';
     $('history').replaceChildren();
     outcomes.slice(-12).forEach((isHeads, index) => {
@@ -88,7 +88,17 @@
       item.setAttribute('aria-label', 'Toss ' + tossNumber + ': ' + (isHeads ? 'heads' : 'tails'));
       $('history').append(item);
     });
-    $('empty-history').textContent = count ? 'Showing tosses ' + Math.max(1, count - 11) + '–' + count + ', oldest first.' : 'Toss the coin to begin. Up to the last 12 outcomes appear here, oldest first.';
+    $('empty-history').textContent = count ? 'Showing tosses ' + Math.max(1, count - 11) + '-' + count + ', oldest first.' : 'Toss the coin to begin. Up to the last 12 outcomes appear here, oldest first.';
+    LearningUI.renderBars($('outcome-bars'), {
+      bars: [
+        { label: 'Heads', value: heads },
+        { label: 'Tails', value: count - heads, series: 3 }
+      ],
+      max: Math.max(1, count),
+      format: value => fmt.int(value) + (count ? ' of ' + count : ''),
+      caption: 'Counts so far',
+      target: count ? { value: count * chance, label: 'Expected heads at this sample size' } : undefined
+    });
     const difference = observed === null ? 0 : (observed - chance) * 100;
     $('observation').textContent = observed === null
       ? 'The expected proportion is ' + Math.round(chance * 100) + '%. There is no observed proportion until the first toss.'
@@ -104,7 +114,7 @@
   function startRun(nextSeed, nextChance) {
     seed = nextSeed;
     chance = nextChance;
-    randomState = seed;
+    random = LearningUI.seededRandom(seed);
     outcomes = [];
     $('seed').value = seed;
     chanceControl.set(chance * 100, { notify: false });
@@ -128,6 +138,7 @@
   $('toss-ten').addEventListener('click', () => sample(10));
   $('replay').addEventListener('click', () => startRun(seed, chance));
   $('reset').addEventListener('click', () => { question.reset(); startRun(42, 0.5); });
+  LearningUI.math.render(document);
   render();
 })();
 </script>

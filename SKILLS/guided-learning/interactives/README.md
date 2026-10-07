@@ -21,7 +21,8 @@ independent of this repository; creating lessons requires no remote connection.
 2. Choose a template from the table below. Read only that template and the
    relevant component contract; there is no need to load every example.
 3. Scaffold into the learner's workspace, edit its marked lesson/model sections,
-   rebuild, and verify it. Keep the working interaction shell.
+   rebuild, and check it with `verify.py` and in a browser. Keep the working
+   interaction shell.
 4. Ask a warm-up question, explore one contrast, ask for an explanation, then try a
    new case. The page supports the conversation; operating a slider is not
    evidence that the learner understands its model.
@@ -38,8 +39,8 @@ PowerShell example:
 & 'C:\path\to\python.exe' 'SKILLS/guided-learning/interactives/scaffold.py' parameter-explorer 'C:\Learning\My Vault\topics\algebra\learning\interactives\YYYY-MM-DD_linear-change.html'
 ```
 
-Replace the destination and date with the pinned workspace path and today's
-date. The scaffolder creates a standalone HTML page, supplies missing shared
+`scaffold.py --help` lists every pattern with the question it answers. Replace
+the destination and date with the pinned workspace path and today's date. The scaffolder creates a standalone HTML page, supplies missing shared
 assets beside it, and refuses to overwrite the destination or conflicting
 assets. For a topic with customized assets, follow **Local assets and
 customizations** below.
@@ -50,6 +51,17 @@ alone; their next build replaces them. Rebuild after changes to shared assets:
 ```sh
 python3 /absolute/path/to/topic/learning/interactives/build.py YYYY-MM-DD_linear-change.html
 ```
+
+Then run the static checker, which reports the mistakes a browser will not:
+broken labels, duplicate ids, a network request in an offline page, a missing
+runtime, leftover template text.
+
+```sh
+python3 SKILLS/guided-learning/interactives/verify.py /absolute/path/to/YYYY-MM-DD_linear-change.html
+```
+
+It exits non-zero when it finds an error. A clean run is not a test of the
+lesson's mathematics, its teaching, or its behavior in a browser.
 
 Filenames are relative to the builder's directory, regardless of the current
 shell directory. With no filenames, it processes adjacent `*.html` files. Check
@@ -64,15 +76,22 @@ something would not reveal useful information.
 
 | Learner need | Start with | Included example | Adaptation contract |
 | --- | --- | --- | --- |
-| “What happens if I change this?” | [Parameter explorer](templates/parameter-explorer.html) | Slope and intercept in `y = mx + b` | Change the equation, control bounds, output units, chart domains, and warm-up question together. |
+| “What happens if I change this?” | [Parameter explorer](templates/parameter-explorer.html) | Slope and intercept in a linear equation | Change the equation, control bounds, output units, chart domains, and warm-up question together. |
 | “Show me how it works, one step at a time.” | [Step sequence](templates/step-sequence.html) | Binary search through a sorted list | Supply a finite sequence of states with an action, visible state, and explanation for every transition. |
 | “When would I choose A over B?” | [Comparison](templates/comparison.html) | Simple and compound growth | Keep inputs and axes shared; change the two models, assumptions, and comparison question. |
 | “Why are results different each time?” | [Probability lab](templates/probability-lab.html) | Seeded coin trials and running frequency | Replace the generator and statistic; define the seed, sample limit, theoretical target, and restart behavior. |
 | “What should I do next, and why?” | [Decision scenario](templates/decision-scenario.html) | Investigating a missing user name | Replace the scenario states, choices, consequences, and explanation prompts; keep routes reachable and restartable. |
+| “Quiz me, and tell me why I was wrong.” | [Practice set](templates/practice-set.html) | Choosing mean, median, mode, or range | Replace the items, distractor feedback, hint ladder, and the worked answer the learner compares against. |
+| “Help me put this in the right order.” | [Order the steps](templates/order-steps.html) | Solving a bracketed linear equation | Replace the steps and the rule that orders them; every misplacement needs a reason, not a verdict. |
+| “Show me how these parts connect.” | [System map](templates/system-map.html) | Dependencies in a build pipeline | Replace nodes and edges; keep the graph acyclic, the table complete, and every arrow readable in both directions. |
+| “What does this data actually say?” | [Data explorer](templates/data-explorer.html) | A rate reversal when a grouping is ignored | Replace the dataset and grouping; name the source, the units, and what the data cannot support. |
+| “Why is that formula true?” | [Geometry lab](templates/geometry-lab.html) | Squares on the sides of a right triangle | Replace the construction and the quantity it measures; keep the drawing, the numbers, and the claim in agreement. |
 
 The [precision and recall example](example-interactive.html) remains a domain
-example. The five templates are complete activities, not empty mockups: preserve
-their working behaviors while replacing their teaching content.
+example. The ten templates are complete activities, not empty mockups: preserve
+their working behaviors while replacing their teaching content. The
+[component gallery](components.html) shows every control, figure, and notation
+feature on one page, with the markup beside each one.
 
 Useful extensions need not introduce another framework:
 
@@ -159,7 +178,7 @@ controls rather than replacing their containing DOM on each input; replacing a
 focused control can disrupt keyboard use. Insert learner-supplied text with
 `textContent`, never concatenate it into `innerHTML`.
 
-## Shared components and recipes
+## Shared components
 
 Include the runtime **before** the lesson script. Source templates use relative
 paths to shared assets; generated topic pages use adjacent files. The builder
@@ -169,12 +188,30 @@ replaces these references with marked inline blocks for portability:
 <link rel="stylesheet" href="interactive.css">
 <!-- Page-specific styles belong in a separate style element. -->
 <!-- Put one announcer inside the body, before the scripts. -->
-<p class="sr-only" data-announcer aria-live="polite" aria-atomic="true"></p>
+<p class="sr-only" data-announcer role="status" aria-live="polite" aria-atomic="true"></p>
 <script src="interactive.js"></script>
 <script>
   // Page model and component setup go here, after the relevant HTML.
 </script>
 ```
+
+**[COMPONENTS.md](COMPONENTS.md) is the full reference**: every helper, the
+markup it expects, its options, and the CSS classes and tokens. Open
+[components.html](components.html) in a browser to see them all working. Read
+the reference section you need rather than the whole file.
+
+| Need | Helper |
+| --- | --- |
+| A slider, radio group, or checkbox wired to a model | `bindRange`, `bindChoice`, `bindCheckbox` |
+| A finite trace with Back, Next, Play, a scrubber, and progress | `mountStepper` |
+| A question, a practice set, a prediction, hints, or a written explanation | `mountQuestion`, `mountQuiz`, `mountPrediction`, `mountHints`, `mountSelfExplain` |
+| Ordering or matching, keyboard-first | `mountSortable`, `mountMatching` |
+| Equations, fractions, roots, sums, matrices | `math.render`, `math.tex`, `math.update` |
+| A line, area, step, or scatter chart with a data cursor | `renderChart` |
+| Counts, shares, or histogram bins | `renderBars` |
+| A matrix, truth table, or heat map | `renderGrid` |
+| A diagram you draw yourself | `svg.create`, `svg.el`, `svg.scale`, `svg.path` |
+| Formatting, seeded randomness, announcements, change highlights | `fmt`, `seededRandom`, `announce`, `motion` |
 
 Use one `LearningUI` global; no module loader is needed. Build-time markers are
 `<!-- interactive.css:start -->` / `<!-- interactive.css:end -->` and equivalent
@@ -182,137 +219,54 @@ Use one `LearningUI` global; no module loader is needed. Build-time markers are
 preserves page-specific code. Only shared CSS and optional shared JS are inlined;
 external images, fonts, data files, or new libraries are not automatically bundled.
 
-### Labeled range and output
+### Mathematics, not monospace
+
+Set equations with `LearningUI.math`, which compiles a TeX subset to native
+MathML: real fractions, exponents, roots, and large operators in the browser's
+math font, read aloud as mathematics by assistive technology, with no library
+and no network. Reserve `.code-block` for code and transcripts.
 
 ```html
-<label for="rate">Growth per round</label>
-<input id="rate" type="range" min="0" max="20" step="1" value="5">
-<output id="rate-value" for="rate">5%</output>
-<p id="rate-help">The initial amount stays fixed.</p>
+<p class="equation" data-math="C(t) = P(1 + r)^t" data-math-display="block"></p>
+<p>Explain what <var>m</var> controls in <span data-math="y = mx + b"></span>.</p>
 ```
 
 ```js
-const rateInput = document.querySelector('#rate');
-rateInput.setAttribute('aria-describedby', 'rate-help');
-const rate = LearningUI.bindRange(rateInput, document.querySelector('#rate-value'), {
-  format: value => `${value}%`,
-  onInput: value => render(value),
-  onChange: value => LearningUI.announce(`Growth set to ${value}%`)
-});
-render(rate.get());
-// Preset button: rate.set(10); Reset button: rate.reset();
+LearningUI.math.render(document);                      // once, after the markup exists
+LearningUI.math.update($('equation'), `x = ${value}`); // when a value changes
 ```
 
-`get()` returns the numeric value. `set(number, {notify: true})` updates it;
-`notify: false` is useful when setting several inputs before one combined render.
-Initialization updates the output without calling `onInput`; explicitly render
-the model once afterward. `set()` invokes `onInput` by default, but `onChange`
-runs only for a native user change. The native range enforces its bounds and
-step. `reset()` restores the initial value. Keep a readable value next to the input and
-use a select/number input instead when exact entry is important. Use `onInput`
-for visual updates and `onChange` for a concise spoken result; do not announce
-every point during a continuous drag.
+`\term{1}{m}` tints one part of a formula with series color 1, so a slider, a
+chart series, and the term it moves can share a color. Pair it with a
+`.term-key` list that names each term in words: color never carries meaning
+alone. The supported notation table is in
+[COMPONENTS.md](COMPONENTS.md#supported-notation).
 
-### Finite step playback
+### Layout and styling
 
-```html
-<section id="trace" aria-label="Worked trace">
-  <p data-position></p>
-  <p id="trace-explanation" data-step-summary></p>
-  <div class="btn-row">
-    <button type="button" class="btn btn-secondary" data-back>Back</button>
-    <button type="button" class="btn" data-next>Next step</button>
-    <button type="button" class="btn btn-secondary" data-play>Play</button>
-    <button type="button" class="btn btn-secondary" data-reset>Reset</button>
-  </div>
-</section>
-```
+Reuse `interactive.css` before adding local rules: `.lesson`, `.workspace`,
+`.controls`, `.stage`, `.panel`, `.prompt-card`, `.callout`, `.notice`,
+`.stack`, `.two-col`, `.metrics-grid`, `.btn`, `.segmented`, `.feedback`,
+`.equation`, and the rest are listed in the reference. Use the shared color and
+spacing tokens rather than literal values; the stylesheet also defines a dark
+palette, so a token follows the learner's theme. Every page gets a light/dark
+button from the shared runtime. It follows the system initially, remembers a
+manual preference when browser storage is available, and applies one theme to
+the whole page. CSS `light-dark()` keeps both palettes alongside each token.
 
-```js
-const states = ['Start at the input.', 'Apply the operation.', 'Inspect the result.'];
-const trace = LearningUI.mountStepper(document.querySelector('#trace'), {
-  count: states.length,
-  interval: 900,
-  render: index => {
-    document.querySelector('#trace-explanation').textContent = states[index];
-  }
-});
-// trace.go(1); trace.pause(); trace.reset(); trace.destroy();
-```
+Use outlined secondary buttons for actions and pill-shaped presets for settings.
+Panels nested inside a stage become flat sections with dividers. Answer feedback
+belongs inline within its parent surface, and quiz options occupy separate rows.
 
-Indices start at zero; `interval` is milliseconds between steps, not model time,
-and must be at least 200. Playback starts only on request, pauses in a hidden tab,
-and stops at the last step. `data-speed` is an optional multiplier select (for
-example `0.5`, `1`, `2`); copy its markup from the step-sequence template.
-With reduced motion enabled, Play is disabled and Back/Next remain usable.
-`data-step-summary` supplies meaning for the announcement after a manual step.
-Call `destroy()` before removing or
-replacing a mounted component. Do not use infinite autoplay to demonstrate an
-algorithm that has a finite trace.
+Copy lesson shell, chart, stepper, and feedback markup from a working template
+rather than reconstructing it from memory. Give colors redundant text labels or
+distinct line styles; red and green alone must not encode correctness.
 
-### Question with explanatory feedback
-
-```html
-<form id="check">
-  <fieldset>
-    <legend>With y = 2x, what happens to y when x doubles?</legend>
-    <label><input type="radio" name="answer" value="double"> It doubles</label>
-    <label><input type="radio" name="answer" value="same"> It stays the same</label>
-  </fieldset>
-  <button class="btn" type="submit" data-check>Check answer</button>
-  <button class="btn btn-secondary" type="button" data-retry>Try again</button>
-  <p data-feedback role="status"></p>
-</form>
-```
-
-```js
-const check = LearningUI.mountQuestion(document.querySelector('#check'), {
-  correct: 'double',
-  feedback: {
-    double: 'Yes. Multiplying x by 2 also multiplies 2x by 2.',
-    same: 'Hold the multiplier at 2: compare x = 3 and x = 6, then try again.'
-  }
-});
-// check.reset();
-```
-
-Scope one radio group to each question form and use unique group names if multiple
-questions share a page. Missing selection must produce a helpful prompt. Feedback
-should explain the choice, suggest an action when wrong, and allow retry. This
-component checks one selected value; use scenario branches or tutor discussion
-for open-ended reasoning, partial credit, and genuinely multiple valid answers.
-
-### Chart with data alternative
-
-```html
-<div id="growth-chart"></div>
-<p id="growth-summary">Doubling x doubles y in this example.</p>
-```
-
-```js
-LearningUI.renderChart(document.querySelector('#growth-chart'), {
-  series: [{label: 'y = 2x', points: [{x: 0, y: 0}, {x: 1, y: 2}, {x: 2, y: 4}]}],
-  xLabel: 'Input x', yLabel: 'Output y',
-  xDomain: [0, 2], yDomain: [0, 4],
-  formatX: value => String(value), formatY: value => String(value)
-});
-```
-
-The renderer accepts one to four nonempty series and supplies an SVG with
-distinct line patterns/markers, a legend, and a data table in a details
-disclosure. It redraws for container resizing. Supply a separate short interpretation tied to the current state;
-table values alone do not explain the relationship. Domains and formatters are
-optional. Explicit domains must contain two increasing finite numbers. Use fixed
-domains when comparisons require a shared scale, and label any intentional
-change of scale. Points outside the domain are clipped visually while remaining
-in the table; explain clipping when it matters. Supply finite numeric points in meaningful order.
-This is a small line-chart renderer, not a statistical package: calculate and
-validate uncertainty, bins, or transformations in the model before rendering.
-
-`LearningUI.announce(message)` sends a short, debounced polite announcement to
-the page's `[data-announcer]` element; without that element it does nothing.
-Use it for completed runs, reset, or meaningful changed results. Keep visible
-text as well; do not rely on a live region as the only explanation.
+Default to one page with visible sections. Tabs cost keyboard, focus, and state
+logic; use them only when separating genuinely different views helps, and
+implement their full keyboard behavior. If later views use earlier inputs, label
+the source view, show a live input summary, and state the dependency in every
+dependent view. Do not hide data provenance behind navigation.
 
 The runtime's generated control labels, announcements, and feedback prefixes
 currently use English. Translating only the template prose does not translate
@@ -323,21 +277,6 @@ twice; keep the translated source for future edits. The builder preserves
 unmarked lesson code. Translate visible and spoken strings together and verify
 the full interaction; do not overwrite the canonical kit for a learner's language.
 
-### Layout and styling
-
-Reuse `interactive.css` before adding local rules. Its layout and surface
-classes include `.container`, `.layout`, `.two-col`, `.panel`, `.card`,
-`.notice`, `.control-group`, `.btn`, `.btn-secondary`, `.btn-row`, `.preset-row`,
-`.formula`, and `.explain`. Copy lesson shell, chart, stepper, and feedback
-markup from the working templates rather than reconstructing it from memory.
-Use the shared color and spacing variables. Give colors redundant text labels
-or distinct line styles; red/green alone must not encode correctness.
-
-Default to one page with visible sections. Tabs cost keyboard/focus/state logic;
-use them only when separating genuinely different views helps. A custom tab UI
-must implement its full keyboard and focus behavior. If later views use earlier
-inputs, label the source view, show a live input summary, and state the dependency
-in every dependent view. Do not hide data provenance behind navigation.
 
 ## Motion, access, and correctness
 
@@ -348,6 +287,12 @@ grades response speed. Respect `prefers-reduced-motion` in both CSS and scripted
 playback; the same result must remain available through immediate updates or
 manual steps. If adding custom timers, stop them on reset and when the page is
 hidden. A Pause button must actually stop progression.
+
+The shared runtime adds short transitions to pointer-triggered answers, hints,
+predictions, and worked explanations. Keyboard actions and continuous slider
+updates stay immediate. Reduced motion keeps a gentle fade on reveals and
+removes positional motion. Keep mouse focus rings off charts and map nodes,
+while preserving visible keyboard focus.
 
 Use native `<button>`, `<input>`, `<select>`, `<fieldset>/<legend>`, and
 `<details>/<summary>`. Pair each input with a visible label, provide units and
@@ -373,7 +318,8 @@ percentage. Do not imply causality from correlation, calibrated probabilities
 from scores, or convergence after every additional random sample. Show rounding
 only in the display and preserve calculation precision.
 
-The supplied pages do not send or persist responses. Keep that default. A learner
+The supplied pages save only a light/dark preference in browser storage; no
+responses or progress are sent or persisted. Keep that default. A learner
 may write reflections locally, but refreshing the page can discard them; say so
 when relevant. Adding storage or export requires an explicit design for what is
 saved and how it is cleared. Browser interactions do not silently update a
@@ -412,9 +358,12 @@ reconsider whether it still meets the offline standalone requirement.
 - **Access:** Tab through the page, operate controls without a pointer, and check
   a narrow viewport and zoom. Verify reduced motion, text/table alternatives,
   visible focus, meaningful labels, and feedback without color dependence.
-- **Delivery:** Run the selected Python builder and check its exit status. Open
-  the built page from a different directory or offline; check console errors if
-  browser tools exist. Source review alone is not browser verification.
+- **Notation:** Equations render as mathematics, not as monospace code. Symbols
+  in prose use `<var>`. Every highlighted term is also named in words.
+- **Delivery:** Run the selected Python builder and check its exit status, then
+  `verify.py` on the built file. Open the page from a different directory or
+  offline; check console errors if browser tools exist. Source review alone is
+  not browser verification.
 
 When a tool is unavailable, record that limit and use a feasible check; do not
 claim to have tested a browser or screen reader you did not use. The main tutor
@@ -433,7 +382,10 @@ the explanation/transfer prompt. These sources support design principles; they
 do not validate this exact kit, its taxonomy, or individual generated lessons.
 
 For development in the setup repository, change canonical assets here and update
-the installer allowlist/tests for new files. Run
+the installer allowlist/tests for new files. The kit's files are
+`interactive.css`, `interactive.js`, `build.py`, `scaffold.py`, `verify.py`,
+`README.md`, `COMPONENTS.md`, `index.html`, `components.html`,
+`example-interactive.html`, and `templates/`. Run
 `python3 -m unittest discover -s tests -v` after helper or installer changes and
 verify that generated vaults contain reusable examples but no learner topics,
 concept sessions, roadmaps, recall entries, or journals. Preserve the repository

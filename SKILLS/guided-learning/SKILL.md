@@ -1,7 +1,7 @@
 ---
 name: guided-learning
 metadata:
-  version: "3.7.0"
+  version: "3.7.1"
 description: >
   Guide ongoing courses with topic roadmaps, a spiral curriculum, personalized
   lessons, and spaced recall. Use to start or continue a course, work through

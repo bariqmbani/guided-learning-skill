@@ -6,9 +6,6 @@
   <title>Follow the evidence · Decision scenario</title>
   <link rel="stylesheet" href="../interactive.css">
   <style>
-    .decision-history { padding-left: 1.2rem; font-size: .85rem; }
-    .decision-history li + li { margin-top: .85rem; }
-    .decision-history small { display: block; color: var(--muted); }
     #scenario-artifact { white-space: pre-wrap; overflow-wrap: anywhere; }
     #scenario-title:focus { outline-offset: .35rem; }
   </style>
@@ -28,7 +25,7 @@
       <p>You are working locally with two small test profiles. Some cards display a name; others display “undefined.”</p>
       <p class="explain">Each choice reveals a consequence. You can restart and compare another path. There is no score.</p>
       <button id="reset" class="btn btn-secondary" type="button">Restart scenario</button>
-      <h3>Your decision trail</h3><p id="empty-history" class="explain">No decisions yet.</p><ol id="history" class="decision-history"></ol>
+      <h3>Your decision trail</h3><p id="empty-history" class="explain">No decisions yet.</p><ol id="history" class="trail"></ol>
     </div>
     <div class="stage stack">
       <h2>03 · Inspect the consequence</h2>
