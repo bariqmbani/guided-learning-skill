@@ -54,6 +54,7 @@ class CreateVaultTests(unittest.TestCase):
             "topics/registry.json", "SKILLS/guided-learning/logs/session.md",
             "learning/interactives/private-lesson.html",
             "learner-profile.json", "Learner Profile.md",
+            "runtime.local.toml",
             "concept-sessions/2026-10-07_private/note.md",
             "concept-sessions/2026-10-07_private/mentor-feedback.md",
             "concept-sessions/2026-10-07_private/practice.md",
@@ -258,6 +259,7 @@ class CreateVaultTests(unittest.TestCase):
         setup.create_vault(ROOT, destination, "Learning", archive)
         extracted = self.base / "extracted"
         with zipfile.ZipFile(archive) as bundle:
+            self.assertNotIn("first/runtime.local.toml", bundle.namelist())
             for name in ["learner-profile", "concept-learning", "guided-learning"]:
                 self.assertIn(f"first/.agents/skills/{name}/SKILL.md", bundle.namelist())
                 self.assertIn(f"first/.claude/skills/{name}/SKILL.md", bundle.namelist())

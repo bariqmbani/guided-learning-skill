@@ -15,6 +15,7 @@
 SKILLS/guided-learning/logs/
 
 # Generated exports and local caches.
+/runtime.local.toml
 /dist/
 __pycache__/
 .trash/

@@ -73,6 +73,9 @@ friend; they extract it, open the folder in Obsidian, and choose a learning skil
 or optional profile setup.
 No ZIP is tracked in this repository.
 
+ZIPs omit `runtime.local.toml`. After extraction, use a verified local Python to run
+`scripts/configure_runtime.py`; see [runtime configuration](INSTALLATION.md#python-in-a-new-session-or-an-existing-vault).
+
 The generator copies an explicit list of reusable assets. It never copies owner
 profiles, topics, concept-session bundles, course notes, recall history, journals, attachments, execution
 logs, account-specific instructions, Git history, or Obsidian workspace state.

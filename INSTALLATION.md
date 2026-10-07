@@ -18,7 +18,8 @@ Python helpers directly.
    `-c "import sys; print(sys.executable); print(sys.version); sys.exit(0 if sys.version_info >= (3, 9) else 1)"`.
    A Windows app alias or launcher without a runtime is not sufficient. Use a
    known interpreter path if discovery commands fail; in PowerShell invoke a
-   quoted executable with `&`. Record the successful command for later helpers.
+   quoted executable with `&`. The generator saves the actual interpreter in
+   `runtime.local.toml` so future sessions do not depend on this conversation.
 4. Obtain the source using Git or the archive route below. If the source is
    already extracted locally, use it directly. Read its repository instructions.
 5. Run the generator through the matching wrapper or verified Python command.
@@ -135,6 +136,8 @@ for the `&` call operator.
 
 ## Verify before reporting success
 
+- Use the saved Python in `runtime.local.toml` to run the profile helper's `show`
+  command from the vault root; confirm the recorded Python works.
 - All three skills have regular `SKILL.md` entries under both `.agents/skills/`
   and `.claude/skills/`, and their canonical files are under `SKILLS/`.
 - `topics/registry.json` has `active_topic: null` and `topics: []`;
@@ -147,3 +150,15 @@ Report the vault path, the working Python invocation for future helpers, and any
 remaining optional limitation (such as unavailable Bash for HTML builds). Open
 the destination folder as a vault in Obsidian. Run Codex or Claude Code there;
 profile setup and learning begin only when requested.
+
+## Python in a new session or an existing vault
+
+`runtime.local.toml` stores only `python` (the executable path) and `version`.
+Quote that path when running helpers; PowerShell requires `&` before it.
+If the interpreter moves, or the file is absent after ZIP extraction, verify
+Python as above and use it to run `scripts/configure_runtime.py` from the vault.
+The record is ignored by Git and excluded from generated ZIPs.
+
+For an older vault, run that helper from a current source copy with
+`--vault '/path/to/existing-vault'`. It adds missing runtime guidance, a Git ignore
+entry, and the refresh helper while preserving learning data and custom instructions.

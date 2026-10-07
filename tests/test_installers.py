@@ -31,6 +31,8 @@ class InstallerTests(unittest.TestCase):
         profile = json.loads((self.destination / "learner-profile.json").read_text())
         self.assertFalse(profile["configured"])
         self.assertEqual(profile["name"], "")
+        runtime = (self.destination / "runtime.local.toml").read_text(encoding="utf-8")
+        self.assertIn("version = ", runtime)
         self.assertEqual({p.name for p in (self.destination / "concept-sessions").iterdir()}, {"README.md"})
         for agent in (".agents", ".claude"):
             for skill in ("learner-profile", "concept-learning", "guided-learning"):
@@ -117,6 +119,8 @@ class InstallerTests(unittest.TestCase):
                 result = self.run_installer(command, "--name", "My Learning")
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assert_empty_vault()
+                runtime = (self.destination / "runtime.local.toml").read_text(encoding="utf-8")
+                self.assertEqual(json.loads(runtime.splitlines()[0].split(" = ", 1)[1]), str(interpreter))
                 before = {p: p.read_bytes() for p in self.destination.rglob("*") if p.is_file()}
                 result = self.run_installer(command)
                 self.assertNotEqual(result.returncode, 0)

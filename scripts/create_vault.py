@@ -16,6 +16,12 @@ profile_spec = importlib.util.spec_from_file_location(
 profiles = importlib.util.module_from_spec(profile_spec)
 profile_spec.loader.exec_module(profiles)
 
+runtime_spec = importlib.util.spec_from_file_location(
+    "vault_runtime", Path(__file__).resolve().with_name("configure_runtime.py")
+)
+runtime = importlib.util.module_from_spec(runtime_spec)
+runtime_spec.loader.exec_module(runtime)
+
 
 # Explicitly enumerate reusable assets; never copy a course, registry, or workspace.
 ASSETS = [
@@ -23,6 +29,7 @@ ASSETS = [
     "INSTALLATION.md",
     "scripts/install_vault.sh",
     "scripts/install_vault.ps1",
+    "scripts/configure_runtime.py",
     "SKILLS/learner-profile/SKILL.md",
     "SKILLS/learner-profile/LICENSE",
     "SKILLS/learner-profile/CHANGELOG.md",
@@ -61,11 +68,7 @@ AGENTS = """# Learning vault
 
 Treat this directory as the vault root. All learning paths are relative to it.
 
-Use the available shell's syntax and a verified Python 3.9+ interpreter. Commands
-shown with `python3` also work with `python`, `py -3`, or an explicit interpreter
-path; use the command verified during installation. See `INSTALLATION.md` for
-dependency checks and PowerShell examples. Bash is needed only by the optional
-interactive HTML builder, not by installation or the Python learning helpers.
+""" + runtime.RUNTIME_GUIDANCE + """
 
 Choose the learning workflow before selecting a topic or writing learning data:
 
@@ -175,7 +178,8 @@ def skill_entry(name, canonical):
 ---
 
 Read `SKILLS/{name}/SKILL.md` from the learning vault root and follow its
-instructions. Resolve the requested entry point before selecting a course or
+instructions. Use the Python executable in the vault's `runtime.local.toml` for helpers.
+Resolve the requested entry point before selecting a course or
 writing learning data. References are relative to that canonical skill directory,
 not this registration entry. The same canonical instructions serve both agents.
 """
@@ -239,6 +243,7 @@ IGNORE = """.obsidian/workspace.json
 topics/.registry.lock
 __pycache__/
 /dist/
+/runtime.local.toml
 """
 
 
@@ -367,6 +372,8 @@ No Python packages are required. Skills are registered for both agents using
 small entry files that load each canonical skill; symlinks are unnecessary.
 See [installation and dependency recovery](INSTALLATION.md) if Git or Python is
 missing, or the terminal uses PowerShell. Git and Bash are not needed to install.
+`runtime.local.toml` remembers the local Python for future sessions and is excluded
+from ZIP exports. See `INSTALLATION.md` to configure or refresh it.
 
 The installer creates files without asking learning questions. Start onboarding
 in your learning chat with **$learner-profile** (Codex) or
@@ -488,6 +495,7 @@ def create_vault(source, destination, name, archive=None):
             path.write_bytes(content)
             if path.suffix in {".py", ".sh"}:
                 path.chmod(0o755)
+        runtime.configure_runtime(destination)
         if archive is not None:
             archive.parent.mkdir(parents=True, exist_ok=True)
             with archive.open("xb") as handle:
@@ -495,6 +503,8 @@ def create_vault(source, destination, name, archive=None):
                 with zipfile.ZipFile(handle, "w", compression=zipfile.ZIP_DEFLATED) as bundle:
                     # Directory entries preserve empty attachments and other scaffold folders.
                     for path in [destination, *sorted(destination.rglob("*"))]:
+                        if path == destination / runtime.RUNTIME_FILE:
+                            continue
                         bundle.write(path, Path(destination.name) / path.relative_to(destination))
     except BaseException:
         if archive_created:
@@ -523,6 +533,7 @@ def main():
     except KeyboardInterrupt:
         parser.exit(130, "\nInstallation cancelled.\n")
     print(f"Created empty learning vault: {destination}")
+    print(f"Saved Python runtime for future sessions: {destination / runtime.RUNTIME_FILE}")
     if archive is not None:
         print(f"Shareable ZIP: {archive}")
     print("Open the folder in Obsidian and run claude or codex here. Use learner-profile to personalize,")

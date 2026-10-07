@@ -23,6 +23,9 @@ roadmaps, and spaced recall. Topic helpers and profile setup operate in installe
 vaults; concept sessions also support a separate learning workspace. None writes
 learner data in this source checkout.
 
+Generated vaults remember Python in `runtime.local.toml`, ignored by Git and
+excluded from ZIPs. `scripts/configure_runtime.py` refreshes installed vaults only.
+
 Interactive source assets live
 under SKILLS/guided-learning/interactives/. Installed vaults receive copies under
 learning/interactives/ for new-topic scaffolding.

@@ -60,6 +60,10 @@ helpers. Git is optional: a source ZIP works too. See
 [installation and dependency recovery](INSTALLATION.md) for missing Git, missing
 Python, offline setup, and shell-specific commands.
 
+The installer remembers Python in `runtime.local.toml` for future sessions.
+See [runtime configuration](INSTALLATION.md#python-in-a-new-session-or-an-existing-vault)
+to refresh it or configure a shared ZIP.
+
 Interactive HTML builds use Bash; on Windows, use WSL or Git
 Bash for those builds. The destination must be a new directory outside the source
 setup directory, including all its subdirectories. When generating another vault
