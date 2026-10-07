@@ -257,6 +257,8 @@ manual preference when browser storage is available, and applies one theme to
 the whole page. CSS `light-dark()` keeps both palettes alongside each token.
 
 Use outlined secondary buttons for actions and pill-shaped presets for settings.
+Segmented radio groups use equal-width columns that wrap with the available
+space, keeping option widths consistent even when the last row is incomplete.
 Panels nested inside a stage become flat sections with dividers. Answer feedback
 belongs inline within its parent surface, and quiz options occupy separate rows.
 Recorded warm-up answers also use `.feedback` with `data-tone="info"`; keep their

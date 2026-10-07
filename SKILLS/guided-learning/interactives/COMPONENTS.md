@@ -121,7 +121,7 @@ yourself afterwards.
 
 ### `bindChoice(container, options)`
 
-A radio group, including the `.segmented` row. Returns the chosen value.
+A radio group, including the `.segmented` layout. Returns the chosen value.
 
 ```html
 <div class="segmented" id="view" role="radiogroup" aria-label="How to group the data">
@@ -136,6 +136,12 @@ view.get();          // "overall"
 view.set('split');
 view.reset();
 ```
+
+`.segmented` uses equal-width columns that adapt to the available space. More
+options wrap into additional rows; an incomplete final row keeps the same option
+widths. Long labels wrap within their options, and narrow containers reduce the
+column count. The native radios keep their keyboard behavior without additional
+JavaScript. Give each group its own input `name` and an accessible group label.
 
 ### `bindCheckbox(input, options)`
 
@@ -667,7 +673,7 @@ cells are announced together.
 | `.metrics-grid`, `.metric`, `.metric--boxed`, `.metric--accent` | Numeric readouts |
 | `.stat-strip`, `.readout`, `.delta` | Compact value rows |
 | `.btn`, `.btn-secondary`, `.btn-ghost`, `.btn-sm`, `.btn-row`, `.preset-row`, `.preset-btn` | Buttons |
-| `.segmented` | Radio group styled as one row |
+| `.segmented` | Radio group with equal-width options in adaptive columns |
 | `.choice` | A selectable row wrapping a radio or checkbox |
 | `.feedback` | Inline answer feedback and recorded warm-up answers; `data-tone` is `correct`, `retry`, or `info` |
 | `.equation`, `.equation--plain`, `.equation-row`, `.term-key`, `var` | Mathematics |

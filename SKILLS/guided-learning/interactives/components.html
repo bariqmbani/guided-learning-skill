@@ -96,6 +96,45 @@ LearningUI.math.update($('equation'), `x = ${value}`);</pre>
         <p class="readout" id="choice-readout">Grouping: everyone. Reference line: shown.</p>
       </div>
     </div>
+    <p class="explain">Segmented choices share equal-width columns. More choices add rows, long labels wrap, and each option keeps its width in the last row.</p>
+    <div class="three-col">
+      <div class="panel stack">
+        <h3 id="seasons-title">Four seasons</h3>
+        <div class="segmented" role="radiogroup" aria-labelledby="seasons-title">
+          <label><input type="radio" name="demo-season" value="spring" checked> Spring</label>
+          <label><input type="radio" name="demo-season" value="summer"> Summer</label>
+          <label><input type="radio" name="demo-season" value="autumn"> Autumn</label>
+          <label><input type="radio" name="demo-season" value="winter"> Winter</label>
+        </div>
+      </div>
+      <div class="panel stack">
+        <h3 id="weekdays-title">Seven days</h3>
+        <div class="segmented" role="radiogroup" aria-labelledby="weekdays-title">
+          <label><input type="radio" name="demo-weekday" value="monday" checked> Monday</label>
+          <label><input type="radio" name="demo-weekday" value="tuesday"> Tuesday</label>
+          <label><input type="radio" name="demo-weekday" value="wednesday"> Wednesday</label>
+          <label><input type="radio" name="demo-weekday" value="thursday"> Thursday</label>
+          <label><input type="radio" name="demo-weekday" value="friday"> Friday</label>
+          <label><input type="radio" name="demo-weekday" value="saturday"> Saturday</label>
+          <label><input type="radio" name="demo-weekday" value="sunday"> Sunday</label>
+        </div>
+      </div>
+      <div class="panel stack">
+        <h3 id="learning-steps-title">Ten learning steps</h3>
+        <div class="segmented" role="radiogroup" aria-labelledby="learning-steps-title">
+          <label><input type="radio" name="demo-learning-step" value="warm-up" checked> Warm up</label>
+          <label><input type="radio" name="demo-learning-step" value="goal"> Set a goal</label>
+          <label><input type="radio" name="demo-learning-step" value="read"> Read</label>
+          <label><input type="radio" name="demo-learning-step" value="explore"> Explore</label>
+          <label><input type="radio" name="demo-learning-step" value="try"> Try it</label>
+          <label><input type="radio" name="demo-learning-step" value="feedback"> Get feedback</label>
+          <label><input type="radio" name="demo-learning-step" value="check"> Check understanding</label>
+          <label><input type="radio" name="demo-learning-step" value="explain"> Explain</label>
+          <label><input type="radio" name="demo-learning-step" value="apply"> Apply</label>
+          <label><input type="radio" name="demo-learning-step" value="recall"> Recall</label>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section class="gallery-section stack" id="figures" aria-labelledby="figures-title">

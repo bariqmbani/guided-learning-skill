@@ -91,6 +91,51 @@ const allPages = [...templates, ...galleries];
       await page.setViewportSize({ width: 1280, height: 900 });
     }
 
+    await open('components');
+    // Reproduce partial rows (4/7/10 choices in three columns), including
+    // narrower containers and RTL. The final choice must not grow to a full row.
+    const segmentedIssues = await page.evaluate(() => {
+      const issues = [];
+      for (const source of document.querySelectorAll('#controls .three-col .segmented')) {
+        const group = source.cloneNode(true);
+        group.querySelectorAll('input').forEach(input => { input.name += '-layout-probe'; });
+        document.querySelector('main').append(group);
+        try {
+          for (const width of [160, 240, 360, 500]) {
+            group.style.width = width + 'px';
+            for (const direction of ['ltr', 'rtl']) {
+              group.dir = direction;
+              const bounds = group.getBoundingClientRect();
+              const labels = [...group.querySelectorAll(':scope > label')];
+              const firstWidth = labels[0].getBoundingClientRect().width;
+              labels.forEach(label => {
+                const rect = label.getBoundingClientRect();
+                if (Math.abs(rect.width - firstWidth) > 1 || rect.height < 44 ||
+                    rect.left < bounds.left || rect.right > bounds.right ||
+                    rect.top < bounds.top || rect.bottom > bounds.bottom ||
+                    label.scrollWidth > label.clientWidth || label.scrollHeight > label.clientHeight) {
+                  issues.push(labels.length + ' choices, ' + width + 'px, ' + direction + ': ' + label.textContent.trim());
+                }
+              });
+            }
+          }
+        } finally { group.remove(); }
+      }
+      return issues;
+    });
+    assert.deepEqual(segmentedIssues, [], 'segmented choices stretch or clip');
+    for (const [name, count] of [['Four seasons', 4], ['Seven days', 7], ['Ten learning steps', 10]]) {
+      const group = page.getByRole('radiogroup', { name, exact: true });
+      const options = group.getByRole('radio');
+      assert.equal(await options.count(), count);
+      await options.first().focus();
+      await page.keyboard.press('ArrowRight');
+      assert.equal(await options.nth(1).isChecked(), true);
+      assert.equal(await options.nth(1).locator('..').evaluate(hasOutline), true, 'segmented keyboard focus is hidden');
+      await options.last().check();
+      assert.equal(await group.locator('input:checked').count(), 1);
+    }
+
     await open('parameter-explorer');
     // A pointer does not create the keyboard ring, including while held down.
     const chart = page.locator('#line-chart svg');
@@ -271,6 +316,12 @@ const allPages = [...templates, ...galleries];
     assert.equal(await page.locator('#worked').isVisible(), true);
 
     await open('system-map');
+    const picker = page.locator('#picker');
+    await picker.getByRole('radio', { name: 'Compile', exact: true }).check();
+    assert.match(await text('#map-desc'), /Waits for Checkout/);
+    await page.keyboard.press('ArrowRight');
+    assert.equal(await picker.getByRole('radio', { name: 'Unit tests', exact: true }).isChecked(), true);
+    await page.click('#reset');
     const assertNodeBounds = async () => {
       const clipped = await page.locator('#map .node').evaluateAll(nodes => nodes.flatMap(node => {
         const rect = node.querySelector('.node-box').getBBox();
@@ -392,7 +443,7 @@ const allPages = [...templates, ...galleries];
       await staticPage.goto(pathToFileURL(path.join(temporary, name + '.html')).href);
       assert.equal(await staticPage.locator('noscript').isVisible(), true, name + ': missing static fallback');
     }
-    console.log('PASS: 13 standalone pages offline; static checks, MathML notation, desktop/mobile, pointer and keyboard focus, chart cursor, models, reset/retry, playback/reduced motion, quiz layout, map bounds, seeded replay, branches, ordering, theme controls and persistence, restricted storage, and no-JS fallbacks.');
+    console.log('PASS: 13 standalone pages offline; static checks, MathML notation, desktop/mobile, pointer and keyboard focus, segmented choices, chart cursor, models, reset/retry, playback/reduced motion, quiz layout, map bounds, seeded replay, branches, ordering, theme controls and persistence, restricted storage, and no-JS fallbacks.');
   } finally {
     if (browser) await browser.close();
     fs.rmSync(temporary, { recursive: true, force: true });
