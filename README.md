@@ -28,17 +28,12 @@ an absolute path to a new folder outside the source setup directory.
 Create an empty Obsidian learning vault at "<vault-path>" using:
 https://github.com/bariqmbani/guided-learning-skill
 
-Clone main into a temporary folder, then follow AGENTS.md and SHARING.md to
-install into a new destination outside the clone. If it already exists, ask for
-another path.
+Get main via Git or a source ZIP. Follow INSTALLATION.md for prerequisites,
+shell-specific setup, installation, and verification. Honor AGENTS.md and
+SHARING.md. Use a new destination outside the source directory; never overwrite.
 
-Verify learner-profile, concept-learning, and guided-learning are registered
-for both Codex and Claude Code. Verify the topic registry is empty, the shared
-learner profile is unconfigured, and no learner concept sessions are present.
-Report the vault path and how to open it in Obsidian. Explain how to choose
-learner-profile for optional preference setup, concept-learning for one concept,
-or guided-learning for a course with a roadmap and spaced recall. Show both
-Codex's $skill-name and Claude Code's /skill-name invocation syntax.
+Report the vault path, working Python command, and how to open it in Obsidian.
+Briefly explain the three skills and their Codex and Claude Code invocations.
 ```
 
 ## Install an empty vault
@@ -48,11 +43,24 @@ templates. Learner profiles, topics, roadmaps, and concept-session documents bel
 in a separate installed vault or learning workspace. Create your own empty vault with:
 
 ```sh
-./scripts/install_vault.sh ../my-learning --name "My Learning"
+sh scripts/install_vault.sh ../my-learning --name "My Learning"
 ```
 
-Or run `python3 scripts/create_vault.py ../my-learning` directly. Python 3.9 or
-newer is required. Interactive HTML builds use Bash; on Windows, use WSL or Git
+In PowerShell:
+
+```powershell
+.\scripts\install_vault.ps1 'C:\Learning\My Vault' --name 'My Learning'
+```
+
+The wrappers detect a compatible Python interpreter. Or run
+`python3 scripts/create_vault.py ../my-learning` directly; on Windows,
+`py -3 scripts/create_vault.py 'C:\Learning\My Vault'` also works when `.ps1`
+execution is blocked. Python 3.9 or newer is required for installation and learning
+helpers. Git is optional: a source ZIP works too. See
+[installation and dependency recovery](INSTALLATION.md) for missing Git, missing
+Python, offline setup, and shell-specific commands.
+
+Interactive HTML builds use Bash; on Windows, use WSL or Git
 Bash for those builds. The destination must be a new directory outside the source
 setup directory, including all its subdirectories. When generating another vault
 from an installed vault, choose a destination outside that source vault as well.

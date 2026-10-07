@@ -4,19 +4,29 @@ This repository contains reusable setup files. Learning data belongs in a
 separate installed vault or learning workspace. Python 3.9 or newer is required;
 no packages are needed.
 
-For an agent to clone and install the setup, use the **Install with an agent**
-prompt in [README.md](README.md#install-with-an-agent). It clones `main` and
+For an agent to fetch and install the setup, use the **Install with an agent**
+prompt in [README.md](README.md#install-with-an-agent). It clones or downloads `main` and
 creates a new vault before learning or optional profile setup.
+See [installation and dependency recovery](INSTALLATION.md) for tool detection,
+archive downloads without Git, Python setup, and PowerShell support.
 
 ## Install
 
 ```sh
-./scripts/install_vault.sh ../friend-learning --name "Friend Learning"
+sh scripts/install_vault.sh ../friend-learning --name "Friend Learning"
 ```
 
-Or use `python3 scripts/create_vault.py ../friend-learning` directly. On Windows,
-use `py -3 scripts/create_vault.py C:/path/to/new-vault`. Interactive HTML builds
-use Bash; Windows users can use WSL or Git Bash.
+In PowerShell, run:
+
+```powershell
+.\scripts\install_vault.ps1 'C:\Learning\Friend Learning' --name 'Friend Learning'
+```
+
+Both wrappers detect a working Python 3.9+ interpreter. They do not install
+dependencies automatically. Or run
+`python3 scripts/create_vault.py ../friend-learning` directly. On Windows, use `py -3 scripts/create_vault.py C:/path/to/new-vault`. Interactive HTML builds
+use Bash; Windows users can use WSL or Git Bash for those optional builds.
+Neither Git nor Bash is required for vault generation or Python learning helpers.
 
 The destination must be a new directory outside the source setup directory and
 all its subdirectories. If you run the generator from an installed vault, the new

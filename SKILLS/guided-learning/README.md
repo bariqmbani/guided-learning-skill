@@ -28,24 +28,24 @@ an absolute path to a new folder.
 Create an empty Obsidian learning vault at "<vault-path>" using:
 https://github.com/bariqmbani/guided-learning-skill
 
-Clone main into a temporary folder, then follow AGENTS.md and SHARING.md to
-install into a new destination outside the clone. If it already exists, ask for
-another path.
+Get main via Git or a source ZIP. Follow INSTALLATION.md for prerequisites,
+shell-specific setup, installation, and verification. Honor AGENTS.md and
+SHARING.md. Use a new destination outside the source directory; never overwrite.
 
-Verify learner-profile, concept-learning, and guided-learning are registered
-for both Codex and Claude Code. Verify the topic registry is empty, the shared
-learner profile is unconfigured, and no learner concept sessions are present.
-Report the vault path and how to open it in Obsidian. Explain how to choose
-learner-profile for optional preference setup, concept-learning for one concept,
-or guided-learning for a course with a roadmap and spaced recall. Show both
-Codex's $skill-name and Claude Code's /skill-name invocation syntax.
+Report the vault path, working Python command, and how to open it in Obsidian.
+Briefly explain the three skills and their Codex and Claude Code invocations.
 ```
 
 For terminal installation, run from this setup repository:
 
 ```sh
-./scripts/install_vault.sh ../my-learning --name "My Learning"
+sh scripts/install_vault.sh ../my-learning --name "My Learning"
 ```
+
+In PowerShell, use `./scripts/install_vault.ps1 'C:\Learning\My Vault'`.
+See [installation and dependency recovery](../../INSTALLATION.md) for archive
+downloads without Git, missing Python, and direct Python invocation when
+PowerShell script execution is blocked.
 
 The destination must be new and outside the source setup or vault directory tree.
 Python 3.9 or newer is required. Interactive HTML

@@ -20,7 +20,9 @@ profile_spec.loader.exec_module(profiles)
 # Explicitly enumerate reusable assets; never copy a course, registry, or workspace.
 ASSETS = [
     ".gitattributes",
+    "INSTALLATION.md",
     "scripts/install_vault.sh",
+    "scripts/install_vault.ps1",
     "SKILLS/learner-profile/SKILL.md",
     "SKILLS/learner-profile/LICENSE",
     "SKILLS/learner-profile/CHANGELOG.md",
@@ -58,6 +60,12 @@ ASSETS = [
 AGENTS = """# Learning vault
 
 Treat this directory as the vault root. All learning paths are relative to it.
+
+Use the available shell's syntax and a verified Python 3.9+ interpreter. Commands
+shown with `python3` also work with `python`, `py -3`, or an explicit interpreter
+path; use the command verified during installation. See `INSTALLATION.md` for
+dependency checks and PowerShell examples. Bash is needed only by the optional
+interactive HTML builder, not by installation or the Python learning helpers.
 
 Choose the learning workflow before selecting a topic or writing learning data:
 
@@ -247,7 +255,7 @@ def make_files(source, name):
             raise ValueError(f"Reusable asset missing or symlinked: {relative}")
         content = path.read_bytes()
         # Keep exported scripts usable in Bash/POSIX even from a CRLF source ZIP.
-        files[relative] = content.replace(b"\r\n", b"\n") if path.suffix in {".py", ".sh"} else content
+        files[relative] = content.replace(b"\r\n", b"\n") if path.suffix in {".py", ".sh", ".ps1"} else content
     # Source assets stay with the skill; installed vaults also need shared templates.
     for asset_filename in ["interactive.css", "build.sh", "example-interactive.html"]:
         files[f"learning/interactives/{asset_filename}"] = files[f"SKILLS/guided-learning/interactives/{asset_filename}"]
@@ -357,6 +365,8 @@ Python 3.9 or newer is required for the helpers and setup script. Interactive
 HTML builds also use Bash; on Windows use WSL or Git Bash for those builds.
 No Python packages are required. Skills are registered for both agents using
 small entry files that load each canonical skill; symlinks are unnecessary.
+See [installation and dependency recovery](INSTALLATION.md) if Git or Python is
+missing, or the terminal uses PowerShell. Git and Bash are not needed to install.
 
 The installer creates files without asking learning questions. Start onboarding
 in your learning chat with **$learner-profile** (Codex) or
@@ -409,17 +419,19 @@ workflow or establish durable mastery from a single successful session.
 To create another empty vault from this setup:
 
 ```sh
-bash scripts/install_vault.sh /path/to/new-vault
+sh scripts/install_vault.sh /path/to/new-vault
 ```
 
 To also produce a ZIP you can share:
 
 ```sh
-bash scripts/install_vault.sh /path/to/new-vault --zip /path/to/new-vault.zip
+sh scripts/install_vault.sh /path/to/new-vault --zip /path/to/new-vault.zip
 ```
 
 You can also run `python3 scripts/create_vault.py /path/to/new-vault` directly.
 On Windows, use `py -3 scripts/create_vault.py C:/path/to/new-vault`.
+PowerShell also supports `./scripts/install_vault.ps1 C:/path/to/new-vault`;
+the POSIX and PowerShell wrappers detect a compatible Python interpreter.
 Choose a destination and ZIP path that
 do not already exist. The destination must be outside this source vault's directory
 tree, and the ZIP must be outside the new vault. No Git repository
