@@ -1,42 +1,38 @@
 ---
-date: 2026-01-15
+date: "2026-01-15"
+topic: "example-topic"
 pass: 1
-cluster: Foundations
-concept: example-concept
-complexity: medium
-duration: ~20 min
-comprehension: passed
+cluster: "Foundations"
+concept: "example-topic--example-concept"
+complexity: "medium"
+duration: "~20 min"
+comprehension: "partial"
 ---
 
 # Session: Example Concept
 
-## Recall checks
-- No items due (first session)
-
 ## What we covered
-- Core claim: what the concept states and why it emerged
-- Key mechanism: how the algorithm/process works at a high level
-- PhD relevance: where this shows up in our research system
 
-## How we learned it
-- Misconception flip archetype (started with the common misunderstanding, rebuilt correctly)
-- Interactive HTML visualization for parameter exploration
-- Connection mapping to one previously covered concept
+- The metric balances two kinds of error; overall accuracy can hide that tradeoff.
+- We traced the same calculation on a small dataset before exploring a threshold.
+
+## Attempts and feedback
+
+- Asked how raising the threshold would change the errors. The learner expected
+  both to improve. Comparing the same cases at two thresholds helped: they then
+  explained which missed cases increased and why, using the example for support.
+- On a fresh case, they calculated the result correctly without a hint but
+  could not yet explain the effect of a smaller sample. That part needs revisiting.
 
 ## Artifacts
-- [[learning/interactives/2026-01-15_example-concept.html]]
 
-## What worked well
-- The "drag the slider and watch what happens" moment when threshold hit 0.85 — immediate understanding of the tradeoff
-- Connecting to the prior concept via the contrast archetype landed well
-
-## Corrections given
-- Initially described the metric as "just accuracy" — needed to clarify the difference between raw accuracy and the balanced version
-- Missed the implication for edge cases with small sample sizes
+- [[topics/example-topic/learning/interactives/2026-01-15_example-concept.html|Threshold activity]]
 
 ## Connections made
-- Links to [[prerequisite-concept]] — this extends the foundation by adding X
-- Potential tension with [[competing-concept]] — needs exploration in Pass 2
+
+- Connected the error tradeoff to an earlier decision-cost example with one hint.
 
 ## Next up
-- [[next-concept-on-roadmap]] (same cluster, light complexity)
+
+- Resume with a small-sample example before marking this pass complete.
+- Then approach the next planned concept; its note has not been created yet.

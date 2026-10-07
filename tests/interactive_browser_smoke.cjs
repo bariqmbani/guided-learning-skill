@@ -12,7 +12,8 @@ const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const { execFileSync } = require('node:child_process');
 const { chromium } = require(process.env.LEARNING_PLAYWRIGHT_PATH || 'playwright');
-const kit = path.resolve(__dirname, '../SKILLS/guided-learning/interactives');
+const { checkLocalization } = require('./interactive_locale_checks.cjs');
+const kit = path.resolve(__dirname, '../SKILLS/learning-interactives');
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'learning-browser-'));
 const python = process.env.LEARNING_PYTHON || 'python3';
 const templates = ['parameter-explorer', 'step-sequence', 'comparison', 'probability-lab',
@@ -29,7 +30,8 @@ const allPages = [...templates, ...galleries];
     for (const name of galleries) {
       fs.copyFileSync(path.join(kit, name + '.html'), path.join(temporary, name + '.html'));
     }
-    execFileSync(python, [path.join(temporary, 'build.py'), ...galleries.map(name => name + '.html')]);
+    execFileSync(python, [path.join(temporary, 'build.py'),
+      ...templates.map(name => name + '.source.html'), ...galleries.map(name => name + '.html')]);
     // The static checker must pass on everything before the browser runs.
     execFileSync(python, [path.join(kit, 'verify.py'), '--quiet',
       ...allPages.map(name => path.join(temporary, name + '.html'))], { encoding: 'utf8' });
@@ -637,7 +639,8 @@ const allPages = [...templates, ...galleries];
         assert.equal(await summary.locator('..').getAttribute('open'), null, name + ': no-JS disclosure cannot close');
       }
     }
-    console.log('PASS: 13 standalone pages offline; static checks, MathML notation, desktop/mobile, pointer and keyboard focus, segmented choices, matching verdicts and isolated descriptions, chart cursor, models, reset/retry, playback/reduced motion, interrupted reveals and native disclosures, quiz layout, map bounds, seeded replay, branches, ordering, theme controls and persistence, restricted storage, and no-JS fallbacks.');
+    await checkLocalization(browser);
+    console.log('PASS: 13 standalone pages offline; static checks, MathML notation, desktop/mobile, pointer and keyboard focus, segmented choices, matching verdicts and isolated descriptions, chart cursor, models, reset/retry, playback/reduced motion, interrupted reveals and native disclosures, quiz layout, map bounds, seeded replay, branches, ordering, theme controls and persistence, restricted storage, no-JS fallbacks, and localized runtime controls/feedback.');
   } finally {
     if (browser) await browser.close();
     fs.rmSync(temporary, { recursive: true, force: true });

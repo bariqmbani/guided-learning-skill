@@ -1,6 +1,9 @@
 # Five-Session Review
 
 Read after every five sessions in the selected topic. Use only that topic's logs.
+Count their metadata first. For evidence relevant to a possible pattern, read
+linked protocols or older logs' inline Session Notes. Older logs remain valid
+and need no conversion.
 Correction tag definitions live in [session records](session-records.md).
 
 **Every 5 sessions in the selected topic**, review only its logs and count tag frequencies. If any tag appears in >=3 of the last 5 sessions:

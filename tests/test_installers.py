@@ -35,7 +35,7 @@ class InstallerTests(unittest.TestCase):
         self.assertIn("version = ", runtime)
         self.assertEqual({p.name for p in (self.destination / "concept-sessions").iterdir()}, {"README.md"})
         for agent in (".agents", ".claude"):
-            for skill in ("learner-profile", "concept-learning", "guided-learning"):
+            for skill in ("learner-profile", "concept-learning", "guided-learning", "learning-interactives"):
                 self.assertTrue((self.destination / agent / "skills" / skill / "SKILL.md").is_file())
         for asset in ("scripts/install_vault.ps1", "scripts/install_vault.sh", "INSTALLATION.md"):
             self.assertTrue((self.destination / asset).is_file())

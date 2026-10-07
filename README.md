@@ -9,13 +9,15 @@ curriculum and spaced recall.
 | Set or update shared learning preferences | `$learner-profile` | `/learner-profile` |
 | Understand one concept | `$concept-learning bubble sort` | `/concept-learning bubble sort` |
 | Start or continue a course | `$guided-learning probability` | `/guided-learning probability` |
+| Build an interactive activity | `$learning-interactives` | `/learning-interactives` |
 
 Profile setup is optional. Both teaching skills use the same saved preferences
 and can begin before the profile is configured.
 
 Current releases: [learner-profile 1.0.2](SKILLS/learner-profile/CHANGELOG.md),
-[concept-learning 1.0.1](SKILLS/concept-learning/CHANGELOG.md), and
-[guided-learning 3.7.0](SKILLS/guided-learning/CHANGELOG.md). Versions are recorded
+[concept-learning 1.1.0](SKILLS/concept-learning/CHANGELOG.md),
+[guided-learning 3.8.0](SKILLS/guided-learning/CHANGELOG.md), and
+[learning-interactives 1.0.0](SKILLS/learning-interactives/CHANGELOG.md). Versions are recorded
 in each skill's `metadata.version`; generated vaults preserve those versions and
 the complete changelogs.
 
@@ -33,12 +35,12 @@ shell-specific setup, installation, and verification. Honor AGENTS.md and
 SHARING.md. Use a new destination outside the source directory; never overwrite.
 
 Report the vault path, working Python command, and how to open it in Obsidian.
-Briefly explain the three skills and their Codex and Claude Code invocations.
+Briefly explain the four skills and their Codex and Claude Code invocations.
 ```
 
 ## Install an empty vault
 
-This repository contains the installer, three skills, documentation, and reusable
+This repository contains the installer, four skills, documentation, and reusable
 templates. Learner profiles, topics, roadmaps, and concept-session documents belong
 in a separate installed vault or learning workspace. Create your own empty vault with:
 
@@ -73,14 +75,17 @@ new directory outside the source
 setup directory, including all its subdirectories. When generating another vault
 from an installed vault, choose a destination outside that source vault as well.
 
-The [interactive learning kit](SKILLS/guided-learning/interactives/README.md)
-includes five runnable templates, reusable controls/charts, and an offline HTML
-scaffolder. [Open its catalog](SKILLS/guided-learning/interactives/index.html) in a
+The [interactive learning kit](SKILLS/learning-interactives/README.md)
+includes ten runnable templates, reusable controls/charts, and an offline HTML
+scaffolder. [Open its catalog](SKILLS/learning-interactives/index.html) in a
 browser to explore the patterns. Installed vaults receive the kit under
-`learning/interactives/`; tutors customize lessons in the learner's workspace.
+`learning/interactives/`. Its on-demand skill serves both teaching workflows.
+Tutors edit compact `.source.html` files in the learner's workspace and build
+standalone `.html` pages for delivery. Locale dictionaries translate runtime
+labels without copying the shared implementation.
 
 Open the new folder in Obsidian. Run `codex` or `claude` from that folder, then
-choose a skill from the table above. The installer registers all three skills
+choose a skill from the table above. The installer registers all four skills
 for both agents without asking learning questions or creating learner sessions.
 
 ## Onboarding example

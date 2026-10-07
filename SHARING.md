@@ -31,11 +31,12 @@ Neither Git nor Bash is required for vault generation or Python learning helpers
 The destination must be a new directory outside the source setup directory and
 all its subdirectories. If you run the generator from an installed vault, the new
 destination must also be outside that source vault. The installer creates Obsidian settings,
-templates, native entries for learner-profile, concept-learning, and guided-learning
+templates, native entries for learner-profile, concept-learning, guided-learning,
+and learning-interactives
 in both agents, shared interactive assets, an empty topic registry
 (`active_topic: null`, `topics: []`), and an unconfigured shared learner profile.
 It does not ask questions, select a subject, create course progress, or include
-learner concept sessions. Verify all three entries in `.agents/skills/` and
+learner concept sessions. Verify all four entries in `.agents/skills/` and
 `.claude/skills/` after installation.
 
 Each installed vault is an independent local copy of the setup at installation
@@ -49,6 +50,7 @@ Open the installed folder in Obsidian and run Codex or Claude Code there. Choose
 | Optional shared preference setup or updates | `$learner-profile` | `/learner-profile` |
 | One concept with saved notes, feedback, and practice | `$concept-learning bubble sort` | `/concept-learning bubble sort` |
 | A course with a roadmap and spaced recall | `$guided-learning probability` | `/guided-learning probability` |
+| An interactive activity | `$learning-interactives` | `/learning-interactives` |
 
 Profile setup offers every field one question at a time, accepts skips and early
 completion, and supports targeted updates. Both teaching skills read the same root
@@ -93,7 +95,7 @@ learner profiles, concept-session bundles, course files, or generated exports he
 Deleting a file in a new commit does not erase it from earlier Git history.
 
 Reusable interactive source files live under
-`SKILLS/guided-learning/interactives/`; installed vaults receive shared templates
+`SKILLS/learning-interactives/`; installed vaults receive shared templates
 under `learning/interactives/`. Course lessons use each topic's registered paths;
 concept lessons keep any interactive in their own session bundle.
 

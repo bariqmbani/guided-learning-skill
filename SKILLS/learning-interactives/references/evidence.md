@@ -52,34 +52,6 @@ concise feedback. Check browser/assistive-technology combinations when possible;
 native semantics reduce implementation burden but do not eliminate testing.
 Access needs should shape the activity itself, not just a fallback sentence.
 
-## Candidate learner requests and pattern coverage
-
-The taxonomy below is an authoring analysis: plausible tasks across course
-subjects, not a claim about measured frequency or an exhaustive catalog of
-everything learners will request. Several subjects can use the same interaction
-mechanism. Choose by the thinking task, then adapt the content.
-
-| Thinking task | Candidate requests | Starting pattern | What the learner should produce |
-| --- | --- | --- | --- |
-| Explore a relationship | “Show how slope changes the line”; “What does changing a threshold do?”; “How does resistance affect current?” | Parameter explorer | An initial answer plus an explanation of what changed and what stayed fixed |
-| Trace state over time | “Walk through binary search”; “Show the message flow”; “Explain each step in this derivation” | Step sequence | The next state and the rule responsible for the transition |
-| Compare alternatives | “When does compounding matter?”; “Compare caching strategies”; “Which claim follows from which assumptions?” | Comparison | A conditional choice using shared criteria, including a boundary case |
-| Reason about uncertainty | “Why is a small sample unstable?”; “How do trials approach an expected rate?”; “How would this queue behave?” | Probability lab | A distinction between a model expectation, a particular sample, and variability |
-| Decide and justify | “What should I inspect next?”; “How would you respond in this scenario?”; “Which sentence fits this context?” | Decision scenario | A reason for a choice and a revised decision after seeing consequences |
-| Retrieve from memory | “Quiz me on the mechanism”; “Test whether I still know this”; “Give me practice questions” | Practice set | An independent answer, then an explanation in the learner's own words |
-| Construct or sequence | “Help me arrange this process”; “Put these steps in order”; “Which step comes first?” | Order the steps | An order plus the rule that forces it, not a remembered sequence |
-| Inspect relationships among many items | “Show the dependencies”; “Explain a causal diagram”; “How are these ideas connected?” | System map | A relationship explained in words, with direction and assumptions explicit |
-| Read data honestly | “What does this table actually say?”; “Why do these two summaries disagree?” | Data explorer | A claim the data supports, and a named limit it does not |
-| Justify a formula or construction | “Why is that formula true?”; “Show me where this comes from” | Geometry lab | An argument about the quantities, not a restatement of the formula |
-| Classify or match | “Let me practice identifying examples”; “Match each term to its definition” | Matching or question component within a relevant pattern | A rationale for each pairing; use a new case after feedback |
-
-Templates cover reusable structure, not domain verification. A Bayesian
-simulation, physical model, medical case, or financial scenario needs its own
-appropriate sources and assumptions. Specialized numerical or spatial demands
-may need a locally bundled dependency; decide from the capability gap, not from
-the subject label. For a purely verbal distinction, a short conversation or
-comparison table may be more useful than a custom interactive.
-
 ## References
 
 - Podolefsky, N. S., Moore, E. B., & Perkins, K. K. (2013; revised 2014).
@@ -106,6 +78,6 @@ comparison table may be more useful than a custom interactive.
 - MDN Web Docs. [MathML reference](https://developer.mozilla.org/en-US/docs/Web/MathML)
   for the notation the kit emits and its browser availability.
 
-See the kit guide at `SKILLS/guided-learning/interactives/README.md` for templates,
-adaptation boundaries, and the delivery checklist, and
-`SKILLS/guided-learning/interactives/COMPONENTS.md` for each component's contract.
+For authoring, use [the skill workflow](../SKILL.md),
+[pattern selection](patterns.md), and the relevant
+[component contract](../COMPONENTS.md).

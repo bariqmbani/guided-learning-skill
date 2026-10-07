@@ -1,7 +1,7 @@
 ---
 name: concept-learning
 metadata:
-  version: "1.0.1"
+  version: "1.1.0"
 description: >
   Guide a personalized lesson on one concept with worked examples, supported practice,
   and an independent understanding check. Automatically save a session note, mentor
@@ -28,6 +28,7 @@ agent entry. Read only the reference needed for the current action:
 | [personalization.md](../learner-profile/references/personalization.md) | When learner feedback suggests a lasting teaching adjustment, or the learner asks to retain or remove one. Follow its session/vault scope and saving rules. |
 | [learner-profile/SKILL.md](../learner-profile/SKILL.md) | When the learner requests shared setup or a targeted profile update. That skill loads its onboarding reference as needed; an ordinary lesson does not start onboarding. |
 | [onboarding-evidence.md](../learner-profile/references/onboarding-evidence.md) | When explaining the rationale or evidence limits of the teaching and personalization choices. |
+| [learning-interactives/SKILL.md](../learning-interactives/SKILL.md) | Only when an interactive helps this lesson's outcome; owns artifact construction and verification. No course setup is needed. |
 | [topic-routing.md](../guided-learning/references/topic-routing.md) | Only after an explicit request to connect this session to a course, together with [guided-learning/SKILL.md](../guided-learning/SKILL.md). Never use it to select an active topic for a focused lesson. |
 
 For an independent installation without these sibling skills, use the teaching
@@ -161,10 +162,20 @@ imply success. Keep status and assessment consistent across all three records.
 
 Create other documents only when they add value:
 
-- **`interactive.html`** for a useful simulation or exploration. Make it
-  self-contained, accessible, and usable offline, with embedded CSS/JavaScript,
-  visible labels, keyboard controls, a reset, and a clear prompt about what to
-  notice. Provide a text alternative. No course assets or build step are required.
+- **`interactive.html`** for useful manipulation, exploration, or practice. Read
+  [learning-interactives](../learning-interactives/SKILL.md) when installed and
+  pass the outcome, model, language/access needs, time budget, and the pinned
+  session destination. Keep compact authoring source and supporting local assets
+  inside that session; deliver its offline page as `interactive.html`. This uses
+  no course assets, topic registry, or progress records. Announce the artifact
+  after build and review, give a first action, then invite exploration before
+  dependent assessment. Record only learner work actually observed. If the
+  authoring skill is unavailable, a small activity may still be authored directly
+  as self-contained HTML with embedded CSS/JavaScript, visible labels, keyboard
+  controls, a reset, a clear exploration prompt, and a text alternative. Validate
+  its model and behavior with available tools; do not invent toolkit commands or
+  claim unperformed checks. Use a worked example or accessible diagram when time,
+  tools, or access constraints cannot support a useful interactive.
 - **`resources.md`** for a substantial annotated set of supporting sources. Keep a
   short source list in `note.md`; distinguish material actually consulted from
   optional further reading and never invent citations.

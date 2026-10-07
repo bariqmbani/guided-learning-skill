@@ -39,7 +39,10 @@ After dispatch selects this course workflow, establish the intended topic using 
 
 5. **After the session, offer to persist:**
    - "Want me to add these concepts to your learning roadmap for deeper study later?"
-   - If yes: create concept notes in `{concepts_dir}`, add them to the roadmap (or create one if it doesn't exist — follow [Bootstrapper](bootstrap.md)), and schedule recall
+   - If yes: add the selected concepts to the roadmap (or create one if needed,
+     following [bootstrap](bootstrap.md)). Create or enrich notes only for
+     concepts actually taught; leave future notes until approached. Schedule
+     recall only for observed work meeting the current pass's criterion.
    - If no: just write a session protocol and move on
 
 ### Guidelines

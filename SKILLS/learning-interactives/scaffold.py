@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Create a new standalone interactive from a reusable template in one command.
+"""Create compact authoring source for a new interactive from a template.
 
 Example: python scaffold.py parameter-explorer /path/to/topic/interactives/lesson.html
-Copies this kit's CSS, JavaScript, and builder beside the lesson for later edits.
-Existing identical assets are reused; custom assets and existing HTML are never
-overwritten. No server, packages, or network connection are required.
+The destination names the final page. Creates lesson.source.html plus shared
+assets; build.py lesson.source.html produces the standalone lesson.html later.
+Existing identical assets are reused; existing source, output, and customized
+assets are never overwritten. No server or packages are required.
 """
 
 import argparse
@@ -34,10 +35,14 @@ def scaffold(template, destination):
     if template not in TEMPLATES:
         raise ValueError(f"Unknown template: {template}. Choose from {', '.join(TEMPLATES)}")
     destination = Path(destination).expanduser().absolute()
-    if destination.suffix.lower() != ".html":
+    if destination.suffix != ".html":
         raise ValueError("Destination must be a new .html file")
-    if destination.exists() or destination.is_symlink():
-        raise ValueError(f"Destination already exists; nothing overwritten: {destination}")
+    if destination.name.endswith('.source.html'):
+        raise ValueError("Name the final .html page, not its .source.html authoring file")
+    authoring = destination.with_name(destination.stem + '.source.html')
+    for target in (destination, authoring):
+        if target.exists() or target.is_symlink():
+            raise ValueError(f"Destination already exists; nothing overwritten: {target}")
     # Match the source-checkout protection used by the concept-session helper.
     # Installed vaults have their own AGENTS.md and remain valid destinations.
     for ancestor in destination.resolve().parents:
@@ -50,6 +55,16 @@ def scaffold(template, destination):
 
     source = KIT / "templates" / f"{template}.html"
     html = source.read_text(encoding="utf-8")
+    # A local template may already have been built for preview. Strip only its
+    # marked shared blocks so scaffolding always starts with compact source.
+    spec = importlib.util.spec_from_file_location('interactive_builder', KIT / 'build.py')
+    builder = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(builder)
+    html = builder.source_view(html)
+    # Templates live one directory below the assets; authoring pages sit beside
+    # their local copies. Keep the source small until the final delivery build.
+    html = html.replace('href="../interactive.css"', 'href="interactive.css"')
+    html = html.replace('src="../interactive.js"', 'src="interactive.js"')
     assets = {}
     for name in ASSETS:
         assets[name] = (KIT / name).read_bytes()
@@ -58,14 +73,6 @@ def scaffold(template, destination):
                                   (not target.is_file() or target.read_bytes() != assets[name])):
             raise ValueError(f"Asset conflict; nothing overwritten: {target}. "
                              "Use a new directory or a kit matching the existing assets.")
-    # Load only the builder beside this script, never a destination's custom code.
-    spec = importlib.util.spec_from_file_location("interactive_builder", KIT / "build.py")
-    builder = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(builder)
-    rendered, count = builder.render_html(html, KIT)
-    if not count:
-        raise ValueError(f"Template has no recognized interactive asset references: {source}")
-
     destination.parent.mkdir(parents=True, exist_ok=True)
     created = []
     try:
@@ -76,14 +83,14 @@ def scaffold(template, destination):
             with target.open("xb") as handle:
                 created.append(target)
                 handle.write(content)
-        with destination.open("x", encoding="utf-8") as handle:
-            created.append(destination)
-            handle.write(rendered)
+        with authoring.open("x", encoding="utf-8") as handle:
+            created.append(authoring)
+            handle.write(html)
     except BaseException:
         for path in reversed(created):
             path.unlink(missing_ok=True)
         raise
-    return destination
+    return authoring
 
 
 def main():
@@ -93,14 +100,14 @@ def main():
     parser.add_argument("template", choices=tuple(TEMPLATES), metavar="template",
                         help="one of:\n" + "\n".join(f"  {name:<20} {why}"
                                                       for name, why in TEMPLATES.items()))
-    parser.add_argument("destination", type=Path, help="new .html file in a learning workspace")
+    parser.add_argument("destination", type=Path, help="new final .html filename in a learning workspace")
     args = parser.parse_args()
     try:
         destination = scaffold(args.template, args.destination)
     except (OSError, UnicodeError, ValueError) as exc:
         parser.exit(1, f"Error: {exc}\n")
-    print(f"Created standalone interactive: {destination}")
-    print(f'Rebuild after editing: pass "{destination.name}" to "{destination.parent / "build.py"}" '
+    print(f"Created authoring source: {destination}")
+    print(f'After editing, build the standalone page: pass "{destination.name}" to "{destination.parent / "build.py"}" '
           'using the same Python interpreter.')
 
 

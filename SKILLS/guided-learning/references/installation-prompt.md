@@ -12,5 +12,5 @@ shell-specific setup, installation, and verification. Honor AGENTS.md and
 SHARING.md. Use a new destination outside the source directory; never overwrite.
 
 Report the vault path, working Python command, and how to open it in Obsidian.
-Briefly explain the three skills and their Codex and Claude Code invocations.
+Briefly explain the four skills and their Codex and Claude Code invocations.
 ```

@@ -9,7 +9,7 @@ import tempfile
 import unittest
 
 
-SOURCE = Path(__file__).resolve().parents[1] / "SKILLS/guided-learning/interactives"
+SOURCE = Path(__file__).resolve().parents[1] / "SKILLS/learning-interactives"
 POWERSHELL = shutil.which("pwsh") or shutil.which("powershell")
 HTML = '<link rel="stylesheet" href="interactive.css"><style>.local { color: red; }</style><p>日本語</p>'
 
@@ -130,6 +130,65 @@ class InteractiveBuildTests(unittest.TestCase):
         for path, content in before.items():
             self.assertEqual(path.read_bytes(), content)
 
+    def test_authoring_source_stays_compact_and_rebuilds_only_its_delivery(self):
+        source = self.html.with_name('lesson.source.html')
+        source.write_text(HTML, encoding='utf-8')
+        before = source.read_bytes()
+        result = self.run_builder(source.name)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = source.with_name('lesson.html')
+        self.assertIn('interactive.css:start', output.read_text(encoding='utf-8'))
+        self.assertEqual(source.read_bytes(), before)
+        self.assertEqual(self.html.read_text(encoding='utf-8'), HTML)
+        self.css.write_text('body { color: purple; }', encoding='utf-8')
+        self.assertEqual(self.run_builder().returncode, 0)
+        self.assertIn('color: purple', output.read_text(encoding='utf-8'))
+        self.assertEqual(source.read_bytes(), before)
+        self.assertEqual(output.read_text(encoding='utf-8').count('learning-interactives:generated'), 1)
+
+    def test_source_view_excludes_shared_assets_without_writing(self):
+        (self.directory / 'interactive.js').write_text('window.kit = 1;', encoding='utf-8')
+        source = self.html.with_name('lesson.source.html')
+        authored = HTML + '<script src="interactive.js"></script><script>window.lesson = 42;</script>'
+        source.write_text(authored, encoding='utf-8')
+        self.assertEqual(self.run_builder(source.name).returncode, 0)
+        output = source.with_name('lesson.html')
+        before = output.read_bytes()
+        viewed = self.run_builder('--source-view', output.name)
+        self.assertEqual(viewed.returncode, 0, viewed.stderr)
+        self.assertEqual(viewed.stdout, authored)
+        self.assertNotIn('window.kit', viewed.stdout)
+        self.assertEqual(source.read_text(encoding='utf-8'), authored)
+        self.assertEqual(output.read_bytes(), before)
+        for encoding in ('ascii', 'cp1252'):
+            with self.subTest(stdout=encoding):
+                viewed = subprocess.run(
+                    [sys.executable, str(self.directory / 'build.py'), '--source-view', output.name],
+                    env={**os.environ, 'PYTHONIOENCODING': encoding + ':strict'},
+                    cwd=self.base, capture_output=True)
+                self.assertEqual(viewed.returncode, 0, viewed.stderr)
+                self.assertEqual(viewed.stdout.decode('utf-8'), authored)
+
+    def test_source_build_refuses_unrelated_or_symlinked_output_before_batch_write(self):
+        source = self.html.with_name('lesson.source.html')
+        source.write_text(HTML, encoding='utf-8')
+        output = source.with_name('lesson.html')
+        output.write_text('Existing learner work', encoding='utf-8')
+        result = self.run_builder(self.html.name, source.name)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('not a generated lesson', result.stderr)
+        self.assertEqual(output.read_text(encoding='utf-8'), 'Existing learner work')
+        self.assertEqual(self.html.read_text(encoding='utf-8'), HTML)
+        output.unlink()
+        try:
+            output.symlink_to(self.html)
+        except OSError:
+            self.skipTest('Creating symlinks requires platform privileges')
+        result = self.run_builder(source.name)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('symlinked', result.stderr)
+        self.assertEqual(self.html.read_text(encoding='utf-8'), HTML)
+
     def test_javascript_closing_tag_literal_cannot_end_inline_script(self):
         (self.directory / "interactive.js").write_text('window.tag = "</script>";', encoding="utf-8")
         self.html.write_text('<script src="interactive.js"></script>', encoding="utf-8")
@@ -190,6 +249,9 @@ class InteractiveVerifyTests(unittest.TestCase):
             [sys.executable, str(SOURCE / "scaffold.py"), "parameter-explorer", str(page)],
             cwd=self.base, text=True, capture_output=True)
         self.assertEqual(built.returncode, 0, built.stdout + built.stderr)
+        delivered = subprocess.run([sys.executable, str(self.base / 'build.py'), 'lesson.source.html'],
+                                   text=True, capture_output=True)
+        self.assertEqual(delivered.returncode, 0, delivered.stdout + delivered.stderr)
         html = page.read_text(encoding="utf-8")
         self.assertIn("global.localStorage.setItem(themeKey, value)", html)
         result = self.run_verify(page)
@@ -286,29 +348,36 @@ class InteractiveScaffoldTests(unittest.TestCase):
             '<p>Example model</p><script src="../interactive.js"></script>'
             '<script>window.lesson = true;</script>', encoding="utf-8")
         self.destination = self.base / "learning workspace/2026-10-07_日本語.html"
+        self.authoring = self.destination.with_name(self.destination.stem + '.source.html')
 
     def run_scaffold(self, template="parameter-explorer", destination=None):
         return subprocess.run([sys.executable, str(self.kit / "scaffold.py"), template,
                                str(destination or self.destination)], cwd=self.base,
                               text=True, capture_output=True)
 
-    def test_one_command_copies_assets_and_builds_shareable_html(self):
+    def test_scaffold_creates_compact_source_and_independent_delivery_build(self):
         result = self.run_scaffold()
         self.assertEqual(result.returncode, 0, result.stderr)
-        built = self.destination.read_text(encoding="utf-8")
+        self.assertFalse(self.destination.exists())
+        authored = self.authoring.read_text(encoding='utf-8')
         for name in ("interactive.css", "interactive.js"):
-            self.assertIn(f"<!-- {name}:start -->", built)
-            self.assertIn((self.kit / name).read_text(encoding="utf-8"), built)
-            self.assertNotIn(f'="../{name}"', built)
-        self.assertIn("window.lesson = true;", built)
+            self.assertNotIn(f"<!-- {name}:start -->", authored)
+            self.assertNotIn((self.kit / name).read_text(encoding="utf-8"), authored)
+            self.assertIn(f'="{name}"', authored)
+            self.assertNotIn(f'="../{name}"', authored)
+        self.assertIn("window.lesson = true;", authored)
         for name in ("interactive.css", "interactive.js", "build.py"):
             self.assertEqual((self.destination.parent / name).read_bytes(), (self.kit / name).read_bytes())
         # Rebuilding works from an unrelated working directory and needs no kit.
         shutil.rmtree(self.kit)
-        result = subprocess.run([sys.executable, str(self.destination.parent / "build.py"), self.destination.name],
+        result = subprocess.run([sys.executable, str(self.destination.parent / "build.py"), self.authoring.name],
                                 cwd=self.base, text=True, capture_output=True)
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(self.destination.read_text(encoding="utf-8"), built)
+        self.assertEqual(self.authoring.read_text(encoding="utf-8"), authored)
+        built = self.destination.read_text(encoding='utf-8')
+        for name in ('interactive.css', 'interactive.js'):
+            self.assertIn(f'<!-- {name}:start -->', built)
+        self.assertIn('window.lesson = true;', built)
 
     def test_existing_lesson_and_custom_assets_are_preserved_before_any_write(self):
         self.destination.parent.mkdir()
@@ -329,6 +398,27 @@ class InteractiveScaffoldTests(unittest.TestCase):
                 self.assertEqual(custom.read_text(encoding="utf-8"), "Custom asset; preserve it")
                 self.assertEqual(len(list(self.destination.parent.iterdir())), 1)
                 custom.unlink()
+
+    def test_existing_authoring_source_is_not_overwritten(self):
+        self.destination.parent.mkdir()
+        self.authoring.write_text('Unfinished lesson', encoding='utf-8')
+        result = self.run_scaffold()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('Destination already exists', result.stderr)
+        self.assertEqual(self.authoring.read_text(encoding='utf-8'), 'Unfinished lesson')
+        self.assertEqual(list(self.destination.parent.iterdir()), [self.authoring])
+
+    def test_scaffolding_a_previously_built_template_still_produces_compact_source(self):
+        template = self.kit / 'templates/parameter-explorer.html'
+        authored = template.read_text(encoding='utf-8').replace('../interactive.', 'interactive.')
+        result = subprocess.run([sys.executable, str(self.kit / 'build.py'),
+                                 'templates/parameter-explorer.html'], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('interactive.js:start', template.read_text(encoding='utf-8'))
+        result = self.run_scaffold()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.authoring.read_text(encoding='utf-8'), authored)
+        self.assertFalse(self.destination.exists())
 
     def test_second_lesson_reuses_identical_assets(self):
         self.assertEqual(self.run_scaffold().returncode, 0)

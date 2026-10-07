@@ -2,8 +2,9 @@
 
 A pedagogical framework for teaching complex academic concepts through structured revisitation, spaced recall, and adaptive explanation.
 
-The public setup offers three skills: `learner-profile` for shared preferences,
-`concept-learning` for a focused lesson, and `guided-learning` for a course.
+The public setup offers four skills: `learner-profile` for shared preferences,
+`concept-learning` for a focused lesson, `guided-learning` for a course, and
+`learning-interactives` for shared activity authoring.
 Optional [learner-profile setup](../learner-profile/SKILL.md) offers every profile
 field one question at a time and tailors examples, pace, explanations, and
 activities for both learning skills. Learning can start before setup is complete.

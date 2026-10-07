@@ -142,7 +142,7 @@ for the `&` call operator.
 
 - Use the saved Python in `runtime.local.toml` to run the profile helper's `show`
   command from the vault root; confirm the recorded Python works.
-- All three skills have regular `SKILL.md` entries under both `.agents/skills/`
+- All four skills have regular `SKILL.md` entries under both `.agents/skills/`
   and `.claude/skills/`, and their canonical files are under `SKILLS/`.
 - `topics/registry.json` has `active_topic: null` and `topics: []`;
   `topics/` contains only `README.md` and `registry.json`.

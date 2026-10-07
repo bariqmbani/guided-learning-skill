@@ -1,9 +1,10 @@
 # Component reference
 
 Every helper in `interactive.js`, every class in `interactive.css`, and the
-markup each one expects. Copy a block, change its content, and check the result
-in a browser. Read [README.md](README.md) first for choosing a pattern and for
-the verification checklist; this file is the API, not the method.
+markup each one expects. Read only the needed sections below. Use
+[pattern selection](references/patterns.md) if undecided, and the
+[verification checklist](references/verification.md) before delivery. Routine
+authoring does not require reading the shared runtime implementation.
 
 Load the runtime before the lesson script, and put one announcer in the body:
 
@@ -24,7 +25,7 @@ Load the runtime before the lesson script, and put one announcer in the body:
 Contents: [utilities](#utilities) · [controls](#controls) · [sequence](#sequence)
 · [questions and practice](#questions-and-practice) · [mathematics](#mathematics)
 · [drawing](#drawing) · [figures](#figures) · [layout classes](#layout-classes)
-· [design tokens](#design-tokens) · [motion](#motion)
+· [design tokens](#design-tokens) · [motion](#motion) · [localization](#localization)
 
 Components throw on a contract violation, so a mistake surfaces while you write
 the lesson rather than while a learner uses it. Call each lesson component once,
@@ -45,6 +46,8 @@ LearningUI.round(value, places)      // round for display only
 
 Keep full precision in the model and round only when displaying. Negative
 numbers use a typographic minus (−), so a readout matches the notation beside it.
+Formatting uses `LearningUIStrings.locale` when supplied, otherwise the browser
+locale. Pass explicit singular and plural terms to `fmt.count` outside English.
 
 ```js
 fmt.num(1234.567)        // "1,234.57"   locale-aware, at most 2 decimals
@@ -57,6 +60,18 @@ fmt.unit(9.81, 'm/s²')   // "9.81 m/s²"  with a narrow space
 fmt.count(1, 'round')    // "1 round"    plural only when needed
 fmt.minus('-4 to -1')    // "−4 to −1"   fix a hand-written string
 ```
+
+### Localization
+
+Set `window.LearningUIStrings = { locale, messages }` before loading the runtime.
+`messages` maps keys to plain text with named `{placeholders}`; missing keys use
+English. `locale` optionally controls number/percentage formatting. Configuration
+is read once, including the automatically mounted theme button.
+
+See [localization](references/localization.md) for a small example and component
+key families. `LearningUI.i18n.defaults` exposes the frozen English dictionary;
+`LearningUI.i18n.text(key, values)` formats one of those messages. Translate lesson
+markup and author-provided labels separately; keep `interactive.js` shared.
 
 ### Reproducible randomness
 

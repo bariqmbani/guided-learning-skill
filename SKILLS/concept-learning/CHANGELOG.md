@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0] — 2026-10-07
+
+### Changed
+
+- Route optional activity construction to `learning-interactives`, sharing the
+  same authoring and verification workflow as course lessons.
+- Pin compact authoring source, assets, and the offline `interactive.html` to
+  the concept session without resolving a topic or creating course records.
+- Keep learner assessment with the tutor and retain direct standalone HTML
+  authoring when the optional kit is unavailable, with an accessible alternative
+  when interaction does not suit the lesson's constraints.
+
 ## [1.0.1] — 2026-10-07
 
 ### Fixed

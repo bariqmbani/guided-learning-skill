@@ -1,44 +1,39 @@
-# Bootstrapper — Start a New Topic
+# Bootstrap a course
 
-After topic selection, when the selected track has no concept checklist entries yet, the skill bootstraps everything needed to start learning immediately.
+Use after topic routing when the selected roadmap is missing or has no checked
+or unchecked concept entries. Preserve every existing learning record.
 
-### When it triggers
+1. Read [topic intake](topic-intake.md) for missing outcome, starting-point, and
+   practice context. Keep course decisions separate from shared preferences;
+   reuse answers already given and accept exploratory goals.
+2. Write a roadmap of **10–20 concepts in 3–5 dependency-ordered clusters** to
+   `{roadmap}`. Give each concept one checklist line with a descriptive title and
+   the eventual topic-prefixed note path. Include the learning outcome, success
+   demonstration, provisional starting point, practice opportunities, and domain
+   mode. Unknowns remain unknown; do not infer mastery or invent a deadline.
+3. Create only missing recall, protocol-directory, and glossary scaffolding.
+   Preserve existing rows and entries. Add glossary terms when introduced.
+4. Present the outcome, clusters, and concept count briefly. For a roadmap-only
+   request, stop here without generating concept notes. Otherwise create the
+   first needed note as below and begin a useful lesson within the time budget:
+   prerequisite prompt, explanation, then an attempt with feedback. No separate
+   entrance test or extra approval is needed.
 
-- Topic routing has selected the intended existing or newly created track.
-- Its roadmap does not exist or has no concept checklist entries (checked or unchecked).
-- Dispatch selected an ongoing course (for example, "build me a reinforcement learning curriculum" or `/guided-learning UX research methods`). An independent single-concept request has already routed to `concept-learning`.
+## Create a concept note when approaching it
 
-### What it does
+Before teaching a concept whose note is missing, create that note in
+`{concepts_dir}` using the pinned naming/link rules from topic routing. A plan
+may link future notes that do not exist yet; do not generate a file per planned
+concept just to fill those links.
 
-1. **Gather a short topic plan** using [topic intake](topic-intake.md): ask only for missing information about a useful outcome, starting knowledge, and realistic practice opportunities. Infer domain mode from the purpose; if unclear, use self-study. Optional deadlines and materials affect scope. Accept exploratory goals and skipped optional answers. Keep these decisions in the selected topic, separate from the global profile.
+Start with the title, an accurate 2–3 sentence core claim, and what the current
+lesson needs for mechanism, application, or prerequisites. Add evidence,
+limitations, and connections as they become relevant. A general-knowledge draft
+is provisional; identify sources actually consulted and leave unsupported
+claims or citations out. Do not populate empty sections or placeholder source
+links. Preserve existing notes and enrich them rather than replacing them.
 
-2. **Generate a starter roadmap** with 10-20 concepts organized into 3-5 clusters:
-   - Use the learner's stated goal to pick relevant sub-topics
-   - Order clusters by dependency (foundations first)
-   - Each concept gets one line in the roadmap checklist
-   - Write the roadmap to `{roadmap}`
-   - Include a short **Learning plan** with the outcome, success demonstration, provisional starting point, practice opportunities, and domain mode. Unknowns stay unknown; do not invent a deadline or infer mastery.
-
-3. **Generate stub concept notes** for each concept in the roadmap:
-   - Create one file per concept in `{concepts_dir}`. For new tracks, use `<topic-id>--<concept-slug>.md` filenames and vault-relative wikilinks with display titles. Preserve existing legacy filenames and links.
-   - Each stub has: title, a 2-3 sentence core claim (from the agent's knowledge), empty Evidence and Implications sections, and placeholder source links
-   - These are starting points, not finished notes — the learner (or other skills like literature-intake) can enrich them later
-
-4. **Create the recall queue** only if missing and the `{protocols_dir}` directory if missing. Preserve all existing recall rows and files.
-
-5. **Create the glossary** if missing, then add the first few key terms from the topic without replacing any existing entries
-
-6. **Announce what was created**: Briefly show the outcome, clusters, and concept count. Explain that the learner can adjust the plan as they learn.
-
-7. **Start the first useful lesson** when the learner asked to learn. Give a short prerequisite prompt, explanation, and an attempt with feedback within the available time. Use the response to refine support; do not add a separate entrance test or redundant approval to begin. If they requested only a roadmap, stop after presenting it.
-
-### Quality guidelines
-
-- **Don't over-generate.** 10-20 concepts is enough for a solid foundation. The learner can always add more later. Breadth over exhaustiveness.
-- **Name concepts clearly.** Use descriptive titles that make sense in isolation: "Cohen's Kappa" not "Metric 3", "Retrieval-Augmented Generation" not "Advanced Technique".
-- **Cluster names should be meaningful.** "Statistical Foundations" not "Cluster 1".
-- **Calibrate the starting point.** Use self-report to choose an initial level, then adjust from a brief prerequisite task and subsequent attempts. A claim to know the basics does not by itself mark foundational concepts mastered. Reuse intake evidence rather than repeating the same probes.
-- **Stub notes should be useful, not empty.** The core claim should be accurate enough that the agent can teach from it in Pass 1. It's OK to use training knowledge for stubs — they'll be enriched with sources later.
-
-Use the pinned paths from [topic routing](topic-routing.md). Starter formats are
-in the sibling `../examples/` directory; adapt their paths to the selected topic.
+Use [the concept-note example](../examples/concept-note.md) as a shape when
+needed, adapting its paths and omitting unneeded sections. The other starter
+formats live in `../examples/`. Clear names and dependency order matter more
+than exhaustive coverage; refine the roadmap from observed learner attempts.

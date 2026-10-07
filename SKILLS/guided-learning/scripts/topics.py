@@ -246,7 +246,8 @@ def migrate(vault, registry, query):
     shared_interactive_files = {
         "interactive.css", "interactive.js", "build.py", "scaffold.py", "verify.py",
         "example-interactive.html", "index.html", "components.html",
-        "README.md", "COMPONENTS.md", "templates",
+        "README.md", "COMPONENTS.md", "templates", "references",
+        "SKILL.md", "LICENSE", "CHANGELOG.md",
     }
     if source_interactives.is_symlink():
         raise ValueError(f"Refusing to migrate a symlinked interactive directory: {source_interactives}")

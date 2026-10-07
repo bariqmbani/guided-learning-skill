@@ -1,7 +1,7 @@
 # Guided Learning Skill
 
 Guided-learning runs courses with a spiral curriculum, independent topic tracks,
-comprehension checks, practice, and spaced recall. It is one of three skills in
+comprehension checks, practice, and spaced recall. It is one of four skills in
 this setup:
 
 | Skill | Purpose | Main records |
@@ -9,6 +9,7 @@ this setup:
 | `learner-profile` | Optional shared preference setup and targeted updates | Root `learner-profile.json` and `Learner Profile.md` |
 | `concept-learning` | A focused, personalized lesson on one concept | A bundle under `concept-sessions/` |
 | `guided-learning` | Start or resume a course and revisit its concepts | A topic's roadmap, notes, recall queue, journals, and logs |
+| `learning-interactives` | Build or adapt an interactive for either teaching workflow | Compact source and portable HTML in the pinned workspace |
 
 Use `$skill-name` in Codex or `/skill-name` in Claude Code. For example,
 `$concept-learning bubble sort` starts a focused lesson, while
@@ -33,7 +34,7 @@ shell-specific setup, installation, and verification. Honor AGENTS.md and
 SHARING.md. Use a new destination outside the source directory; never overwrite.
 
 Report the vault path, working Python command, and how to open it in Obsidian.
-Briefly explain the three skills and their Codex and Claude Code invocations.
+Briefly explain the four skills and their Codex and Claude Code invocations.
 ```
 
 For terminal installation, run from this setup repository:
@@ -50,7 +51,7 @@ PowerShell script execution is blocked.
 The destination must be new and outside the source setup or vault directory tree.
 Python 3.9 or newer is required, including for interactive HTML builds on Windows,
 macOS, and Linux. Open the generated folder
-in Obsidian and run `codex` or `claude` there. All three skills are registered for
+in Obsidian and run `codex` or `claude` there. All four skills are registered for
 both agents; the new vault has an empty topic registry, an unconfigured profile,
 and no learner concept sessions.
 
@@ -107,7 +108,9 @@ Use `$guided-learning` in Codex or `/guided-learning` in Claude Code. Three cour
 entry points are supported:
 
 - **A new subject:** state your goal and starting point. The tutor creates a
-  starter roadmap of 10–20 concepts and begins a useful first lesson.
+  starter roadmap of 10–20 concepts and begins a useful first lesson. Concept
+  notes are created as their lessons approach, instead of generating empty notes
+  for the whole course.
 - **An existing topic:** say **Continue [topic]** or **Continue my roadmap** to
   resume the intended track.
 - **A source:** provide a PDF, URL, or pasted text. The tutor resolves the intended
@@ -126,6 +129,10 @@ registered paths are defined in [topic-routing.md](references/topic-routing.md).
 4. Use a comprehension check and practice with feedback.
 5. Connect the concept to existing knowledge.
 6. Record the session and update the topic's course records and recall queue.
+
+The protocol holds the learner's attempts, feedback, and next step. A compact
+execution log stores review metadata and links to that protocol without repeating
+the lesson narrative. Pass-specific teaching guidance loads only for the current pass.
 
 Concepts are grouped into related clusters and revisited across three passes:
 
@@ -146,11 +153,13 @@ refresher. These intervals are a practical heuristic, not universally optimal.
 Completing a queue cycle is evidence at those delays, not permanent mastery.
 
 Interactive HTML can make algorithms, parameter changes, or tradeoffs easier to
-inspect. The [interactive kit](interactives/README.md) provides five runnable
+inspect. The [interactive kit](../learning-interactives/README.md) provides ten runnable
 templates, shared accessible components, and a Python scaffolder without external
-UI dependencies. [Open the catalog](interactives/index.html) in a browser to try
+UI dependencies. [Open the catalog](../learning-interactives/index.html) in a browser to try
 parameter exploration, step playback, comparisons, probability experiments, and
-decision scenarios. Course interactives preserve the selected topic's assets;
+decision scenarios, retrieval practice, ordering, system maps, data exploration,
+and geometry. Edit compact sources and build portable pages through
+[Learning Interactives](../learning-interactives/SKILL.md). Course interactives preserve the selected topic's assets;
 static examples or other exercises are appropriate when an interactive is
 unnecessary or inaccessible. Notes and protocols also work without Obsidian;
 use Markdown links appropriate to your note system.
@@ -166,6 +175,7 @@ your-vault/
     learner-profile/
     concept-learning/
     guided-learning/
+    learning-interactives/     # shared activity authoring
   learner-profile.json
   Learner Profile.md
   learning/interactives/       # reusable shared assets
@@ -201,7 +211,7 @@ links the teaching principles to research and explains their limits. The evidenc
 does not establish that these exact agent skills or their assessment judgments
 are validated learning interventions. Evaluate explanation accuracy, independent
 application, and later recall as well as learner feedback.
-The [interactive design rationale](references/interactive-evidence.md) distinguishes
+The [interactive design rationale](../learning-interactives/references/evidence.md) distinguishes
 research findings, accessibility guidance, and the kit's authoring choices.
 
 See [SKILL.md](SKILL.md) for course instructions and [CHANGELOG.md](CHANGELOG.md)

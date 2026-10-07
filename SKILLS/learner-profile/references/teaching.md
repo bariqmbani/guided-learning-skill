@@ -8,9 +8,11 @@ The owning skill controls scope, storage, progression, and any recall scheduling
 Read shared profile defaults and the selected course or current session's
 approved preferences. Current explicit requests take priority. Use the learner's
 language, time, goals, interests, and access constraints to choose examples and
-activities. Do not resolve an active topic for a standalone concept session.
-An absent profile never blocks a lesson or forces onboarding; offer learner-profile
-setup and ask language or immediate time constraints only when needed.
+activities. Apply language, including bilingual preferences, to explanations,
+recall, questions, exercises, and new lesson prose. Do not resolve an active
+topic for a standalone concept session. An absent or unconfigured profile never
+blocks a lesson or forces onboarding; offer learner-profile setup and ask
+language or immediate time constraints only when needed.
 
 Choose one observable outcome for the current lesson. Reuse context already
 supplied; ask only a missing question that will change teaching. A brief

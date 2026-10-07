@@ -31,6 +31,106 @@
 
   /* ======================================================= 1. utilities == */
 
+  /* Small, initialization-only locale configuration; shared assets never need
+   * a translated copy. Messages are plain text with named {placeholders}. */
+  const defaultStrings = Object.freeze({
+    'theme.dark': 'Dark mode',
+    'theme.light': 'Light mode',
+    'theme.switchDark': 'Switch to dark mode',
+    'theme.switchLight': 'Switch to light mode',
+    'stepper.reducedMotion': 'Reduced motion is on. Use Previous and Next to explore each step.',
+    'stepper.pause': 'Pause',
+    'stepper.replay': 'Replay',
+    'stepper.play': 'Play',
+    'stepper.position': 'Step {current} of {total}',
+    'stepper.scrub': '{current} of {total}',
+    'stepper.announce': '{position}. {summary}',
+    'stepper.finished': 'Playback finished. {position}.',
+    'question.choose': 'Choose an answer, then check your reasoning.',
+    'question.correct': 'That fits. {feedback}',
+    'question.retry': 'Revisit this. {feedback}',
+    'question.evidence': 'Use the evidence above to explain your choice.',
+    'quiz.position': 'Question {current} of {total}',
+    'quiz.summary': 'You answered {correct} of {total} correctly on the first attempt. Now explain one of them in your own words; a correct selection is not the same as an explanation.',
+    'quiz.complete': 'Set complete',
+    'quiz.choose': 'Choose an answer, then check it.',
+    'quiz.correct': 'That fits. {feedback}',
+    'quiz.retry': 'Not yet. {feedback}',
+    'quiz.evidence': 'Explain which evidence supports your choice.',
+    'quiz.seeSummary': 'See the summary',
+    'quiz.next': 'Next question',
+    'quiz.restarted': 'Practice set restarted.',
+    'answer.choose': 'Choose or write an answer first.',
+    'answer.label': 'Your answer',
+    'answer.record': '{label}: {answer}',
+    'answer.recorded': 'Answer recorded. Compare it with the evidence below.',
+    'hints.first': 'Show a hint',
+    'hints.next': 'Show the next hint',
+    'hints.shown': '{shown} of {total} hints shown',
+    'hints.available': '{total} hints available',
+    'hints.announce': 'Hint {current}. {hint}',
+    'explain.minimum': 'Write at least {minimum} characters before comparing ({length} so far).',
+    'explain.count': '{length} characters written. Nothing here is saved.',
+    'explain.write': 'Write your own explanation first. Retrieving it from memory is the part that helps.',
+    'explain.compare': 'Compare the two. Name one thing the worked answer makes explicit that yours left out, then tell your tutor.',
+    'explain.revealed': 'A worked answer is now visible. Compare it with your own explanation.',
+    'order.moved': '{label} moved to position {position} of {total}.',
+    'order.earlier': 'Move “{label}” earlier, currently position {position}',
+    'order.later': 'Move “{label}” later, currently position {position}',
+    'order.correct': 'In place',
+    'order.retry': 'Not here yet',
+    'order.complete': 'Every step is in place. Now say what forces each step to come before the next one.',
+    'order.partial': '{placed} of {total} steps are in place. {feedback}',
+    'order.evidence': 'Use the rule that decides which step must come first.',
+    'order.shuffled': 'Order shuffled.',
+    'matching.label': 'Match for {term}',
+    'matching.choose': 'Choose…',
+    'matching.correct': 'Correct',
+    'matching.retry': 'Try again',
+    'matching.incomplete': 'Choose a match for every item first. {correct} of {answered} chosen so far are right.',
+    'matching.complete': 'All matched. Say what feature decided each pair.',
+    'matching.partial': '{correct} of {total} are right. {feedback}',
+    'matching.evidence': 'Compare the two that look closest.',
+    'math.root': 'root[{index}]',
+    'chart.caption': '{y} by {x}',
+    'chart.description': '{caption}. {series}.{cursor} Values in the data table below.',
+    'chart.seriesSeparator': ' and ',
+    'chart.cursorDescription': ' Use the arrow keys to read individual values.',
+    'chart.baseline': 'Baseline for comparison',
+    'chart.cursorHint': 'Hover or focus the chart, then press ← or → to read each value.',
+    'chart.data': 'Chart data',
+    'chart.series': 'Series',
+    'table.show': 'View values as a table',
+    'bars.reference': 'Reference',
+    'bars.category': 'Category',
+    'bars.value': 'Value'
+  });
+  const localeConfig = global.LearningUIStrings || {};
+  const messages = Object.create(null);
+  Object.keys(defaultStrings).forEach(key => {
+    const value = localeConfig.messages && localeConfig.messages[key];
+    if (typeof value === 'string' && value.trim()) messages[key] = value;
+  });
+  Object.freeze(messages);
+  let numberLocale;
+  if (typeof localeConfig.locale === 'string' && localeConfig.locale) {
+    try {
+      new Intl.NumberFormat(localeConfig.locale);
+      numberLocale = localeConfig.locale;
+    } catch (_) { /* An invalid locale keeps the browser's number formatting. */ }
+  }
+  function translate(key, values = {}) {
+    if (!Object.prototype.hasOwnProperty.call(defaultStrings, key)) throw new RangeError('Unknown LearningUI string: ' + key);
+    const message = messages[key] === undefined ? defaultStrings[key] : messages[key];
+    return message.replace(/\{([a-zA-Z]+)\}/g, (token, name) => {
+      if (!Object.prototype.hasOwnProperty.call(values, name)) return token;
+      const value = values[name];
+      return typeof value === 'number' && numberLocale
+        ? new Intl.NumberFormat(numberLocale).format(value) : String(value);
+    });
+  }
+  const i18n = Object.freeze({ text: translate, defaults: defaultStrings });
+
   const clamp = (value, low, high) => Math.min(high, Math.max(low, value));
   const lerp = (from, to, t) => from + (to - from) * t;
   function round(value, places = 0) {
@@ -51,7 +151,7 @@
       const options = places === undefined
         ? { maximumFractionDigits: 2 }
         : { minimumFractionDigits: places, maximumFractionDigits: places };
-      return new Intl.NumberFormat(undefined, options).format(value).replace('-', MINUS);
+      return new Intl.NumberFormat(numberLocale, options).format(value).replace('-', MINUS);
     },
     int(value) { return fmt.num(Math.round(requireFinite(value, 'An integer value')), 0); },
     fixed(value, places = 2) { return fmt.num(value, places); },
@@ -61,7 +161,12 @@
       return (value > 0 ? '+' : MINUS) + fmt.num(Math.abs(value), places);
     },
     /* Takes a fraction: 0.625 -> "62.5%". */
-    pct(fraction, places = 1) { return fmt.num(requireFinite(fraction, 'A proportion') * 100, places) + '%'; },
+    pct(fraction, places = 1) {
+      requireFinite(fraction, 'A proportion');
+      return numberLocale
+        ? new Intl.NumberFormat(numberLocale, { style: 'percent', minimumFractionDigits: places, maximumFractionDigits: places }).format(fraction).replace('-', MINUS)
+        : fmt.num(fraction * 100, places) + '%';
+    },
     unit(value, unit, places) { return fmt.num(value, places) + ' ' + unit; },
     minus(text) { return String(text).replace(/-(?=[\d.])/g, MINUS); },
     /* "1 round" / "3 rounds" without a translation framework. */
@@ -126,9 +231,9 @@
     else delete doc.documentElement.dataset.theme;
     const target = currentTheme() === 'dark' ? 'light' : 'dark';
     doc.querySelectorAll('[data-theme-toggle]').forEach(button => {
-      button.textContent = target === 'dark' ? 'Dark mode' : 'Light mode';
-      button.setAttribute('aria-label', 'Switch to ' + target + ' mode');
-      button.title = 'Switch to ' + target + ' mode';
+      button.textContent = translate('theme.' + target);
+      button.setAttribute('aria-label', translate(target === 'dark' ? 'theme.switchDark' : 'theme.switchLight'));
+      button.title = button.getAttribute('aria-label');
     });
   }
   const theme = {
@@ -372,7 +477,7 @@
     }
     const motionNote = doc.createElement('p');
     motionNote.className = 'explain motion-note';
-    motionNote.textContent = 'Reduced motion is on. Use Previous and Next to explore each step.';
+    motionNote.textContent = translate('stepper.reducedMotion');
     root.append(motionNote);
     let index = 0, playing = false, timer, destroyed = false;
     const listeners = [];
@@ -384,14 +489,14 @@
       back.disabled = index === 0;
       next.disabled = index === count - 1;
       play.disabled = motion.reduced() || count === 1;
-      play.textContent = playing ? 'Pause' : index === count - 1 ? 'Replay' : 'Play';
+      play.textContent = translate(playing ? 'stepper.pause' : index === count - 1 ? 'stepper.replay' : 'stepper.play');
       play.setAttribute('aria-pressed', String(playing));
-      position.textContent = 'Step ' + (index + 1) + ' of ' + count;
+      position.textContent = translate('stepper.position', { current: index + 1, total: count });
       motionNote.hidden = !motion.reduced();
       if (progress) progress.style.width = (count === 1 ? 100 : (index / (count - 1)) * 100) + '%';
       if (scrub && Number(scrub.value) !== index) scrub.value = String(index);
       if (scrub) scrub.setAttribute('aria-valuetext', labels && labels[index] ? labels[index] : position.textContent);
-      if (scrubValue) scrubValue.textContent = (index + 1) + ' of ' + count;
+      if (scrubValue) scrubValue.textContent = translate('stepper.scrub', { current: index + 1, total: count });
       if (stepList) {
         [...stepList.children].forEach((item, position_) => {
           if (position_ === index) item.setAttribute('aria-current', 'step');
@@ -416,7 +521,7 @@
       draw();
       if (!silent) {
         const summary = find('step-summary');
-        announce(position.textContent + '. ' + (summary ? summary.textContent : ''));
+        announce(translate('stepper.announce', { position: position.textContent, summary: summary ? summary.textContent : '' }));
       }
     }
     function schedule() {
@@ -428,7 +533,7 @@
         if (index >= count - 1) pause();
         draw();
         if (playing) schedule();
-        else announce('Playback finished. ' + position.textContent + '.');
+        else announce(translate('stepper.finished', { position: position.textContent }));
       }, delay);
     }
     listen(back, 'click', () => go(index - 1));
@@ -498,7 +603,7 @@
       event.preventDefault();
       const selected = form.querySelector('input[type="radio"]:checked');
       if (!selected) {
-        result.textContent = 'Choose an answer, then check your reasoning.';
+        result.textContent = translate('question.choose');
         result.dataset.tone = 'info';
         const first = form.querySelector('input[type="radio"]');
         if (first) first.focus();
@@ -507,8 +612,9 @@
       attempts += 1;
       const isCorrect = selected.value === String(correct);
       result.dataset.tone = isCorrect ? 'correct' : 'retry';
-      result.textContent = (isCorrect ? 'That fits. ' : 'Revisit this. ') +
-        (feedback[selected.value] || 'Use the evidence above to explain your choice.');
+      result.textContent = translate(isCorrect ? 'question.correct' : 'question.retry', {
+        feedback: feedback[selected.value] || translate('question.evidence')
+      });
       motion.enter(result);
       if (retry) retry.hidden = false;
       if (onAnswer) onAnswer({ correct: isCorrect, value: selected.value, attempts });
@@ -556,7 +662,7 @@
     let answered = false;
     function paint() {
       const item = items[index];
-      position.textContent = 'Question ' + (index + 1) + ' of ' + items.length;
+      position.textContent = translate('quiz.position', { current: index + 1, total: items.length });
       prompt.textContent = item.prompt;
       choices.replaceChildren();
       item.choices.forEach(choice => {
@@ -586,13 +692,12 @@
     function finish() {
       const correctCount = firstTry.filter(Boolean).length;
       summary.hidden = false;
-      summary.textContent = 'You answered ' + correctCount + ' of ' + items.length +
-        ' correctly on the first attempt. Now explain one of them in your own words; a correct selection is not the same as an explanation.';
+      summary.textContent = translate('quiz.summary', { correct: correctCount, total: items.length });
       motion.enter(summary);
       check.hidden = true;
       next.hidden = true;
       if (progress) progress.style.width = '100%';
-      position.textContent = 'Set complete';
+      position.textContent = translate('quiz.complete');
       if (progress) progress.style.width = '100%';
       announce(summary.textContent);
       if (onComplete) onComplete({ total: items.length, firstAttemptCorrect: correctCount, firstTry: firstTry.slice() });
@@ -603,7 +708,7 @@
       const selected = choices.querySelector('input:checked');
       if (!selected) {
         result.dataset.tone = 'info';
-        result.textContent = 'Choose an answer, then check it.';
+        result.textContent = translate('quiz.choose');
         return;
       }
       const isCorrect = selected.value === String(item.correct);
@@ -612,11 +717,12 @@
         answered = true;
       }
       result.dataset.tone = isCorrect ? 'correct' : 'retry';
-      result.textContent = (isCorrect ? 'That fits. ' : 'Not yet. ') +
-        ((item.feedback && item.feedback[selected.value]) || 'Explain which evidence supports your choice.');
+      result.textContent = translate(isCorrect ? 'quiz.correct' : 'quiz.retry', {
+        feedback: (item.feedback && item.feedback[selected.value]) || translate('quiz.evidence')
+      });
       motion.enter(result);
       next.hidden = false;
-      next.textContent = index === items.length - 1 ? 'See the summary' : 'Next question';
+      next.textContent = translate(index === items.length - 1 ? 'quiz.seeSummary' : 'quiz.next');
       if (isCorrect) check.disabled = true;
     }
     form.addEventListener('submit', submit);
@@ -633,7 +739,7 @@
       firstTry = [];
       paint();
     }
-    if (restart) restart.addEventListener('click', () => { reset(); announce('Practice set restarted.'); });
+    if (restart) restart.addEventListener('click', () => { reset(); announce(translate('quiz.restarted')); });
     paint();
     return { reset, position: () => index };
   }
@@ -687,14 +793,14 @@
       const answer = readAnswer();
       if (!answer) {
         record.hidden = false;
-        record.textContent = 'Choose or write an answer first.';
+        record.textContent = translate('answer.choose');
         return;
       }
       record.hidden = false;
-      record.textContent = (label || 'Your answer') + ': ' + answer;
+      record.textContent = translate('answer.record', { label: label || translate('answer.label'), answer });
       motion.enter(record);
       show(true);
-      announce('Answer recorded. Compare it with the evidence below.');
+      announce(translate('answer.recorded'));
       if (onLock) onLock(answer);
     });
     if (retry) retry.addEventListener('click', reset);
@@ -713,9 +819,9 @@
     list.setAttribute('aria-live', 'polite');
     let shown = 0;
     function paint() {
-      button.textContent = shown === 0 ? 'Show a hint' : 'Show the next hint';
+      button.textContent = translate(shown === 0 ? 'hints.first' : 'hints.next');
       button.disabled = shown >= hints.length;
-      if (counter) counter.textContent = shown ? shown + ' of ' + hints.length + ' hints shown' : hints.length + ' hints available';
+      if (counter) counter.textContent = translate(shown ? 'hints.shown' : 'hints.available', { shown, total: hints.length });
     }
     button.addEventListener('click', () => {
       if (shown >= hints.length) return;
@@ -725,7 +831,7 @@
       motion.enter(item);
       shown += 1;
       paint();
-      announce('Hint ' + shown + '. ' + hints[shown - 1]);
+      announce(translate('hints.announce', { current: shown, hint: hints[shown - 1] }));
     });
     function reset() {
       shown = 0;
@@ -755,8 +861,8 @@
       if (!counter) return;
       const length = answer.value.trim().length;
       counter.textContent = length < minLength
-        ? 'Write at least ' + minLength + ' characters before comparing (' + length + ' so far).'
-        : length + ' characters written. Nothing here is saved.';
+        ? translate('explain.minimum', { minimum: minLength, length })
+        : translate('explain.count', { length });
     }
     answer.addEventListener('input', paintCount);
     form.addEventListener('submit', event => {
@@ -764,7 +870,7 @@
       if (answer.value.trim().length < minLength) {
         if (feedbackNode) {
           feedbackNode.dataset.tone = 'info';
-          feedbackNode.textContent = 'Write your own explanation first. Retrieving it from memory is the part that helps.';
+          feedbackNode.textContent = translate('explain.write');
         }
         answer.focus();
         return;
@@ -772,10 +878,10 @@
       reference.hidden = false;
       if (feedbackNode) {
         feedbackNode.dataset.tone = 'info';
-        feedbackNode.textContent = 'Compare the two. Name one thing the worked answer makes explicit that yours left out, then tell your tutor.';
+        feedbackNode.textContent = translate('explain.compare');
       }
       motion.enter(reference);
-      announce('A worked answer is now visible. Compare it with your own explanation.');
+      announce(translate('explain.revealed'));
       if (onReveal) onReveal(answer.value.trim());
     });
     function reset() {
@@ -816,7 +922,7 @@
       current.splice(to, 0, current.splice(from, 1)[0]);
       paint();
       const label = items.find(item => item.id === id).label;
-      announce(label + ' moved to position ' + (to + 1) + ' of ' + current.length + '.');
+      announce(translate('order.moved', { label, position: to + 1, total: current.length }));
       const moved = list.querySelector('[data-id="' + id + '"]');
       if (moved) {
         const button = moved.querySelector(delta < 0 ? '[data-up]' : '[data-down]');
@@ -842,13 +948,13 @@
         up.type = 'button';
         up.dataset.up = '';
         up.textContent = '↑';
-        up.setAttribute('aria-label', 'Move “' + item.label + '” earlier, currently position ' + (index + 1));
+        up.setAttribute('aria-label', translate('order.earlier', { label: item.label, position: index + 1 }));
         up.disabled = index === 0;
         const down = doc.createElement('button');
         down.type = 'button';
         down.dataset.down = '';
         down.textContent = '↓';
-        down.setAttribute('aria-label', 'Move “' + item.label + '” later, currently position ' + (index + 1));
+        down.setAttribute('aria-label', translate('order.later', { label: item.label, position: index + 1 }));
         down.disabled = index === current.length - 1;
         up.addEventListener('click', () => move(id, -1));
         down.addEventListener('click', () => move(id, 1));
@@ -866,14 +972,14 @@
         const isRight = order[index] === id;
         row.dataset.verdict = isRight ? 'correct' : 'wrong';
         const verdict = row.children[2];
-        verdict.textContent = isRight ? 'In place' : 'Not here yet';
+        verdict.textContent = translate(isRight ? 'order.correct' : 'order.retry');
         if (isRight) placed += 1;
         else if (feedback && feedback[id]) notes.push(feedback[id]);
       });
       result.dataset.tone = placed === order.length ? 'correct' : 'retry';
       result.textContent = placed === order.length
-        ? 'Every step is in place. Now say what forces each step to come before the next one.'
-        : placed + ' of ' + order.length + ' steps are in place. ' + (notes[0] || 'Use the rule that decides which step must come first.');
+        ? translate('order.complete')
+        : translate('order.partial', { placed, total: order.length, feedback: notes[0] || translate('order.evidence') });
       motion.enter(result);
       announce(result.textContent);
       if (onCheck) onCheck({ placed, total: order.length, complete: placed === order.length });
@@ -883,7 +989,7 @@
       paint();
       result.textContent = '';
       delete result.dataset.tone;
-      announce('Order shuffled.');
+      announce(translate('order.shuffled'));
     });
     if (checkLabel) check.textContent = checkLabel;
     function reset() {
@@ -927,7 +1033,7 @@
         const select = doc.createElement('select');
         const selectId = instanceId + '-' + index;
         select.id = selectId;
-        select.setAttribute('aria-label', 'Match for ' + pair.term);
+        select.setAttribute('aria-label', translate('matching.label', { term: pair.term }));
         select.setAttribute('aria-describedby', selectId + '-verdict');
         const answer = doc.createElement('div');
         answer.className = 'match-answer';
@@ -937,7 +1043,7 @@
         verdict.hidden = true;
         const blank = doc.createElement('option');
         blank.value = '';
-        blank.textContent = 'Choose…';
+        blank.textContent = translate('matching.choose');
         select.append(blank);
         choices.forEach(choice => {
           const option = doc.createElement('option');
@@ -971,7 +1077,7 @@
         }
         const isRight = select.value === pair.match;
         row.dataset.verdict = isRight ? 'correct' : 'wrong';
-        verdict.textContent = isRight ? 'Correct' : 'Try again';
+        verdict.textContent = translate(isRight ? 'matching.correct' : 'matching.retry');
         verdict.hidden = false;
         if (isRight) right += 1;
         else if (pair.why) notes.push(pair.why);
@@ -979,10 +1085,10 @@
       const answered = [...grid.querySelectorAll('select')].filter(select => select.value).length;
       result.dataset.tone = right === pairs.length ? 'correct' : 'retry';
       result.textContent = answered < pairs.length
-        ? 'Choose a match for every item first. ' + right + ' of ' + answered + ' chosen so far are right.'
+        ? translate('matching.incomplete', { correct: right, answered })
         : right === pairs.length
-          ? 'All matched. Say what feature decided each pair.'
-          : right + ' of ' + pairs.length + ' are right. ' + (notes[0] || 'Compare the two that look closest.');
+          ? translate('matching.complete')
+          : translate('matching.partial', { correct: right, total: pairs.length, feedback: notes[0] || translate('matching.evidence') });
       motion.enter(result);
       announce(result.textContent);
     });
@@ -1377,7 +1483,7 @@
       case 'text': return node.variant === 'op' ? node.v + ' ' : node.v;
       case 'frac': return wrap(node.num) + '/' + wrap(node.den);
       case 'binom': return 'C(' + toLinear(node.num) + ', ' + toLinear(node.den) + ')';
-      case 'sqrt': return (node.index ? 'root[' + toLinear(node.index) + ']' : '√') + wrap(node.body);
+      case 'sqrt': return (node.index ? translate('math.root', { index: toLinear(node.index) }) : '√') + wrap(node.body);
       case 'sup': return wrap(node.base) + '^' + wrap(node.sup);
       case 'sub': return wrap(node.base) + '_' + wrap(node.sub);
       case 'subsup': return wrap(node.base) + '_' + wrap(node.sub) + '^' + wrap(node.sup);
@@ -1666,8 +1772,11 @@
     const figure = svg.create({
       width,
       height,
-      label: yLabel + ' by ' + xLabel + '. ' + series.map(item => item.label).join(' and ') +
-        '.' + (cursorOn ? ' Use the arrow keys to read individual values.' : '') + ' Values in the data table below.',
+      label: translate('chart.description', {
+        caption: translate('chart.caption', { y: yLabel, x: xLabel }),
+        series: series.map(item => item.label).join(translate('chart.seriesSeparator')),
+        cursor: cursorOn ? translate('chart.cursorDescription') : ''
+      }),
       describedBy: cursorOn ? readoutId : undefined
     });
     const defs = svg.el('defs');
@@ -1802,7 +1911,7 @@
       swatch.style.borderColor = 'var(--graphic-neutral)';
       swatch.style.borderTopStyle = 'dotted';
       swatch.setAttribute('aria-hidden', 'true');
-      entry.append(swatch, doc.createTextNode(options.baselineLabel || 'Baseline for comparison'));
+      entry.append(swatch, doc.createTextNode(options.baselineLabel || translate('chart.baseline')));
       legend.append(entry);
     }
 
@@ -1850,25 +1959,25 @@
     }
     let hint = state.hint;
     if (cursorOn && !hint) {
-      hint = node('p', 'Hover or focus the chart, then press ← or → to read each value.', 'chart-hint');
+      hint = node('p', translate('chart.cursorHint'), 'chart-hint');
       state.hint = hint;
     }
     let details = state.details;
     const firstBuild = !details;
     if (!details) {
       details = node('details');
-      details.append(node('summary', 'View values as a table'));
+      details.append(node('summary', translate('table.show')));
       const wrap = node('div', undefined, 'table-wrap');
       wrap.tabIndex = 0;
       wrap.setAttribute('role', 'region');
-      wrap.setAttribute('aria-label', 'Chart data');
+      wrap.setAttribute('aria-label', translate('chart.data'));
       details.append(wrap);
       state.details = details;
     }
     const table = node('table', undefined, 'data-table');
-    table.append(node('caption', yLabel + ' by ' + xLabel));
+    table.append(node('caption', translate('chart.caption', { y: yLabel, x: xLabel })));
     const head = node('thead'), headRow = node('tr');
-    ['Series', xLabel, yLabel].forEach(label => {
+    [translate('chart.series'), xLabel, yLabel].forEach(label => {
       const cell = node('th', label);
       cell.scope = 'col';
       headRow.append(cell);
@@ -2029,19 +2138,19 @@
       });
     }
     if (target) {
-      const note = node('p', (target.label || 'Reference') + ': ' + format(Number(target.value)), 'explain');
+      const note = node('p', (target.label || translate('bars.reference')) + ': ' + format(Number(target.value)), 'explain');
       chart.append(note);
     }
     const children = [chart];
     const wantsTable = table === undefined ? orientation === 'vertical' : Boolean(table);
     if (wantsTable) {
       const details = node('details');
-      details.append(node('summary', 'View values as a table'));
+      details.append(node('summary', translate('table.show')));
       const wrap = node('div', undefined, 'table-wrap');
       const dataTable = node('table', undefined, 'data-table');
       if (caption) dataTable.append(node('caption', caption));
       const head = node('thead'), headRow = node('tr');
-      [options.labelHeading || 'Category', options.valueHeading || 'Value'].forEach(text => {
+      [options.labelHeading || translate('bars.category'), options.valueHeading || translate('bars.value')].forEach(text => {
         const cell = node('th', text);
         cell.scope = 'col';
         headRow.append(cell);
@@ -2121,7 +2230,7 @@
 
   global.LearningUI = Object.freeze({
     /* utilities */
-    clamp, lerp, round, fmt, seededRandom, announce, theme, motion,
+    clamp, lerp, round, fmt, seededRandom, announce, theme, motion, i18n,
     /* controls */
     bindRange, bindChoice, bindCheckbox,
     /* sequence and questions */

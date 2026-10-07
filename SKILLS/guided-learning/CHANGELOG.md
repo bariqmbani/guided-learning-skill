@@ -1,5 +1,25 @@
 # Guided Learning — Changelog
 
+## [3.8.0] — 2026-10-07
+
+### Changed
+
+- Extract interactive authoring into the shared `learning-interactives` skill;
+  keep course timing, pinned paths, learner assessment, and records here.
+- Load only the current pass's explanation, checks, and connection guidance.
+  Consolidate shared teaching and topic routing to reduce repeated instructions.
+- Retain the explicit Phase 1 pass overview, multi-concept rules, and Quality Bar;
+  selected-pass guidance remains required before teaching.
+- Preserve concrete Obsidian formatting guidance and every check's underlying
+  task; clarify course routing and record unattempted application honestly.
+- Keep the 10–20-concept roadmap, creating concept notes when approached instead
+  of generating every stub upfront. Roadmap-only requests create no notes.
+- Store session narrative once in the learner protocol; compact execution logs
+  retain review metadata and link to that evidence, including observed attempts,
+  support, and what helped. Preserve older records.
+- Make unassessed and assisted work explicit; unfinished work does not mark a
+  roadmap concept complete or enter recall as a learned concept.
+
 ## [3.7.1] — 2026-10-07
 
 ### Added — Notation, components, and five more activity patterns

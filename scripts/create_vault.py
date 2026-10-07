@@ -26,7 +26,9 @@ runtime_spec.loader.exec_module(runtime)
 # Explicitly enumerate reusable assets; never copy a course, registry, or workspace.
 INTERACTIVE_ASSETS = (
     "interactive.css", "interactive.js", "build.py", "scaffold.py", "verify.py",
-    "README.md", "COMPONENTS.md", "index.html", "components.html",
+    "SKILL.md", "LICENSE", "CHANGELOG.md", "README.md", "COMPONENTS.md",
+    "references/patterns.md", "references/authoring.md", "references/verification.md",
+    "references/localization.md", "references/evidence.md", "index.html", "components.html",
     "example-interactive.html",
     "templates/parameter-explorer.html", "templates/step-sequence.html",
     "templates/comparison.html", "templates/probability-lab.html",
@@ -63,8 +65,10 @@ ASSETS = [
     "SKILLS/guided-learning/references/bootstrap.md",
     "SKILLS/guided-learning/references/teach-from-source.md",
     "SKILLS/guided-learning/references/comprehension-checks.md",
+    "SKILLS/guided-learning/references/pass-1.md",
+    "SKILLS/guided-learning/references/pass-2.md",
+    "SKILLS/guided-learning/references/pass-3.md",
     "SKILLS/guided-learning/references/interactives.md",
-    "SKILLS/guided-learning/references/interactive-evidence.md",
     "SKILLS/guided-learning/references/session-records.md",
     "SKILLS/guided-learning/references/session-review.md",
     "SKILLS/guided-learning/SKILL.md",
@@ -77,7 +81,7 @@ ASSETS = [
     "SKILLS/guided-learning/examples/recall-queue.md",
     "SKILLS/guided-learning/examples/session-protocol.md",
     "SKILLS/guided-learning/scripts/topics.py",
-    *(f"SKILLS/guided-learning/interactives/{name}" for name in INTERACTIVE_ASSETS),
+    *(f"SKILLS/learning-interactives/{name}" for name in INTERACTIVE_ASSETS),
 ]
 
 AGENTS = """# Learning vault
@@ -96,6 +100,9 @@ Choose the workflow before selecting a topic or writing learning data:
   follow [concept-learning](SKILLS/concept-learning/SKILL.md).
 - A course, roadmap, spaced recall, or topic continuation: follow
   [guided-learning](SKILLS/guided-learning/SKILL.md).
+- Build or adapt an interactive activity: follow
+  [learning-interactives](SKILLS/learning-interactives/SKILL.md); the calling
+  teaching skill retains assessment and learning-record ownership.
 
 Honor an explicit skill choice. Ask one scope question only if focused learning
 versus a course is unclear. Follow the selected skill's reference-loading rules.
@@ -138,7 +145,7 @@ separate folders and may link to earlier work. These sessions do not change
 you want it included in a roadmap or future recall.
 """
 
-SKILL_NAMES = ("learner-profile", "concept-learning", "guided-learning")
+SKILL_NAMES = ("learner-profile", "concept-learning", "guided-learning", "learning-interactives")
 
 
 def skill_entry(name, canonical):
@@ -190,7 +197,7 @@ pass: 1
 cluster: ""
 concept: ""
 complexity: ""
-comprehension: ""
+comprehension: "not-yet-assessed"
 ---
 
 # Session: {{title}}
@@ -199,11 +206,11 @@ comprehension: ""
 
 ## What we covered
 
-## How we learned it
+## Attempts and feedback
+
+<!-- Record actual attempts, support, corrections, and evidence of what helped. -->
 
 ## Artifacts
-
-## Corrections given
 
 ## Connections made
 
@@ -238,7 +245,7 @@ def make_files(source, name):
         files[relative] = content.replace(b"\r\n", b"\n") if path.suffix in {".py", ".sh", ".ps1"} else content
     # Source assets stay with the skill; installed vaults also need shared templates.
     for asset_filename in INTERACTIVE_ASSETS:
-        files[f"learning/interactives/{asset_filename}"] = files[f"SKILLS/guided-learning/interactives/{asset_filename}"]
+        files[f"learning/interactives/{asset_filename}"] = files[f"SKILLS/learning-interactives/{asset_filename}"]
     onboarding_example = files["SKILLS/learner-profile/references/onboarding-example.md"].decode("utf-8").rstrip("\n")
     installation_prompt = files["SKILLS/guided-learning/references/installation-prompt.md"].decode("utf-8").rstrip("\n")
     upstream = json.loads((source / "SKILLS/guided-learning/UPSTREAM.json").read_text(encoding="utf-8"))
@@ -251,6 +258,7 @@ def make_files(source, name):
         "Conversational onboarding for language, time, and constraints; topic-specific learning plans with evidence-informed adaptive teaching.",
         "Shared learner-profile skill and compatibility aliases for existing onboarding and profile helper paths.",
         "Personalized concept-learning sessions with notes, mentor feedback, and practice outside course topics.",
+        "Shared learning-interactives skill with compact authoring sources, portable delivery pages, and runtime localization.",
     ]
     texts = {
         "AGENTS.md": AGENTS,
@@ -278,7 +286,8 @@ explains the method. This setup builds on the MIT-licensed
 [Learner Profile](../learner-profile/SKILL.md) guides every optional profile field,
 one question at a time, to personalize both learning skills. [Concept Learning](../concept-learning/SKILL.md) teaches one concept
 and saves notes, mentor feedback, and practice under `concept-sessions/` without
-selecting a course. [Topic intake](references/topic-intake.md) sets a useful outcome and
+selecting a course. [Learning Interactives](../learning-interactives/SKILL.md)
+builds activities for either teaching skill. [Topic intake](references/topic-intake.md) sets a useful outcome and
 starting point for each course. [Research rationale](../learner-profile/references/onboarding-evidence.md)
 explains the evidence and limits of these design choices.
 
@@ -322,7 +331,8 @@ recall, and journals stay in `topics/`; focused lessons stay in `concept-session
 Adding a focused lesson to a course requires your explicit request.
 The [component reference](learning/interactives/COMPONENTS.md) lists every helper
 and class. The [interactive authoring guide](learning/interactives/README.md) explains how
-to scaffold a standalone lesson in its course or concept-session folder.
+to edit a compact source and build a standalone lesson in its course or concept-session folder.
+Both teaching skills call [Learning Interactives](SKILLS/learning-interactives/SKILL.md) only when useful.
 
 Run **$learner-profile** or **/learner-profile** to update preferences.
 """,
@@ -336,6 +346,7 @@ same folder. Read [Home.md](Home.md) to choose a learning workflow:
 | Learner Profile | `$learner-profile` | `/learner-profile` | Shared preferences |
 | Concept Learning | `$concept-learning bubble sort` | `/concept-learning bubble sort` | A focused session under `concept-sessions/` |
 | Guided Learning | `$guided-learning algorithms` | `/guided-learning algorithms` | A course under `topics/` |
+| Learning Interactives | `$learning-interactives` | `/learning-interactives` | A source and standalone activity in the chosen workspace |
 
 Installation is complete. This vault is an independent local copy with its own
 skills, helpers, and templates. It needs no connection to the source checkout or

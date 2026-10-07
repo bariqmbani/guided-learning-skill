@@ -15,8 +15,9 @@
     "Modular instruction references, deduplicated question variants, and separate shared profile schema guidance.",
     "Portable Python CSS/JavaScript builder with encoding-safe filename diagnostics, five interactive templates, reusable components, and a non-overwriting scaffolder.",
     "Compact onboarding with one-way reference loading; shared setup uses learner-profile only.",
-    "Native MathML notation, ten activity templates, retrieval and construction components, figure renderers with a keyboard data cursor, a dark palette, and a static lesson checker."
+    "Native MathML notation, ten activity templates, retrieval and construction components, figure renderers with a keyboard data cursor, a dark palette, and a static lesson checker.",
+    "Extracted shared learning-interactives authoring skill, selective pass guidance, concept notes created on approach, and compact execution logs linked to learner evidence."
   ],
-  "local_version": "3.7.1",
+  "local_version": "3.8.0",
   "fork_repository": "https://github.com/bariqmbani/guided-learning-skill"
 }
