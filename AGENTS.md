@@ -6,6 +6,10 @@ learning records belong in a separate installed vault or learning workspace.
 Do not create topics, roadmaps, recall queues, concept-sessions, or session journals
 in this checkout.
 
+Installation creates an independent local copy. Installed vaults use their own
+skills, helpers, and assets; later source or remote changes do not affect them.
+Do not add repository synchronization or upgrade-migration instructions.
+
 Read README.md for the installation prompt and INSTALLATION.md for missing tools
 and shell-specific setup. Use scripts/create_vault.py, scripts/install_vault.sh,
 or scripts/install_vault.ps1 to create a new vault at a different path. The generator

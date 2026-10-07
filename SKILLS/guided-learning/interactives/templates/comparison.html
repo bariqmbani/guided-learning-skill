@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Two growth rules · Comparison</title>
+  <link rel="stylesheet" href="../interactive.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to lesson</a>
+<main id="main" class="lesson">
+  <!-- EDIT: lesson content. Both models must share inputs and measurement units. -->
+  <header class="lesson-header"><p class="eyebrow">Comparison · Growth models</p><h1>Same start. Different rules.</h1><p class="subtitle">Compare adding a fixed amount with growing the current total. Keep the starting budget and rate identical.</p></header>
+  <section class="prompt-card stack" aria-labelledby="warmup-title">
+    <h2 id="warmup-title">01 · Warm up</h2>
+    <p><strong>Your goal:</strong> explain why repeated percentage growth eventually differs from repeated fixed additions.</p>
+    <form id="warmup" class="stack">
+      <fieldset><legend>Both models begin at 100 units and use a 10% rate. Which has more units after just one round?</legend>
+        <label><input type="radio" name="warmup" value="simple" required> The fixed-addition model.</label>
+        <label><input type="radio" name="warmup" value="equal"> They are equal.</label>
+        <label><input type="radio" name="warmup" value="compound"> The compound model.</label>
+      </fieldset>
+      <div class="btn-row"><button class="btn" type="submit" data-check>Check answer</button><button class="btn btn-secondary" type="button" data-retry>Try again</button></div>
+      <p class="feedback" data-feedback hidden></p>
+    </form>
+  </section>
+  <section class="workspace" aria-labelledby="controls-title">
+    <div class="controls stack">
+      <h2 id="controls-title">02 · Run a fair comparison</h2>
+      <p class="explain">Each control applies to both models. No units are added from outside the system.</p>
+      <div class="control-group"><div class="control-heading"><label for="initial">Initial budget, P</label><output id="initial-value" for="initial">100 units</output></div><input id="initial" type="range" min="10" max="200" step="10" value="100"><div class="range-ends"><span>10 units</span><span>200 units</span></div></div>
+      <div class="control-group"><div class="control-heading"><label for="rate">Growth rate per round, r</label><output id="rate-value" for="rate">10%</output></div><input id="rate" type="range" min="0" max="20" step="1" value="10"><div class="range-ends"><span>0%</span><span>20%</span></div></div>
+      <div class="control-group"><div class="control-heading"><label for="rounds">Number of rounds, t</label><output id="rounds-value" for="rounds">10</output></div><input id="rounds" type="range" min="1" max="20" step="1" value="10"><div class="range-ends"><span>1 round</span><span>20 rounds</span></div></div>
+      <div class="preset-row"><button class="preset-btn" type="button" data-preset="100,10,1">First round</button><button class="preset-btn" type="button" data-preset="100,0,10">Zero growth</button><button class="preset-btn" type="button" data-preset="100,10,20">Longer horizon</button></div>
+      <button id="reset" class="btn btn-secondary" type="button">Reset comparison</button>
+    </div>
+    <div class="stage stack">
+      <h2>03 · Compare the outcomes</h2>
+      <div class="two-col">
+        <article class="panel stack"><h3>Fixed addition · simple growth</h3><p>Add the same fraction of the <strong>initial</strong> budget every round.</p><p class="code-block">S(t) = P × (1 + r × t)</p><p class="metric"><span class="metric-name">Total after selected rounds</span><strong class="metric-value" id="simple-total">200.00</strong><span class="metric-subtext">units</span></p><p class="explain" id="simple-addition">Round 10 adds 10.00 units.</p></article>
+        <article class="panel stack"><h3>Repeated scaling · compound growth</h3><p>Add the same fraction of the <strong>current</strong> total every round.</p><p class="code-block">C(t) = P × (1 + r)<sup>t</sup></p><p class="metric"><span class="metric-name">Total after selected rounds</span><strong class="metric-value" id="compound-total">259.37</strong><span class="metric-subtext">units</span></p><p class="explain" id="compound-addition">Round 10 adds 23.58 units.</p></article>
+      </div>
+      <div id="growth-chart" class="chart" aria-label="Growth comparison graph and data table"></div>
+      <p id="observation">After 10 rounds, compound growth has 59.37 more units. Both started with 100.00 units and the same 10% rate.</p>
+      <p class="explain">Both series share the same axes. Axes rescale when the settings change, so compare the numbers as well as the shapes. Display values are rounded; the model retains full precision.</p>
+    </div>
+  </section>
+  <section class="two-col" aria-label="Explain and transfer"><article class="panel stack"><h2>04 · Explain the difference</h2><p>Set the rate to 10% and inspect rounds 1 and 2. What quantity is the percentage applied to in each model? Explain the first round in which the totals differ.</p><details><summary>Reveal a worked check</summary><p>With P = 100, both reach 110 after round 1. In round 2, fixed addition adds another 10, reaching 120. Compound growth adds 10% of 110, or 11, reaching 121.</p></details></article><article class="panel stack"><h2>Transfer the idea</h2><p>A culture gains 10 cells each hour in one model and 10% of its current cells each hour in another. What changes if both begin with 200 cells? Which assumption would fail as space runs out?</p></article></section>
+  <aside class="notice"><strong>Model limits.</strong> Units are arbitrary and divisible. Rates are constant, growth is applied once per round, and there are no losses, resource limits, or outside contributions. These formulas illustrate arithmetic and geometric growth; they are not forecasts of a real system.</aside>
+  <noscript><p class="notice">JavaScript enables the shared controls and chart. With 100 units at a 10% rate, simple and compound totals are respectively 110 and 110 after one round, 120 and 121 after two rounds, and 200 and approximately 259.37 after ten rounds.</p></noscript>
+  <footer class="lesson-footer">A fair comparison changes the rule while keeping the starting conditions equal.</footer>
+  <!-- END EDIT: lesson content. -->
+</main>
+<p class="sr-only" data-announcer role="status" aria-live="polite" aria-atomic="true"></p>
+<script src="../interactive.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const format = value => value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  // EDIT: paired models. Preserve equal units, initial conditions, and time points.
+  const simple = (initial, rate, round) => initial * (1 + rate * round);
+  const compound = (initial, rate, round) => initial * Math.pow(1 + rate, round);
+  function render() {
+    const initial = Number($('initial').value);
+    const rate = Number($('rate').value) / 100;
+    const rounds = Number($('rounds').value);
+    const simpleTotal = simple(initial, rate, rounds);
+    const compoundTotal = compound(initial, rate, rounds);
+    $('simple-total').textContent = format(simpleTotal);
+    $('compound-total').textContent = format(compoundTotal);
+    $('simple-addition').textContent = 'Round ' + rounds + ' adds ' + format(initial * rate) + ' units.';
+    $('compound-addition').textContent = 'Round ' + rounds + ' adds ' + format(compound(initial, rate, rounds - 1) * rate) + ' units.';
+    const difference = Math.max(0, compoundTotal - simpleTotal);
+    $('observation').textContent = 'After ' + rounds + (rounds === 1 ? ' round' : ' rounds') + ', ' + (difference < 0.0000001 ? 'both models have the same total.' : 'compound growth has ' + format(difference) + ' more units.') + ' Both started with ' + format(initial) + ' units and the same ' + Math.round(rate * 100) + '% rate.';
+    document.querySelectorAll('[data-preset]').forEach(button => {
+      const active = button.dataset.preset === [initial, Math.round(rate * 100), rounds].join(',');
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    const points = fn => Array.from({ length: rounds + 1 }, (_, round) => ({ x: round, y: fn(initial, rate, round) }));
+    LearningUI.renderChart($('growth-chart'), {
+      series: [{ label: 'Fixed addition', points: points(simple) }, { label: 'Compound growth', points: points(compound) }],
+      xLabel: 'Round', yLabel: 'Total units', xDomain: [0, rounds], yDomain: [0, compoundTotal * 1.1], formatY: value => value.toLocaleString('en-US', { maximumFractionDigits: 2 })
+    });
+  }
+  // END EDIT: paired models.
+  const summarize = () => LearningUI.announce($('observation').textContent);
+  const controls = [
+    LearningUI.bindRange($('initial'), $('initial-value'), { format: value => value + ' units', onInput: render, onChange: summarize }),
+    LearningUI.bindRange($('rate'), $('rate-value'), { format: value => value + '%', onInput: render, onChange: summarize }),
+    LearningUI.bindRange($('rounds'), $('rounds-value'), { format: String, onInput: render, onChange: summarize })
+  ];
+  const question = LearningUI.mountQuestion($('warmup'), {
+    correct: 'equal',
+    feedback: {
+      equal: 'Yes. Both first additions are 10% of 100, so both totals become 110. The bases differ starting in the second round.',
+      simple: 'Both rules begin from 100. Calculate the first addition for each: 10% of 100 is 10.',
+      compound: 'Compounding has no previous growth to build on in the first round. Both models first add 10 units.'
+    }
+  });
+  function setValues(values) {
+    values.forEach((value, index) => controls[index].set(value, { notify: false }));
+    render();
+    summarize();
+  }
+  document.querySelectorAll('[data-preset]').forEach(button => button.addEventListener('click', () => setValues(button.dataset.preset.split(',').map(Number))));
+  $('reset').addEventListener('click', () => {
+    setValues([100, 10, 10]);
+    question.reset();
+    LearningUI.announce('Comparison reset to 100 units, 10 percent growth, and 10 rounds. Answer cleared.');
+  });
+  render();
+})();
+</script>
+</body>
+</html>

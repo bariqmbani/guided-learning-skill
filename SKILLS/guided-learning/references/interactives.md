@@ -1,60 +1,85 @@
-# Interactive Construction
+# Interactive construction
 
-## Launch during explanation
+Use an interactive when manipulating inputs, tracing a process, comparing cases,
+sampling outcomes, or exploring consequences helps the learner reach the current
+outcome. Check access constraints, time, and available tools first. A visual
+preference alone does not require a simulation; a static diagram, table, worked
+example, or conversation can serve the same goal.
 
-**Immediately after delivering the Phase 1 explanation**, check whether this concept warrants an interactive HTML visualization (use the core flow's Phase 3 selection criteria). If yes:
+## Choose and build
 
-First check the profile's access constraints and available tools. For text-only preferences, inaccessible controls, or a tight session budget, use a static explanation or worked example that serves the same learning goal. A visual presentation preference alone does not make an interactive necessary.
+Start with **Start here** and **Choose the interaction** in the
+[interactive kit guide](../interactives/README.md), then load only the relevant
+working template. Read component recipes or local-asset guidance as needed;
+there is no need to load every example. The [browser catalog](../interactives/index.html)
+previews five patterns:
 
-1. **Launch a background subagent** (Agent tool, `run_in_background: true`) to build the interactive HTML file.
-   - Pass the subagent the full concept content, pinned CSS and build script paths, output filename, and this reference's construction guidelines.
-   - The subagent should follow all Interactive HTML Guidelines below without loading unrelated teaching references.
-2. **Do not wait** — proceed immediately to Phase 2 (Comprehension Check). The learner reads your explanation while the interactive builds.
-3. When the subagent completes, **announce it** before the learner answers the comprehension check prompt: *"The interactive is ready — open `{interactives_dir}/YYYY-MM-DD_concept-slug.html` and explore it before answering."*
-4. If the concept does not warrant an interactive (e.g., it's a writing or scenario exercise), skip this phase entirely.
+| Need | Template |
+| --- | --- |
+| Change an input and inspect the relationship | `parameter-explorer` |
+| Trace an algorithm, mechanism, or ordered process | `step-sequence` |
+| Compare models or tradeoffs under shared conditions | `comparison` |
+| Explore samples, chance, and variability | `probability-lab` |
+| Choose an action and reason about consequences | `decision-scenario` |
 
-**Learning order:** The interactive reinforces the explanation visually *before* the learner has to reproduce the concept — not after. Seeing the model in motion gives them something concrete to reason about during the comprehension check.
+1. Pin `{interactives_dir}`, `{css_file}`, and `{build_script}` from the selected
+   topic; inspect existing assets and preserve customizations. Use the Python
+   interpreter recorded in `runtime.local.toml` when configured.
+2. Define the outcome, model/assumptions, input bounds, expected result, one edge
+   case, and **warm up → explore → explain → transfer** prompts. Adapt to the
+   learner's language, domain, and access needs.
+3. Use `SKILLS/guided-learning/interactives/scaffold.py` with the pattern name
+   and absolute output path:
 
-## Page content
+   ```sh
+   python3 SKILLS/guided-learning/interactives/scaffold.py step-sequence /absolute/pinned/interactives/YYYY-MM-DD_concept-slug.html
+   ```
 
-Create a self-contained HTML file with interactive controls (sliders, toggles,
-input fields), a real-time visualization, brief explanation, and "What to notice"
-prompts. Use realistic domain values and save it to
-`{interactives_dir}/YYYY-MM-DD_concept-slug.html`.
+   The scaffolder supplies missing assets and builds a standalone page. It
+   refuses overwrites and conflicting assets. For customized topic assets,
+   follow the guide's **Local assets and customizations** workflow and preserve
+   the topic's stylesheet and learner files.
+4. Customize the marked lesson and model sections; keep reusable controls,
+   playback, feedback, and chart/table components. Validate the teaching model
+   independently of its visual presentation.
+5. The main tutor runs the selected topic's `build.py` for the completed filename
+   and checks its exit status, including after delegated work. Filenames are
+   relative to the Python builder's directory.
+6. Open the result in a browser when available. Check baseline/extreme values,
+   reset/retry, keyboard use, narrow-screen layout, reduced motion, and the text
+   or table alternative. Report unavailable checks honestly.
 
-## Interactive HTML Guidelines
+The installed vault uses its own local kit, independent of the source repository.
+The kit needs no external UI library or JavaScript build tool. Shared CSS and
+optional `interactive.js` are inlined by the builder; page-specific styles/code
+stay separate. All learner pages belong in the installed workspace, never this
+source repository. The full guide covers API recipes, domain extensions,
+dependencies, data provenance, and verification.
 
-When creating interactive HTML pages:
+## Fit the activity into the lesson
 
-- **Shared design system**: Every interactive uses the universal stylesheet from `{css_file}`. New interactives should link it via:
-  ```html
-  <link rel="stylesheet" href="interactive.css">
-  ```
-  Run the Python `build_script` to inline CSS for Obsidian, using the interpreter
-  in `runtime.local.toml`. From the vault root, for example in PowerShell:
-  ```powershell
-  & 'C:\path\to\python.exe' "{build_script}"
-  ```
-  Append a filename to build just that file; paths are relative to the builder.
-  For an older `build.sh` registration, use its sibling `build.py`. If absent,
-  copy the reusable `SKILLS/guided-learning/interactives/build.py` beside the
-  selected topic's CSS first. Keep its existing CSS and learning records.
-  The script replaces the `<link>` tag with an inline `<style>` block wrapped in `<!-- interactive.css:start -->` / `<!-- interactive.css:end -->` markers. It's idempotent — re-running after CSS edits updates all HTML files. Page-specific styles go in a separate inline `<style>` block.
-- **Class conventions**: Use the standard classes from `interactive.css`:
-  - Layout: `.layout` (sidebar+main), `.two-col`, `.container`, `.page-padding`
-  - Surfaces: `.panel`, `.card`, `.notice`, `.notice--bar`
-  - Controls: `.slider-row`, `.slider-label`, `.slider-val`, `.control-group`
-  - Buttons: `.btn`, `.btn-secondary`, `.btn-sm`, `.btn-row`, `.preset-row`, `.preset-btn`
-  - Metrics: `.metric` (inline), `.metric-row` + `.metric-bar-bg` + `.metric-bar-fill` (bar)
-  - Navigation: `.nav`, `.tab-content`, `.header`, `.bottom-nav`
-  - Content: `.formula`, `.explain`, `.prompt-box`, `.copy-btn`, `.tag`
-  - Colors: use CSS vars (`var(--accent)`, `var(--green)`, etc.) or utility classes (`.color-tp`, `.color-cyan`, etc.)
-- **Educational**: Not a tech demo — designed to teach. Include "What to notice" prompts and guided exploration steps.
-- **Parameter exploration**: Let the user change inputs and see what happens in real time.
-- **Domain-contextualized**: Use realistic values from the learner's research domain.
-- **Mobile-friendly**: Should work in any modern browser.
-- **Visually clean**: Use a simple, readable design. No flashy animations — clarity over aesthetics.
-- **Cross-tab data provenance**: When an interactive has multiple tabs where later tabs depend on data configured in earlier tabs, always make this dependency explicit. Label the source tab as the shared data source, add a live summary at the end of the source tab previewing what flows into later tabs, and reference the source tab by name in later tabs' introductions. Never assume the learner tracks implicit state across tabs.
-- **Toggle/switch components**: Custom toggles must use `<label for="inputId">` for the clickable track element, not `<div>`. The hidden-checkbox + styled-sibling pattern requires the visual element to be a `<label>` with a `for` attribute. CSS selectors targeting labels inside control rows must use the direct-child combinator (`>`) to avoid styling nested labels (e.g., `.toggle-row > label` not `.toggle-row label`).
-- **Build verification**: After the interactive subagent completes, the main agent MUST run the selected topic's Python builder to inline CSS and check its exit status. Do not rely on the subagent to do this.
-- **Store in**: `{interactives_dir}` with naming scheme `YYYY-MM-DD_concept-slug.html`.
+After Phase 1's explanation, use a background helper only if the host provides
+that capability. Pass the helper the concept/model, pattern, learner constraints,
+pinned paths, and kit guide. Continue useful explanation or ask a warm-up question
+while it builds. If delegation is unavailable, build directly or use an accessible
+worked example within the session budget. Do not invent an Agent tool, flags,
+or a completion-time guarantee.
+
+Announce the interactive only after it is built and checked. Invite exploration
+before an assessment that depends on the page; do not hold up an independent
+learner response because a background build is unfinished. Provide a browser-openable
+path and a specific first action, then ask for the learner's reasoning. Inlining
+assets does not enable scripts in Obsidian's note rendering; link the HTML from
+the note and open it in a browser.
+
+Keep motion purposeful, finite, learner-controlled, and compatible with reduced
+motion. Native controls need visible labels and useful feedback. Every visual
+needs an equivalent explanation/table, and every drag interaction needs a
+keyboard/click alternative. If views share data, label the source, show its live
+summary, and explain the dependency in each dependent view.
+
+The page does not persist responses or update course progress. Record only work
+actually observed through the teaching workflow. Inspecting an animation or
+selecting the correct option does not establish lasting understanding. Use a new
+case or explanation and later recall where appropriate. See the
+[research rationale](interactive-evidence.md) for the evidence and its limits.

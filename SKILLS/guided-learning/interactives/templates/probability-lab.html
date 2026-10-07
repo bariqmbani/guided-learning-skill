@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chance &amp; frequency · Probability lab</title>
+  <link rel="stylesheet" href="../interactive.css">
+  <style>
+    .coin-history { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0; padding: 0; list-style: none; }
+    .coin-history li { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border: 1px solid var(--border); border-radius: 50%; background: var(--card); font-weight: 650; }
+    .coin-history [data-heads="true"] { background: var(--accent-dim); border-color: var(--accent); }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to lesson</a>
+<main id="main" class="lesson">
+  <!-- EDIT: lesson content. Distinguish theoretical chance from observed frequency. -->
+  <header class="lesson-header"><p class="eyebrow">Probability lab · Sampling</p><h1>Chance is not a quota</h1><p class="subtitle">Generate a repeatable sequence of coin tosses and watch a sample differ from its expected proportion.</p></header>
+  <section class="prompt-card stack" aria-labelledby="warmup-title">
+    <h2 id="warmup-title">01 · Test your knowledge</h2><p><strong>Your goal:</strong> distinguish the chance of one outcome from the frequency in a finite sample.</p>
+    <form id="warmup" class="stack">
+      <fieldset><legend>If the chance of heads is 50%, must ten tosses contain exactly five heads?</legend><label><input type="radio" name="warmup" value="yes" required> Yes, 50% means exactly half in every batch.</label><label><input type="radio" name="warmup" value="no"> No, five is the expected count, not a guaranteed count.</label></fieldset>
+      <div class="btn-row"><button class="btn" type="submit" data-check>Check answer</button><button class="btn btn-secondary" type="button" data-retry>Try again</button></div><p class="feedback" data-feedback hidden></p>
+    </form>
+  </section>
+  <section class="workspace" aria-labelledby="controls-title">
+    <div class="controls stack">
+      <h2 id="controls-title">02 · Set up a run</h2>
+      <form id="settings" class="stack">
+        <div class="control-group"><div class="control-heading"><label for="chance">Chance of heads</label><output id="chance-value" for="chance">50%</output></div><input id="chance" type="range" min="0" max="100" step="5" value="50" aria-describedby="settings-help"><div class="range-ends"><span>0%</span><span>100%</span></div></div>
+        <div class="stack"><label for="seed">Sequence seed</label><input id="seed" name="seed" type="number" min="1" max="4294967295" step="1" value="42" required aria-describedby="seed-help"><p id="seed-help" class="explain">An integer from 1 to 4,294,967,295. The same seed and chance replay the same sequence.</p></div>
+        <button class="btn" type="submit">Start with these settings</button>
+        <p id="settings-help" class="explain">Apply changed settings to begin a fresh run. Existing tosses never mix different probabilities.</p>
+      </form>
+      <p id="pending" class="explain" hidden>Settings changed. Start a new run to apply them.</p>
+      <button id="replay" class="btn btn-secondary" type="button">Replay current seed</button>
+      <button id="reset" class="btn btn-secondary" type="button">Reset to default</button>
+      <p class="explain">Replay clears the current sample. Reset restores 50%, seed 42, and clears your answer.</p>
+    </div>
+    <div class="stage stack">
+      <h2>03 · Sample and observe</h2>
+      <p id="run-label">Current run: 50% chance of heads · seed 42.</p>
+      <div class="btn-row"><button id="toss-one" class="btn" type="button">Toss once</button><button id="toss-ten" class="btn btn-secondary" type="button">Toss 10</button></div>
+      <p class="explain" id="limit-note">Up to 200 tosses per run. Near the limit, Toss 10 adds only the remaining tosses.</p>
+      <div class="metrics-grid"><div class="metric"><span class="metric-name">Tosses</span><strong id="toss-count" class="metric-value">0</strong></div><div class="metric"><span class="metric-name">Heads</span><strong id="heads-count" class="metric-value">0</strong></div><div class="metric"><span class="metric-name">Observed heads</span><strong id="observed" class="metric-value">—</strong><span class="metric-subtext">No sample yet</span></div></div>
+      <div class="stack"><h3 id="history-title">Most recent tosses · H = heads, T = tails</h3><ol id="history" class="coin-history" aria-labelledby="history-title"></ol><p id="empty-history" class="explain">Toss the coin to begin. Up to the last 12 outcomes appear here, oldest first.</p></div>
+      <div id="frequency-chart" class="chart" aria-label="Expected and observed heads proportion graph and data table"></div>
+      <p id="observation">The expected proportion is 50%. There is no observed proportion until the first toss.</p>
+    </div>
+  </section>
+  <section class="two-col" aria-label="Explain and transfer"><article class="panel stack"><h2>04 · Explain the evidence</h2><p>Compare the observed percentage after 10 and 100 tosses. Did the difference from the expected percentage shrink on every step? Replay the seed and explain why the path repeats.</p><details><summary>A useful distinction</summary><p>Under an independent, fixed-probability model, larger samples tend to have less relative variation. A particular sequence can still move away from the expected proportion for a while. The next toss does not compensate for earlier outcomes.</p></details></article><article class="panel stack"><h2>Transfer the idea</h2><p>Two surveys sample 10 and 100 people from the same population. Which result would you expect to vary more across repeated samples? What sampling biases could make both misleading?</p></article></section>
+  <aside class="notice"><strong>Model limits.</strong> This uses a seeded pseudorandom generator to illustrate independent coin tosses with a fixed probability. It is reproducible, not a source of physical randomness. A run of at most 200 tosses does not prove a long-run law, establish a coin's fairness, or include the selection biases found in real surveys.</aside>
+  <noscript><p class="notice">Sampling controls require JavaScript. Static example: H, H, T, H, T, T, H, T, H, H contains 6 heads in 10 tosses, an observed 60%. That is compatible with a 50% chance of heads; the expected count of 5 is not a quota. This illustrative sequence is not the seeded run.</p></noscript>
+  <footer class="lesson-footer">A sample is evidence with variability, not a promise about the next outcome.</footer>
+  <!-- END EDIT: lesson content. -->
+</main>
+<p class="sr-only" data-announcer role="status" aria-live="polite" aria-atomic="true"></p>
+<script src="../interactive.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  // EDIT: simulation model. Reset sampling whenever probability or seed changes.
+  const limit = 200;
+  let seed = 42;
+  let chance = 0.5;
+  let randomState = seed;
+  let outcomes = [];
+  function random() {
+    randomState = (Math.imul(1664525, randomState) + 1013904223) >>> 0;
+    return randomState / 4294967296;
+  }
+  function render() {
+    const count = outcomes.length;
+    const heads = outcomes.reduce((total, heads) => total + Number(heads), 0);
+    const observed = count ? heads / count : null;
+    $('run-label').textContent = 'Current run: ' + Math.round(chance * 100) + '% chance of heads · seed ' + seed + '.';
+    $('toss-count').textContent = count;
+    $('heads-count').textContent = heads;
+    $('observed').textContent = observed === null ? '—' : (observed * 100).toFixed(1) + '%';
+    $('observed').nextElementSibling.textContent = count ? heads + ' of ' + count + ' tosses' : 'No sample yet';
+    $('history').replaceChildren();
+    outcomes.slice(-12).forEach((isHeads, index) => {
+      const item = document.createElement('li');
+      const tossNumber = Math.max(0, count - 12) + index + 1;
+      item.textContent = isHeads ? 'H' : 'T';
+      item.dataset.heads = String(isHeads);
+      item.setAttribute('aria-label', 'Toss ' + tossNumber + ': ' + (isHeads ? 'heads' : 'tails'));
+      $('history').append(item);
+    });
+    $('empty-history').textContent = count ? 'Showing tosses ' + Math.max(1, count - 11) + '–' + count + ', oldest first.' : 'Toss the coin to begin. Up to the last 12 outcomes appear here, oldest first.';
+    const difference = observed === null ? 0 : (observed - chance) * 100;
+    $('observation').textContent = observed === null
+      ? 'The expected proportion is ' + Math.round(chance * 100) + '%. There is no observed proportion until the first toss.'
+      : 'Observed heads: ' + (observed * 100).toFixed(1) + '%. Expected: ' + Math.round(chance * 100) + '%. ' + (Math.abs(difference) < 0.000001 ? 'They are equal at this sample size.' : 'The sample is ' + Math.abs(difference).toFixed(1) + ' percentage points ' + (difference > 0 ? 'above' : 'below') + ' expectation.') + ' The chance for the next toss is still ' + Math.round(chance * 100) + '%.';
+    let cumulativeHeads = 0;
+    const series = [{ label: 'Expected proportion', points: [{ x: 0, y: chance }, { x: Math.max(10, count), y: chance }] }];
+    if (count) series.push({ label: 'Observed proportion', points: outcomes.map((isHeads, index) => { cumulativeHeads += Number(isHeads); return { x: index + 1, y: cumulativeHeads / (index + 1) }; }) });
+    LearningUI.renderChart($('frequency-chart'), { series, xLabel: 'Number of tosses', yLabel: 'Proportion of heads', xDomain: [0, Math.max(10, count)], yDomain: [0, 1], formatY: value => (value * 100).toFixed(1) + '%' });
+    $('toss-one').disabled = count >= limit;
+    $('toss-ten').disabled = count >= limit;
+    $('limit-note').textContent = count >= limit ? 'Run complete: 200 tosses. Replay this seed or start a new run to continue exploring.' : 'Up to 200 tosses per run. Near the limit, Toss 10 adds only the remaining tosses.';
+  }
+  function startRun(nextSeed, nextChance) {
+    seed = nextSeed;
+    chance = nextChance;
+    randomState = seed;
+    outcomes = [];
+    $('seed').value = seed;
+    chanceControl.set(chance * 100, { notify: false });
+    $('pending').hidden = true;
+    render();
+    LearningUI.announce('Fresh run. Seed ' + seed + ', ' + Math.round(chance * 100) + '% chance of heads. Zero tosses.');
+  }
+  function sample(amount) {
+    const remaining = limit - outcomes.length;
+    for (let i = 0; i < Math.min(amount, remaining); i += 1) outcomes.push(random() < chance);
+    render();
+    LearningUI.announce(outcomes.length + ' tosses. ' + $('observation').textContent);
+  }
+  // END EDIT: simulation model.
+  function showPending() { $('pending').hidden = Number($('seed').value) === seed && Number($('chance').value) / 100 === chance; }
+  const chanceControl = LearningUI.bindRange($('chance'), $('chance-value'), { format: value => value + '%', onInput: showPending });
+  const question = LearningUI.mountQuestion($('warmup'), { correct: 'no', feedback: { no: 'Yes. The expected count is 10 × 0.5 = 5, but individual batches can contain other counts. A probability describes the process, not a quota.', yes: 'A 50% chance applies to each toss. Ten heads is unlikely, but possible. Try several seeds and compare the first ten tosses.' } });
+  $('seed').addEventListener('input', showPending);
+  $('settings').addEventListener('submit', event => { event.preventDefault(); if ($('settings').reportValidity()) startRun(Number($('seed').value), Number($('chance').value) / 100); });
+  $('toss-one').addEventListener('click', () => sample(1));
+  $('toss-ten').addEventListener('click', () => sample(10));
+  $('replay').addEventListener('click', () => startRun(seed, chance));
+  $('reset').addEventListener('click', () => { question.reset(); startRun(42, 0.5); });
+  render();
+})();
+</script>
+</body>
+</html>

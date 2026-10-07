@@ -1,5 +1,34 @@
 # Guided Learning — Changelog
 
+## [3.7.0] — 2026-10-07
+
+### Added — Reusable interactive learning toolkit
+
+- Add five complete, offline templates for parameter exploration, step sequences,
+  comparisons, probability experiments, and decision scenarios, with a browser gallery.
+- Add shared JavaScript components for labeled controls, feedback and retry,
+  finite playback, and responsive charts with table alternatives. Improve layout,
+  keyboard access, focus visibility, reset behavior, and reduced-motion support.
+- Add `scaffold.py` to create standalone HTML from a template while protecting
+  existing pages and customized assets. Extend `build.py` to inline shared CSS
+  and optional JavaScript, with idempotent refresh and batch validation.
+- Add an authoring guide, component recipes, pattern selection, and cited research
+  rationale to reduce tutor setup work. Use “Warm up,” “Test your knowledge,” and
+  “Check answer” labels suited to each activity.
+
+### Changed — Examples, teaching workflow, and local installation
+
+- Rebuild the precision/recall example around an inspectable sample dataset,
+  including undefined precision when nothing is flagged and a transfer question.
+- Make background building depend on host capabilities and require review before
+  announcing an activity ready; remove assumptions about tool names and timing.
+- Package the complete toolkit in fresh vaults and copy CSS, JavaScript, and the
+  Python builder into new topics. Keep installations as independent local copies;
+  remove repository-upgrade guidance and obsolete shell-builder handling.
+- Expand installer and builder tests, verify that installed tools work after the
+  source copy is removed, and add optional browser checks for all six lessons.
+  Fresh vaults retain empty learner records, with license and attribution preserved.
+
 ## [3.6.4] — 2026-10-07
 
 ### Changed — Onboarding instruction overhead

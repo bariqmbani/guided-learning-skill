@@ -54,6 +54,9 @@ in Obsidian and run `codex` or `claude` there. All three skills are registered f
 both agents; the new vault has an empty topic registry, an unconfigured profile,
 and no learner concept sessions.
 
+Installation is a one-time copy. Your vault stays local and independent of the
+setup repository, with its own skills, templates, and learning records.
+
 ## Shared learner preferences
 
 Run `$learner-profile` in Codex or `/learner-profile` in Claude Code to set up
@@ -143,10 +146,14 @@ refresher. These intervals are a practical heuristic, not universally optimal.
 Completing a queue cycle is evidence at those delays, not permanent mastery.
 
 Interactive HTML can make algorithms, parameter changes, or tradeoffs easier to
-inspect. Course interactives use the selected topic's CSS and builder; static
-examples or other exercises are appropriate when an interactive is unnecessary
-or inaccessible. Notes and protocols also work without Obsidian; use Markdown
-links appropriate to your note system.
+inspect. The [interactive kit](interactives/README.md) provides five runnable
+templates, shared accessible components, and a Python scaffolder without external
+UI dependencies. [Open the catalog](interactives/index.html) in a browser to try
+parameter exploration, step playback, comparisons, probability experiments, and
+decision scenarios. Course interactives preserve the selected topic's assets;
+static examples or other exercises are appropriate when an interactive is
+unnecessary or inaccessible. Notes and protocols also work without Obsidian;
+use Markdown links appropriate to your note system.
 
 ## Learning workspace structure
 
@@ -182,7 +189,7 @@ your-vault/
       logs/
 ```
 
-Existing or migrated courses retain their registered paths. Do not edit the
+Existing courses retain their registered paths. Do not edit the
 shared skill to store personal preferences, and do not use this source checkout
 as a learner workspace.
 
@@ -194,6 +201,8 @@ links the teaching principles to research and explains their limits. The evidenc
 does not establish that these exact agent skills or their assessment judgments
 are validated learning interventions. Evaluate explanation accuracy, independent
 application, and later recall as well as learner feedback.
+The [interactive design rationale](references/interactive-evidence.md) distinguishes
+research findings, accessibility guidance, and the kit's authoring choices.
 
 See [SKILL.md](SKILL.md) for course instructions and [CHANGELOG.md](CHANGELOG.md)
 for version history. Preserve the existing license and attribution when adapting

@@ -15,7 +15,7 @@ and can begin before the profile is configured.
 
 Current releases: [learner-profile 1.0.2](SKILLS/learner-profile/CHANGELOG.md),
 [concept-learning 1.0.1](SKILLS/concept-learning/CHANGELOG.md), and
-[guided-learning 3.6.4](SKILLS/guided-learning/CHANGELOG.md). Versions are recorded
+[guided-learning 3.7.0](SKILLS/guided-learning/CHANGELOG.md). Versions are recorded
 in each skill's `metadata.version`; generated vaults preserve those versions and
 the complete changelogs.
 
@@ -60,6 +60,10 @@ helpers. Git is optional: a source ZIP works too. See
 [installation and dependency recovery](INSTALLATION.md) for missing Git, missing
 Python, offline setup, and shell-specific commands.
 
+Installation is a one-time copy. The vault keeps its own local skills, helpers,
+and templates and operates independently of this checkout and its remote.
+Later repository changes do not update installed vaults or sync with their data.
+
 The installer remembers Python in `runtime.local.toml` for future sessions.
 See [runtime configuration](INSTALLATION.md#python-in-a-new-session-or-an-existing-vault)
 to refresh it or configure a shared ZIP.
@@ -68,6 +72,12 @@ Interactive HTML builds use Python on all platforms. The destination must be a
 new directory outside the source
 setup directory, including all its subdirectories. When generating another vault
 from an installed vault, choose a destination outside that source vault as well.
+
+The [interactive learning kit](SKILLS/guided-learning/interactives/README.md)
+includes five runnable templates, reusable controls/charts, and an offline HTML
+scaffolder. [Open its catalog](SKILLS/guided-learning/interactives/index.html) in a
+browser to explore the patterns. Installed vaults receive the kit under
+`learning/interactives/`; tutors customize lessons in the learner's workspace.
 
 Open the new folder in Obsidian. Run `codex` or `claude` from that folder, then
 choose a skill from the table above. The installer registers all three skills
@@ -206,8 +216,8 @@ deriving counts. It asks before saving the change, and you choose **this topic**
 learner profile; topic preferences stay in that topic's roadmap. See
 [personalization from feedback](SKILLS/learner-profile/references/personalization.md).
 
-Read [SHARING.md](SHARING.md) for installation, public-template sharing, and fork
-updates. The [skill instructions](SKILLS/guided-learning/SKILL.md) define the
+Read [SHARING.md](SHARING.md) for installation, public-template sharing, and setup
+maintenance. The [skill instructions](SKILLS/guided-learning/SKILL.md) define the
 course flow. See [concept-learning](SKILLS/concept-learning/SKILL.md) for the focused
 lesson contract and [learner-profile](SKILLS/learner-profile/SKILL.md) for shared
 preferences. The [onboarding research rationale](SKILLS/learner-profile/references/onboarding-evidence.md)

@@ -5,6 +5,10 @@ third-party Python packages. Git is optional. Interactive HTML builds use the
 same Python interpreter; Bash is not required. PowerShell 5.1+ can install and
 run the Python helpers directly.
 
+The installer creates an independent local vault. Its copied skills, helpers,
+and templates remain available without the source checkout or a connection to
+the repository remote. Repository changes do not update the installed copy.
+
 ## Agent preflight
 
 1. Identify the OS and actual terminal shell. Use its native syntax, quote paths,
@@ -157,7 +161,3 @@ Quote that path when running helpers; PowerShell requires `&` before it.
 If the interpreter moves, or the file is absent after ZIP extraction, verify
 Python as above and use it to run `scripts/configure_runtime.py` from the vault.
 The record is ignored by Git and excluded from generated ZIPs.
-
-For an older vault, run that helper from a current source copy with
-`--vault '/path/to/existing-vault'`. It adds missing runtime guidance, a Git ignore
-entry, and the refresh helper while preserving learning data and custom instructions.

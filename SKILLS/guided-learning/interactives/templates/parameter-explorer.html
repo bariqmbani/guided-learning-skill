@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slope &amp; intercept · Parameter explorer</title>
+  <link rel="stylesheet" href="../interactive.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to lesson</a>
+<main id="main" class="lesson">
+  <!-- EDIT: lesson content. Keep the warm up → explore → explain sequence. -->
+  <header class="lesson-header">
+    <p class="eyebrow">Parameter explorer · Algebra</p>
+    <h1>What moves a line?</h1>
+    <p class="subtitle">Change one parameter at a time to separate the effects of slope and intercept.</p>
+  </header>
+  <section class="prompt-card stack" aria-labelledby="warmup-title">
+    <h2 id="warmup-title">01 · Warm up</h2>
+    <p><strong>Your goal:</strong> explain what <em>m</em> and <em>b</em> each control in <span class="formula-inline">y = mx + b</span>.</p>
+    <form id="warmup" class="stack">
+      <fieldset>
+        <legend>Keep the slope at 1. If the intercept changes from 1 to 3, what happens?</legend>
+        <label><input type="radio" name="warmup" value="steeper" required> The line becomes steeper.</label>
+        <label><input type="radio" name="warmup" value="up-two"> Every point moves up by 2.</label>
+        <label><input type="radio" name="warmup" value="right-two"> Every point moves right by 2.</label>
+      </fieldset>
+      <div class="btn-row"><button class="btn" type="submit" data-check>Check answer</button><button class="btn btn-secondary" type="button" data-retry>Try again</button></div>
+      <p class="feedback" data-feedback hidden></p>
+    </form>
+  </section>
+  <section class="workspace" aria-labelledby="explore-title">
+    <div class="controls stack">
+      <h2 id="explore-title">02 · Change one thing</h2>
+      <div class="control-group">
+        <div class="control-heading"><label for="slope">Slope, m</label><output id="slope-value" for="slope">1.0</output></div>
+        <input id="slope" type="range" min="-3" max="3" step="0.5" value="1" aria-describedby="slope-help">
+        <div class="range-ends"><span>−3</span><span>3</span></div>
+        <p id="slope-help" class="explain">How much y changes when x increases by 1.</p>
+      </div>
+      <div class="control-group">
+        <div class="control-heading"><label for="intercept">Intercept, b</label><output id="intercept-value" for="intercept">1</output></div>
+        <input id="intercept" type="range" min="-4" max="4" step="1" value="1" aria-describedby="intercept-help">
+        <div class="range-ends"><span>−4</span><span>4</span></div>
+        <p id="intercept-help" class="explain">The value of y when x is zero.</p>
+      </div>
+      <div class="stack">
+        <h3>Try a useful contrast</h3>
+        <div class="preset-row"><button class="preset-btn" type="button" data-preset="-1,1">Negative slope</button><button class="preset-btn" type="button" data-preset="0,1">Flat line</button><button class="preset-btn" type="button" data-preset="1,3">Move up by 2</button></div>
+        <button class="btn btn-secondary" id="reset" type="button">Reset experiment</button>
+      </div>
+    </div>
+    <div class="stage stack">
+      <h2>03 · Observe the evidence</h2>
+      <p class="code-block" id="equation">y = 1.0x + 1</p>
+      <div class="metrics-grid">
+        <div class="metric"><span class="metric-name">At x = 0</span><strong class="metric-value" id="at-zero">1</strong><span class="metric-subtext">The y-intercept</span></div>
+        <div class="metric"><span class="metric-name">At x = 2</span><strong class="metric-value" id="at-two">3</strong><span class="metric-subtext">The highlighted input</span></div>
+        <div class="metric"><span class="metric-name">For each +1 in x</span><strong class="metric-value" id="per-unit">+1</strong><span class="metric-subtext">Change in y</span></div>
+      </div>
+      <div id="line-chart" class="chart" aria-label="Line graph and data table"></div>
+      <p id="observation">The line crosses the y-axis at 1. Moving from x = 2 to x = 3 increases y by 1.</p>
+      <p class="explain">The axes stay fixed across experiments. The graph shows x from −4 to 4 and y from −16 to 16.</p>
+    </div>
+  </section>
+  <section class="two-col" aria-label="Explain and transfer">
+    <article class="panel stack"><h2>04 · Explain it</h2><p>Make a line that goes through (0, 2) and (2, 0). Which settings work, and how can you verify both points?</p><details><summary>Reveal a worked check</summary><p>Set m = −1 and b = 2. At x = 0, y = 2. At x = 2, y = −2 + 2 = 0. The line falls by 1 for each step to the right.</p></details></article>
+    <article class="panel stack"><h2>Transfer the idea</h2><p>A machine begins with an offset and adds the same amount each second. Which parameter represents the offset? Which represents the rate? Explain what a negative rate would mean.</p></article>
+  </section>
+  <aside class="notice"><strong>Model limits.</strong> This is an exact linear relationship with no noise. The chart shows a finite window, but the mathematical line continues in both directions. The sliders restrict the examples; they do not restrict the definition of a line.</aside>
+  <noscript><p class="notice">JavaScript is needed to move the line. Worked example: with m = 1 and b = 1, the points (0, 1), (1, 2), and (2, 3) lie on the line. With b = 3, those y-values become 3, 4, and 5. The slope stays 1.</p></noscript>
+  <footer class="lesson-footer">Name the change, point to evidence, then explain why.</footer>
+  <!-- END EDIT: lesson content. -->
+</main>
+<p class="sr-only" data-announcer role="status" aria-live="polite" aria-atomic="true"></p>
+<script src="../interactive.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const signed = value => value > 0 ? '+' + value : String(value);
+  // EDIT: domain model. Keep state derived from the controls; update limits and prompts together.
+  function model(x, slope, intercept) { return slope * x + intercept; }
+  function render() {
+    const slope = Number($('slope').value);
+    const intercept = Number($('intercept').value);
+    $('equation').textContent = 'y = ' + slope.toFixed(1) + 'x ' + (intercept < 0 ? '− ' : '+ ') + Math.abs(intercept);
+    $('at-zero').textContent = intercept;
+    $('at-two').textContent = model(2, slope, intercept);
+    $('per-unit').textContent = signed(slope);
+    const change = slope === 0 ? 'leaves y unchanged' : (slope > 0 ? 'increases' : 'decreases') + ' y by ' + Math.abs(slope);
+    $('observation').textContent = 'The line crosses the y-axis at ' + intercept + '. Moving from x = 2 to x = 3 ' + change + '.';
+    document.querySelectorAll('[data-preset]').forEach(button => {
+      const active = button.dataset.preset === [slope, intercept].join(',');
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    LearningUI.renderChart($('line-chart'), {
+      series: [
+        { label: 'y = mx + b', points: Array.from({ length: 9 }, (_, i) => ({ x: i - 4, y: model(i - 4, slope, intercept) })) },
+        { label: 'At x = 2', points: [{ x: 2, y: model(2, slope, intercept) }] }
+      ],
+      xLabel: 'Input x', yLabel: 'Output y', xDomain: [-4, 4], yDomain: [-16, 16]
+    });
+  }
+  // END EDIT: domain model.
+  const summarize = () => LearningUI.announce($('equation').textContent + '. At x equals 2, y equals ' + $('at-two').textContent + '.');
+  const slopeControl = LearningUI.bindRange($('slope'), $('slope-value'), { format: value => value.toFixed(1), onInput: render, onChange: summarize });
+  const interceptControl = LearningUI.bindRange($('intercept'), $('intercept-value'), { format: String, onInput: render, onChange: summarize });
+  const question = LearningUI.mountQuestion($('warmup'), {
+    correct: 'up-two',
+    feedback: {
+      'up-two': 'Yes. Adding 2 to b adds 2 to every output. The change per unit of x stays the same.',
+      steeper: 'Steepness comes from m. Compare y at x = 0 and x = 1 before and after changing only b.',
+      'right-two': 'Compare the same x-value in both lines: its output increases by 2. The direct effect of changing b is a vertical shift.'
+    }
+  });
+  document.querySelectorAll('[data-preset]').forEach(button => button.addEventListener('click', () => {
+    const [slope, intercept] = button.dataset.preset.split(',').map(Number);
+    slopeControl.set(slope, { notify: false });
+    interceptControl.set(intercept, { notify: false });
+    render();
+    summarize();
+  }));
+  $('reset').addEventListener('click', () => {
+    slopeControl.set(1, { notify: false });
+    interceptControl.set(1, { notify: false });
+    question.reset();
+    render();
+    LearningUI.announce('Experiment reset. Slope 1, intercept 1. Answer cleared.');
+  });
+  render();
+})();
+</script>
+</body>
+</html>

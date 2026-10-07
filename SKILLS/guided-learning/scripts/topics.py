@@ -182,7 +182,7 @@ def create(vault, registry, topic_id, title, aliases):
     updated = {**registry, "active_topic": topic_id, "topics": [*registry["topics"], topic]}
     validate(vault, updated)
     source = inside(vault, "learning/interactives")
-    for name in ["interactive.css", "build.py"]:
+    for name in ["interactive.css", "interactive.js", "build.py"]:
         if not (source / name).is_file():
             raise ValueError(f"Interactive template is missing: {source / name}")
     # mkdir without exist_ok prevents overwriting another creator's directory.
@@ -201,6 +201,7 @@ def create(vault, registry, topic_id, title, aliases):
         handle.write("# Glossary\n\nTerms will be added during this topic's learning sessions.\n")
     for key, name in [("css_file", "interactive.css"), ("build_script", "build.py")]:
         shutil.copy2(source / name, inside(vault, p[key]))
+    shutil.copy2(source / "interactive.js", inside(vault, p["interactives_dir"]) / "interactive.js")
     save_registry(vault, updated)
     update_dashboard(vault, updated)
     return topic
@@ -218,8 +219,6 @@ def migrate(vault, registry, query):
         raise ValueError(f"Topic directory already exists; inspect before migrating: {root_name}")
 
     paths = {key: f"{root_name}/{suffix}" for key, suffix in SUFFIXES.items()}
-    # Retain the registered builder's filename when migrating older courses.
-    paths["build_script"] = (Path(paths["interactives_dir"]) / Path(topic["paths"]["build_script"]).name).as_posix()
     migrated = {**topic, "root": root_name, "layout": "topic", "paths": paths}
     updated = {**registry, "topics": [
         migrated if item["id"] == topic["id"] else item
@@ -243,7 +242,10 @@ def migrate(vault, registry, query):
 
     source_interactives = inside(vault, topic["paths"]["interactives_dir"])
     destination_interactives = inside(vault, paths["interactives_dir"])
-    shared_interactive_files = {"interactive.css", "build.py", "build.sh", "example-interactive.html"}
+    shared_interactive_files = {
+        "interactive.css", "interactive.js", "build.py", "scaffold.py",
+        "example-interactive.html", "index.html", "README.md", "templates",
+    }
     if source_interactives.is_symlink():
         raise ValueError(f"Refusing to migrate a symlinked interactive directory: {source_interactives}")
     if source_interactives.exists():
@@ -257,17 +259,14 @@ def migrate(vault, registry, query):
                 raise ValueError(f"Migration destination already exists: {destination}")
             move_pairs.append((child, destination))
 
-    shared_assets = []
-    for key in ["css_file", "build_script"]:
-        source = inside(vault, topic["paths"][key])
-        destination = inside(vault, paths[key])
+    shared_assets = [
+        (inside(vault, topic["paths"]["css_file"]), inside(vault, paths["css_file"])),
+        (source_interactives / "build.py", inside(vault, paths["build_script"])),
+        (source_interactives / "interactive.js", destination_interactives / "interactive.js"),
+    ]
+    for source, destination in shared_assets:
         if not source.is_file():
             raise ValueError(f"Shared interactive template is missing: {source}")
-        shared_assets.append((source, destination))
-    for name in ["build.py", "build.sh"]:
-        source = inside(vault, str(Path(topic["paths"]["build_script"]).parent / name))
-        if source.is_file() and source.name != Path(paths["build_script"]).name:
-            shared_assets.append((source, destination_interactives / name))
 
     moved = []
     root.mkdir()

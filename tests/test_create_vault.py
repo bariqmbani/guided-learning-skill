@@ -54,6 +54,8 @@ class CreateVaultTests(unittest.TestCase):
             ".obsidian/workspace.json", "AGENTS.md", "Home.md",
             "topics/registry.json", "SKILLS/guided-learning/logs/session.md",
             "learning/interactives/private-lesson.html",
+            "SKILLS/guided-learning/interactives/templates/private-lesson.html",
+            "SKILLS/guided-learning/interactives/private-lesson.html",
             "learner-profile.json", "Learner Profile.md",
             "runtime.local.toml",
             "concept-sessions/2026-10-07_private/note.md",
@@ -70,7 +72,12 @@ class CreateVaultTests(unittest.TestCase):
         self.assertEqual(registry, {"schema_version": 1, "active_topic": None, "topics": []})
         self.assertEqual({p.name for p in (destination / "topics").iterdir()}, {"README.md", "registry.json"})
         self.assertEqual({p.name for p in (destination / "concept-sessions").iterdir()}, {"README.md"})
-        self.assertEqual({p.name for p in (destination / "learning/interactives").iterdir()}, {"build.py", "interactive.css", "example-interactive.html"})
+        shared = destination / "learning/interactives"
+        self.assertEqual({p.relative_to(shared).as_posix() for p in shared.rglob("*") if p.is_file()},
+                         set(setup.INTERACTIVE_ASSETS))
+        for name in setup.INTERACTIVE_ASSETS:
+            canonical = destination / "SKILLS/guided-learning/interactives" / name
+            self.assertEqual((shared / name).read_bytes(), canonical.read_bytes())
         self.assertEqual(
             (destination / "learning/interactives/example-interactive.html").read_bytes(),
             (ROOT / "SKILLS/guided-learning/interactives/example-interactive.html").read_bytes(),
@@ -135,6 +142,8 @@ class CreateVaultTests(unittest.TestCase):
         first = self.helper(vault, "create", "japanese", "--title", "日本語")
         self.assertTrue(first["paths"]["build_script"].endswith("/build.py"))
         builder = vault / first["paths"]["build_script"]
+        self.assertEqual((builder.parent / "interactive.js").read_bytes(),
+                         (vault / "learning/interactives/interactive.js").read_bytes())
         lesson = builder.parent / "lesson.html"
         lesson.write_text('<link rel="stylesheet" href="interactive.css">', encoding="utf-8")
         built = subprocess.run([sys.executable, str(builder), lesson.name],
@@ -157,10 +166,70 @@ class CreateVaultTests(unittest.TestCase):
             self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), digest)
         self.assertIn("[[topics/physics/learning/learning-roadmap|Roadmap]]", (vault / "topics/README.md").read_text())
 
+    def test_missing_javascript_leaves_topic_and_registry_unchanged(self):
+        vault = self.base / "learning"
+        setup.create_vault(ROOT, vault, "Learning")
+        (vault / "learning/interactives/interactive.js").unlink()
+        before = {path: path.read_bytes() for path in (vault / "topics").rglob("*") if path.is_file()}
+
+        error = self.helper(vault, "create", "physics", "--title", "Physics", success=False)
+
+        self.assertIn("Interactive template is missing:", error)
+        self.assertIn("interactive.js", error)
+        self.assertFalse((vault / "topics/physics").exists())
+        for path, content in before.items():
+            self.assertEqual(path.read_bytes(), content)
+
+    def test_installed_vault_works_after_source_is_changed_and_deleted(self):
+        source = self.base / "temporary source"
+        for relative in [*setup.ASSETS, "SKILLS/guided-learning/UPSTREAM.json"]:
+            target = source / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(ROOT / relative, target)
+        vault = self.base / "independent learning"
+        setup.create_vault(source, vault, "Independent Learning")
+        self.assertFalse((vault / ".git").exists())
+        self.assertFalse(any(path.is_symlink() for path in vault.rglob("*")))
+        installed_files = [vault / agent / "skills" / skill / "SKILL.md"
+                           for agent in (".agents", ".claude") for skill in setup.SKILL_NAMES]
+        installed_files += [vault / directory / name
+                            for directory in ("SKILLS/guided-learning/interactives", "learning/interactives")
+                            for name in setup.INTERACTIVE_ASSETS]
+        original = {path: path.read_bytes() for path in installed_files}
+        for path in installed_files:
+            self.assertTrue(path.is_file())
+            self.assertFalse(path.is_symlink())
+            self.assertNotIn(str(source), path.read_text(encoding="utf-8"))
+
+        for relative in ("SKILLS/guided-learning/SKILL.md", "SKILLS/guided-learning/interactives/interactive.js"):
+            (source / relative).write_text("Changed after installation", encoding="utf-8")
+        for path, content in original.items():
+            self.assertEqual(path.read_bytes(), content)
+        shutil.rmtree(source)
+
+        self.assertEqual(self.helper(vault, "list")["topics"], [])
+        self.assertEqual(self.session_helper(vault, "list"), {"sessions": []})
+        self.assertFalse(json.loads((vault / "learner-profile.json").read_text())["configured"])
+        topic = self.helper(vault, "create", "physics", "--title", "Physics")
+        lesson = vault / topic["paths"]["interactives_dir"] / "force.html"
+        result = subprocess.run([
+            sys.executable, str(vault / "learning/interactives/scaffold.py"),
+            "parameter-explorer", str(lesson),
+        ], cwd=self.base, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("<!-- interactive.js:start -->", lesson.read_text(encoding="utf-8"))
+        builder = vault / topic["paths"]["build_script"]
+        result = subprocess.run([sys.executable, str(builder), lesson.name],
+                                cwd=self.base, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.helper(vault, "resolve")["id"], "physics")
+        for path, content in original.items():
+            self.assertEqual(path.read_bytes(), content)
+
     def test_skill_versions_and_release_history_survive_installation(self):
         vault = self.base / "versioned"
         setup.create_vault(ROOT, vault, "Versioned")
-        versions = {"guided-learning": "3.6.4", "concept-learning": "1.0.1", "learner-profile": "1.0.2"}
+        versions = {"guided-learning": "3.7.0", "concept-learning": "1.0.1", "learner-profile": "1.0.2"}
         for name, version in versions.items():
             source = ROOT / "SKILLS" / name
             installed = vault / "SKILLS" / name
@@ -241,6 +310,47 @@ class CreateVaultTests(unittest.TestCase):
             setup.create_vault(ROOT, new, "Learning", new / "nested.zip")
         self.assertFalse(new.exists())
 
+    def test_installed_kit_scaffolds_every_template_without_changing_other_learning(self):
+        vault = self.base / "learning"
+        setup.create_vault(ROOT, vault, "Learning")
+        topic = self.helper(vault, "create", "algorithms", "--title", "Algorithms")
+        shared = vault / "learning/interactives"
+        canonical = vault / "SKILLS/guided-learning/interactives"
+        for template in (shared / "templates").glob("*.html"):
+            with self.subTest(template=template.name):
+                lesson = vault / topic["paths"]["interactives_dir"] / template.name
+                result = subprocess.run([sys.executable, str(shared / "scaffold.py"), template.stem,
+                                         str(lesson)], cwd=self.base, capture_output=True, text=True)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                content = lesson.read_text(encoding="utf-8")
+                self.assertIn("<!-- interactive.css:start -->", content)
+                self.assertIn("<!-- interactive.js:start -->", content)
+                self.assertNotRegex(content, r'(?:src|href)=[\"\']\.\./interactive\.(?:css|js)[\"\']')
+        self.assertEqual(len(list((shared / "templates").glob("*.html"))), 5)
+        before = {p: p.read_bytes() for p in (vault / "topics").rglob("*") if p.is_file()}
+        session = self.session_helper(vault, "create", "state", "--title", "State", "--date", "2026-10-07")
+        lesson = vault / session["root"] / "interactive.html"
+        result = subprocess.run([sys.executable, str(canonical / "scaffold.py"), "step-sequence", str(lesson)],
+                                cwd=self.base, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("<!-- interactive.js:start -->", lesson.read_text(encoding="utf-8"))
+        for path, content in before.items():
+            self.assertEqual(path.read_bytes(), content)
+
+    def test_installed_builder_accepts_nested_template_paths(self):
+        vault = self.base / "learning"
+        setup.create_vault(ROOT, vault, "Learning")
+        shared = vault / "learning/interactives"
+        template = shared / "templates/parameter-explorer.html"
+        result = subprocess.run([sys.executable, str(shared / "build.py"), "templates/parameter-explorer.html"],
+                                cwd=self.base, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        built = template.read_text(encoding="utf-8")
+        self.assertIn("<!-- interactive.css:start -->", built)
+        self.assertIn("<!-- interactive.js:start -->", built)
+        self.assertEqual(self.helper(vault, "list")["topics"], [])
+        self.assertEqual(self.session_helper(vault, "list"), {"sessions": []})
+
     def test_missing_assets_and_invalid_names_leave_no_vault(self):
         destination = self.base / "new"
         with self.assertRaisesRegex(ValueError, "asset missing"):
@@ -295,34 +405,65 @@ class CreateVaultTests(unittest.TestCase):
         for path, contents in before.items():
             self.assertEqual(path.read_bytes(), contents)
 
-    def test_legacy_migration_preserves_shell_builder_and_python_companion(self):
+    def test_root_course_move_preserves_learning_and_shared_templates(self):
         topic_spec = importlib.util.spec_from_file_location(
             "migration_topics", ROOT / "SKILLS/guided-learning/scripts/topics.py")
         topics = importlib.util.module_from_spec(topic_spec)
         topic_spec.loader.exec_module(topics)
-        for companion in (False, True):
-            with self.subTest(companion=companion):
-                vault = self.base / f"legacy-{companion}"
-                setup.create_vault(ROOT, vault, "Legacy")
-                paths = {**topics.SUFFIXES, "build_script": "learning/interactives/build.sh"}
-                legacy = {"id": "legacy", "title": "Legacy", "aliases": [],
-                          "root": ".", "layout": "legacy", "paths": paths}
-                (vault / "topics/registry.json").write_text(json.dumps({
-                    "schema_version": 1, "active_topic": "legacy", "topics": [legacy],
-                }))
-                shared = vault / "learning/interactives"
-                (shared / "build.sh").write_text("#!/bin/sh\n# Original standalone builder\n")
-                if not companion:
-                    (shared / "build.py").unlink()
-                original = (shared / "build.sh").read_bytes()
-                (shared / "lesson.html").write_text("Existing lesson")
-                migrated = self.helper(vault, "migrate", "legacy")
-                builder = vault / migrated["paths"]["build_script"]
-                self.assertEqual(builder.name, "build.sh")
-                self.assertEqual(builder.read_bytes(), original)
-                self.assertEqual((builder.parent / "build.py").exists(), companion)
-                self.assertEqual((builder.parent / "lesson.html").read_text(), "Existing lesson")
-                self.assertTrue((shared / "build.sh").exists())
+        vault = self.base / "local course"
+        setup.create_vault(ROOT, vault, "Local Course")
+        paths = dict(topics.SUFFIXES)
+        course = {"id": "physics", "title": "Physics", "aliases": [],
+                  "root": ".", "layout": "legacy", "paths": paths}
+        (vault / "topics/registry.json").write_text(json.dumps({
+            "schema_version": 1, "active_topic": "physics", "topics": [course],
+        }))
+        learning = {}
+        for key in ("roadmap", "recall_queue", "protocols_dir", "concepts_dir",
+                    "papers_dir", "glossary", "skill_logs_dir"):
+            path = vault / paths[key]
+            if key.endswith("_dir"):
+                path = path / "learner-record.md"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            content = f"Existing learner work: {key}\n"
+            path.write_text(content, encoding="utf-8")
+            learning[key] = (path, content)
+        shared = vault / "learning/interactives"
+        css = shared / "interactive.css"
+        css.write_text(css.read_text() + "\n/* Local learner theme */\n", encoding="utf-8")
+        lesson = ('<link rel="stylesheet" href="interactive.css">\n'
+                  '<script src="interactive.js"></script>\n<p>Existing lesson</p>\n')
+        (shared / "lesson.html").write_text(lesson, encoding="utf-8")
+        shared_before = {path: path.read_bytes() for path in shared.rglob("*")
+                         if path.is_file() and path.name != "lesson.html"}
+
+        moved = self.helper(vault, "migrate", "physics")
+
+        self.assertEqual(moved["layout"], "topic")
+        self.assertEqual(self.helper(vault, "resolve"), moved)
+        for key, (source, content) in learning.items():
+            destination = vault / moved["paths"][key]
+            if key.endswith("_dir"):
+                destination = destination / "learner-record.md"
+            self.assertFalse(source.exists())
+            self.assertEqual(destination.read_text(), content)
+        builder = vault / moved["paths"]["build_script"]
+        self.assertEqual(builder.name, "build.py")
+        for name in ("build.py", "interactive.css", "interactive.js"):
+            self.assertEqual((builder.parent / name).read_bytes(), (shared / name).read_bytes())
+        self.assertEqual((builder.parent / "lesson.html").read_text(), lesson)
+        self.assertFalse((shared / "lesson.html").exists())
+        for path, content in shared_before.items():
+            self.assertEqual(path.read_bytes(), content)
+        for name in ("scaffold.py", "README.md", "index.html", "templates"):
+            self.assertFalse((builder.parent / name).exists())
+        result = subprocess.run([sys.executable, str(builder), "lesson.html"],
+                                cwd=self.base, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        built = (builder.parent / "lesson.html").read_text()
+        self.assertIn("Local learner theme", built)
+        self.assertIn("<!-- interactive.js:start -->", built)
+        self.assertIn("<p>Existing lesson</p>", built)
 
     @unittest.skipUnless(shutil.which("bash"), "Bash entry point requires Bash")
     def test_shell_installer_handles_spaces_and_initializes_skills(self):
@@ -354,6 +495,9 @@ class CreateVaultTests(unittest.TestCase):
                 self.assertIn(f"first/.claude/skills/{name}/SKILL.md", bundle.namelist())
             self.assertIn("first/attachments/", bundle.namelist())
             self.assertIn("first/learning/interactives/example-interactive.html", bundle.namelist())
+            for name in setup.INTERACTIVE_ASSETS:
+                self.assertIn(f"first/learning/interactives/{name}", bundle.namelist())
+                self.assertIn(f"first/SKILLS/guided-learning/interactives/{name}", bundle.namelist())
             self.assertFalse(any("/.git/" in name for name in bundle.namelist()))
             bundle.extractall(extracted)
         portable = extracted / "first"

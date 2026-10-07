@@ -13,9 +13,9 @@
     "Personalized concept-learning sessions with automatic notes, mentor feedback, and practice outside course topics.",
     "Three native Codex and Claude Code skill entries; fresh exports omit all concept-session learner data.",
     "Modular instruction references, deduplicated question variants, and separate shared profile schema guidance.",
-    "Portable Python interactive CSS builder with encoding-safe filename diagnostics.",
+    "Portable Python CSS/JavaScript builder with encoding-safe filename diagnostics, five interactive templates, reusable components, and a non-overwriting scaffolder.",
     "Compact onboarding with one-way reference loading; shared setup uses learner-profile only."
   ],
-  "local_version": "3.6.4",
+  "local_version": "3.7.0",
   "fork_repository": "https://github.com/bariqmbani/guided-learning-skill"
 }

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Follow the evidence · Decision scenario</title>
+  <link rel="stylesheet" href="../interactive.css">
+  <style>
+    .decision-history { padding-left: 1.2rem; font-size: .85rem; }
+    .decision-history li + li { margin-top: .85rem; }
+    .decision-history small { display: block; color: var(--muted); }
+    #scenario-artifact { white-space: pre-wrap; overflow-wrap: anywhere; }
+    #scenario-title:focus { outline-offset: .35rem; }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to lesson</a>
+<main id="main" class="lesson">
+  <!-- EDIT: lesson content. Use consequences and evidence, not a personality or mastery score. -->
+  <header class="lesson-header"><p class="eyebrow">Decision scenario · Debugging</p><h1>Follow the evidence</h1><p class="subtitle">A user name disappears. Choose what to investigate, see the consequence, and revise your approach.</p></header>
+  <section class="prompt-card stack" aria-labelledby="warmup-title">
+    <h2 id="warmup-title">01 · Test your knowledge</h2><p><strong>Your goal:</strong> choose evidence that separates possible causes, then check a repair against more than the failing case.</p>
+    <form id="warmup" class="stack"><fieldset><legend>A reload makes a bug disappear once. Does that demonstrate that its cause is fixed?</legend><label><input type="radio" name="warmup" value="yes" required> Yes, a successful run establishes the fix.</label><label><input type="radio" name="warmup" value="no"> No, reproduce the original conditions and test the suspected cause.</label></fieldset><div class="btn-row"><button class="btn" type="submit" data-check>Check reasoning</button><button class="btn btn-secondary" type="button" data-retry>Try again</button></div><p class="feedback" data-feedback hidden></p></form>
+  </section>
+  <section class="workspace" aria-labelledby="explore-title">
+    <div class="controls stack">
+      <h2 id="explore-title">02 · Investigate</h2>
+      <p>You are working locally with two small test profiles. Some cards display a name; others display “undefined.”</p>
+      <p class="explain">Each choice reveals a consequence. You can restart and compare another path. There is no score.</p>
+      <button id="reset" class="btn btn-secondary" type="button">Restart scenario</button>
+      <h3>Your decision trail</h3><p id="empty-history" class="explain">No decisions yet.</p><ol id="history" class="decision-history"></ol>
+    </div>
+    <div class="stage stack">
+      <h2>03 · Inspect the consequence</h2>
+      <aside id="last-consequence" class="notice" hidden><strong>What your choice revealed</strong><p id="consequence-text"></p></aside>
+      <article class="panel stack" aria-labelledby="scenario-title">
+        <p id="decision-number" class="eyebrow">Decision 1</p>
+        <h2 id="scenario-title" tabindex="-1">A user card says “undefined”</h2>
+        <p id="scenario-description">The problem is reproducible with one profile, while another profile displays a name correctly. You need to distinguish a data-shape mismatch from a presentation problem.</p>
+        <pre id="scenario-artifact" class="code-block">Legacy profile → “Mira Rao”
+New profile    → “undefined”
+Unknown: which field reaches the renderer?</pre>
+        <form id="decision" class="stack"><fieldset id="choices"><legend id="choice-prompt">Which next action gives you useful evidence?</legend></fieldset><button class="btn" type="submit">Choose and see consequence</button></form>
+        <p id="ending" hidden></p>
+        <button id="another-path" class="btn btn-secondary" type="button" hidden>Compare another path</button>
+      </article>
+    </div>
+  </section>
+  <section class="two-col" aria-label="Explain and transfer"><article class="panel stack"><h2>04 · Explain your decision</h2><p>Which observation changed your explanation of the bug? Name one hypothesis it weakened and one it supported. What did testing the original successful case protect against?</p><details><summary>One reasoned path</summary><p>Compare both profiles and the renderer. The renderer reads <code>display_name</code>, but the new profile supplies <code>full_name</code>. Support both schemas, then test the legacy, new, and missing-name cases. This explains the mismatch without assuming why the data producer changed.</p></details></article><article class="panel stack"><h2>Transfer the approach</h2><p>A saved file opens on one machine but not another. What small comparison could separate a file-content problem from an environment problem? State what result you would expect under each explanation.</p></article></section>
+  <aside class="notice"><strong>Model limits.</strong> This is a scripted local debugging exercise, not a live diagnosis. Fixtures have nonempty names or missing/null fields; blank strings, localization, and network failures are outside the model. A compatibility fallback addresses the displayed symptom for these fixtures, but does not establish why the upstream schema changed.</aside>
+  <noscript><p class="notice">The branching controls need JavaScript. Worked path: inspect the profiles → find that the old schema uses display_name and the new schema uses full_name → read the supported field with a fallback → test both schemas and a missing-name case. A reload alone provides no causal explanation. The reflection prompts above remain usable.</p></noscript>
+  <footer class="lesson-footer">A useful next step produces evidence that could change your mind.</footer>
+  <!-- END EDIT: lesson content. -->
+</main>
+<p class="sr-only" data-announcer role="status" aria-live="polite" aria-atomic="true"></p>
+<script src="../interactive.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  // EDIT: scenario graph. Every choice names a consequence and an existing next node.
+  const nodes = {
+    start: {
+      title: 'A user card says “undefined”',
+      description: 'The problem is reproducible with one profile, while another profile displays a name correctly. You need to distinguish a data-shape mismatch from a presentation problem.',
+      artifact: 'Legacy profile → “Mira Rao”\nNew profile    → “undefined”\nUnknown: which field reaches the renderer?',
+      prompt: 'Which next action gives you useful evidence?',
+      choices: [
+        { label: 'Compare both profile objects and the exact field the renderer reads.', next: 'inspect', consequence: 'Comparing input with the field being read exposes a specific mismatch.' },
+        { label: 'Replace every displayed name with “Guest” to remove “undefined.”', next: 'fallback', consequence: 'The visible error disappears, but meaningful names disappear too. A cosmetic success can conceal a regression.' },
+        { label: 'Reload the app and check whether the symptom disappears.', next: 'reload', consequence: 'One card looks correct after reload. Repeating the original failing profile shows the same error, so the cause remains unexplained.' }
+      ]
+    },
+    inspect: {
+      title: 'The data and renderer disagree',
+      description: 'The failing profile uses a different property name. The rendering code always reads the older property.',
+      artifact: 'Legacy: { display_name: "Mira Rao" }\nNew:    { full_name: "Mira Rao" }\nRender: profile.display_name',
+      prompt: 'Which repair and check follow from this evidence?',
+      choices: [
+        { label: 'Support both fields; test legacy, new, and missing-name profiles.', next: 'verified', consequence: 'The change follows the observed mismatch, and the tests cover both working and failing inputs.' },
+        { label: 'Change the renderer to read only full_name; test the new profile.', next: 'regression', consequence: 'The new profile works, but the previously working legacy profile now fails. A single passing test missed the regression.' },
+        { label: 'Display “Guest” for everyone and skip the name-field checks.', next: 'fallback', consequence: 'A universal label hides the mismatch and removes valid names. It does not preserve the required behavior.' }
+      ]
+    },
+    fallback: {
+      title: 'The symptom is hidden, but behavior is lost',
+      description: 'Every card now says “Guest,” including the profile that already worked. The actual requirement is to display a provided name when one exists.',
+      artifact: 'Attempted patch: return "Guest";\nLegacy: expected “Mira Rao” → got “Guest”\nNew:    expected “Mira Rao” → got “Guest”',
+      prompt: 'What will you do with this new evidence?',
+      choices: [
+        { label: 'Inspect the fields in both inputs and the renderer before changing the rule.', next: 'inspect', consequence: 'The failed expectation redirects the investigation toward the data and the rule that consumes it.' },
+        { label: 'Accept the generic label because “undefined” is gone.', next: 'unverified', consequence: 'The error text is gone, but the user-facing requirement is still unmet.' }
+      ]
+    },
+    reload: {
+      title: 'A successful reload is not a diagnosis',
+      description: 'The legacy profile still works, and the new profile still fails under the same conditions. Reloading did not distinguish the hypotheses.',
+      artifact: 'After reload, legacy profile → “Mira Rao”\nRepeat with new profile      → “undefined”',
+      prompt: 'Which observation would reduce the uncertainty?',
+      choices: [
+        { label: 'Compare both inputs with the renderer’s field access.', next: 'inspect', consequence: 'The comparison produces evidence about the input-to-output relationship instead of relying on a transient success.' },
+        { label: 'Stop investigating because one profile rendered correctly.', next: 'unverified', consequence: 'The original failure remains reproducible. One successful case does not establish that the problem is solved.' }
+      ]
+    },
+    regression: {
+      title: 'The narrow repair breaks the old schema',
+      description: 'The changed field access fixes the new input but removes support for the old one.',
+      artifact: 'Attempted patch: return profile.full_name;\nNew profile    → “Mira Rao”\nLegacy profile → “undefined”',
+      prompt: 'What would preserve both required cases?',
+      choices: [
+        { label: 'Use a compatible fallback and verify all three fixtures.', next: 'verified', consequence: 'The revised rule preserves the legacy field, supports the new field, and handles a missing name explicitly.' },
+        { label: 'Undo the change and return to the initial evidence.', next: 'start', consequence: 'Undoing the patch restores the baseline. You can now choose an investigation that accounts for both schemas.' }
+      ]
+    },
+    verified: {
+      title: 'A supported repair, with a clear boundary',
+      description: 'The renderer preserves the legacy field when present, otherwise uses the new field, and finally shows a generic label if neither exists.',
+      artifact: 'name = profile.display_name ?? profile.full_name ?? "Guest"\n\nFixture checks:\nLegacy schema → “Mira Rao” ✓\nNew schema    → “Mira Rao” ✓\nNeither field → “Guest” ✓',
+      ending: 'You have evidence for this repair on the stated fixtures. The upstream schema change still needs an explanation if it matters to the wider system. Explain why these checks support a narrower claim than “all name bugs are fixed.”',
+      choices: []
+    },
+    unverified: {
+      title: 'The stopping rule was too weak',
+      description: 'A symptom disappeared in one situation, but the original requirement was not demonstrated across the relevant inputs.',
+      artifact: 'Claim: the name display is fixed.\nMissing evidence: correct output for both schemas.\nNext useful step: compare inputs and test the rendering rule.',
+      ending: 'Use this consequence to revise your approach. Restart and choose an action that can distinguish the suspected causes, then test a repair against both the original success and the original failure.',
+      choices: []
+    }
+  };
+  // END EDIT: scenario graph.
+  let current = 'start';
+  let history = [];
+  function render(moveFocus = false) {
+    const node = nodes[current];
+    $('decision-number').textContent = node.choices.length ? 'Decision ' + (history.length + 1) : 'Outcome';
+    $('scenario-title').textContent = node.title;
+    $('scenario-description').textContent = node.description;
+    $('scenario-artifact').textContent = node.artifact;
+    $('choices').querySelectorAll('label').forEach(label => label.remove());
+    $('choice-prompt').textContent = node.prompt || 'Scenario complete';
+    node.choices.forEach((choice, index) => {
+      const label = document.createElement('label');
+      const radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'decision';
+      radio.value = String(index);
+      radio.required = true;
+      label.append(radio, document.createTextNode(' ' + choice.label));
+      $('choices').append(label);
+    });
+    $('decision').hidden = node.choices.length === 0;
+    $('ending').hidden = node.choices.length !== 0;
+    $('ending').textContent = node.ending || '';
+    $('another-path').hidden = node.choices.length !== 0;
+    $('empty-history').hidden = history.length > 0;
+    $('history').replaceChildren();
+    history.forEach(entry => {
+      const item = document.createElement('li');
+      const consequence = document.createElement('small');
+      item.textContent = entry.label;
+      consequence.textContent = entry.consequence;
+      item.append(consequence);
+      $('history').append(item);
+    });
+    $('last-consequence').hidden = history.length === 0;
+    $('consequence-text').textContent = history.length ? history[history.length - 1].consequence : '';
+    if (moveFocus) $('scenario-title').focus();
+  }
+  const question = LearningUI.mountQuestion($('warmup'), { correct: 'no', feedback: { no: 'Yes. A useful test recreates the relevant conditions and checks the claim about the cause. A passing case alone does not explain a previous failure.', yes: 'One success can result from different input or a changed environment. Recreate the original conditions and look for evidence about the suspected cause.' } });
+  $('decision').addEventListener('submit', event => {
+    event.preventDefault();
+    const selected = $('decision').querySelector('input:checked');
+    if (!selected) { $('decision').reportValidity(); return; }
+    const choice = nodes[current].choices[Number(selected.value)];
+    history.push(choice);
+    current = choice.next;
+    render(true);
+    LearningUI.announce(choice.consequence);
+  });
+  function reset() { current = 'start'; history = []; question.reset(); render(true); LearningUI.announce('Scenario restarted. Decision trail and answer cleared.'); }
+  $('reset').addEventListener('click', reset);
+  $('another-path').addEventListener('click', reset);
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 ---
 name: guided-learning
 metadata:
-  version: "3.6.4"
+  version: "3.7.0"
 description: >
   Guide ongoing courses with topic roadmaps, a spiral curriculum, personalized
   lessons, and spaced recall. Use to start or continue a course, work through
@@ -46,7 +46,7 @@ References use the same pinned paths and phase numbers as this core flow.
 
 | Reference | Required when |
 | --- | --- |
-| [Topic routing](references/topic-routing.md) | After course dispatch, before any course-file access; covers selection, paths, legacy layouts, and registry recovery. |
+| [Topic routing](references/topic-routing.md) | After course dispatch, before any course-file access; covers selection, pinned paths, and registry recovery. |
 | [Shared teaching](../learner-profile/references/teaching.md) | At lesson start: adaptive support, learner attempts, and honest assessment. |
 | [Bootstrapper](references/bootstrap.md) | The selected roadmap is missing or has no checked or unchecked concept entries. |
 | [Teach from source](references/teach-from-source.md) | A PDF, URL, file, or pasted source is assigned to this course. |
@@ -63,7 +63,7 @@ and registry `paths` for the whole session. All `{roadmap}`, `{recall_queue}`,
 `{concepts_dir}`, `{papers_dir}`, `{protocols_dir}`, `{interactives_dir}`,
 `{glossary}`, `{skill_logs_dir}`, `{css_file}`, and `{build_script}` placeholders
 refer to those paths. Resolve them before access. Never use another topic as a
-fallback or reset existing progress. Recovery and migration follow topic routing.
+fallback or reset existing progress. Registry recovery follows topic routing.
 The bootstrapper creates missing course scaffolding; manual starter templates
 are in `examples/` and must be adapted to the pinned paths.
 
@@ -231,11 +231,14 @@ Immediately after explaining, apply Phase 3's selection criteria. Check access
 constraints, tools, and time first; a visual preference alone does not require an
 interactive. Use a static explanation or worked example for text-only preferences,
 inaccessible controls, or insufficient time. Otherwise read
-[interactives](references/interactives.md), launch the background build with the
-concept and pinned asset paths, and continue toward Phase 2 while it builds.
-The main agent must run the selected builder before announcing the page ready.
-The learner explores it before answering the comprehension check. Skip this phase
-for concepts better served by a scenario or writing exercise.
+[interactives](references/interactives.md), choose a reusable template, and build
+with the concept and pinned asset paths. Use a background helper only when the
+host supports it; otherwise build directly or use a suitable worked example.
+Continue useful explanation or ask a warm-up question while a background build
+runs. The main agent must run the selected builder and review the page before
+announcing it ready; do not promise completion before the learner responds.
+The learner explores it before a comprehension check that depends on the page.
+Skip this phase when a conversation or writing exercise better serves the goal.
 
 ### Phase 2: Explore and check comprehension (5–10 min)
 
@@ -253,7 +256,8 @@ Apply the topic outcome, profile constraints, and current budget before choosing
 - **Interactive HTML:** Prefer for numbers, processes, and tradeoffs, including
   distributions, ROC/calibration curves, Bayesian posteriors, adaptive testing,
   probabilistic models, cost-quality spaces, and system pipelines/routing.
-  Follow [interactives](references/interactives.md) for construction. If already
+  The kit also supports branching decision scenarios. Follow
+  [interactives](references/interactives.md) for template selection and construction. If already
   built, guide deeper exploration of a preset or parameter combination showing
   a non-obvious insight or edge case, then discuss observations.
 - **Scenario:** For decisions or system design, ask how to apply the concept to

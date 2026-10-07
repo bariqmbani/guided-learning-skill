@@ -38,6 +38,10 @@ It does not ask questions, select a subject, create course progress, or include
 learner concept sessions. Verify all three entries in `.agents/skills/` and
 `.claude/skills/` after installation.
 
+Each installed vault is an independent local copy of the setup at installation
+time. It uses its own skills, helpers, and assets. Changes in this repository or
+its remote do not update the vault, and learner data is not synced back.
+
 Open the installed folder in Obsidian and run Codex or Claude Code there. Choose:
 
 | Purpose | Codex | Claude Code |

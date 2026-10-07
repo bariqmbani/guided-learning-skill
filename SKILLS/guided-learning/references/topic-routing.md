@@ -37,6 +37,7 @@ topics/<topic-id>/
     protocols/
     interactives/
       interactive.css
+      interactive.js
       build.py
   concepts/
   literature/papers/
@@ -44,13 +45,13 @@ topics/<topic-id>/
   logs/
 ```
 
-`create` makes an empty scaffold, copies the current CSS and HTML builder, updates the registry and topic dashboard, and selects the new topic. It does not generate a curriculum, copy learning progress, or initialize another topic's files. Run the Bootstrapper afterward for the learner's actual subject and goal.
+`create` makes an empty scaffold, copies CSS, the JavaScript runtime, and the Python HTML builder from the vault's local `learning/interactives/`, updates the registry and topic dashboard, and selects the new topic. It does not generate a curriculum, copy learning progress, or initialize another topic's files. Run the Bootstrapper afterward for the learner's actual subject and goal.
 
 The helper refuses to create a topic in an existing directory or overwrite an existing registry entry. If an unregistered folder already contains a course, inspect it before offering to register its actual paths. Do not delete the folder or pick a different ID just to conceal a collision. Topic IDs cannot contain path separators or traversal components. Registry paths must remain inside the vault and different topics may not share mutable learning paths.
 
 Bootstrap only when the **selected** roadmap has no concept checklist entries, checked or unchecked. Existing checked items are progress. Preserve any existing notes, recall rows, glossary, journals, logs, and domain mode; do not rewrite them from a starter template. Missing directories or individual files can be created without resetting existing ones. The learner's goal and domain mode are independent for every topic.
 
-For new topics, concept filenames must be `<topic-id>--<concept-slug>.md`. Prefix newly created paper-note filenames with the topic ID too. This avoids duplicate basenames that could break existing short wikilinks. Use full vault-relative wikilinks with readable aliases, such as `[[topics/japanese/concepts/japanese--word-order|Word order]]`. When migrating an existing course, preserve its filenames and short concept links; update path-bearing links to the new registered locations. Use qualified links in new roadmap entries, recall rows, glossaries, journals, sources, and interactive references.
+For new topics, concept filenames must be `<topic-id>--<concept-slug>.md`. Prefix newly created paper-note filenames with the topic ID too. This avoids duplicate basenames that could break existing short wikilinks. Preserve existing filenames and links. Use full vault-relative wikilinks with readable aliases, such as `[[topics/japanese/concepts/japanese--word-order|Word order]]`, in new roadmap entries, recall rows, glossaries, journals, sources, and interactive references.
 
 Recall comes only from the selected topic's queue. Pick the next concept only from its roadmap. Detect domain mode from its own roadmap or recall header. Choose comprehension checks, number logs, count sessions, and analyze struggle patterns using only its logs. Include the topic ID in newly written journal and execution-log frontmatter. Do not backfill old records just to add metadata.
 
@@ -60,19 +61,11 @@ Read the selected roadmap's **Teaching preferences** section before teaching.
 Approved topic overrides take priority over vault defaults, while current explicit
 requests take priority over both. The calling skill owns approval for new ongoing
 preferences; routing only resolves their destination. Use the pinned roadmap
-path for topic preferences, including legacy courses. Vault preferences belong in
+path for topic preferences. Vault preferences belong in
 the learner profile; learner feedback must not rewrite the shared skill source.
 
-After creating interactive HTML, run the resolved `build_script` with the Python in `runtime.local.toml` from the vault root. See [interactives](interactives.md) for shell syntax and older `build.sh` registrations. The builder and CSS live alongside that topic's HTML. Do not run the legacy builder for another topic; skip the build when the selected interactive directory contains no HTML.
-
-## Existing and migrated courses
-
-An existing course's exact paths are in `topics/registry.json`; resolve it with `topics.py` rather than deriving paths from its ID. A root-level course can have `layout: "legacy"`; a course under `topics/<topic-id>/` uses `layout: "topic"`. An empty vault has no registered courses and `active_topic: null`.
-
-Preserve any existing course's roadmap progress, recall rows and dates, glossary, notes, journals, logs, interactive pages, filenames, and short concept links. The shared interactive CSS and builder remain at `learning/interactives/` as templates copied into new topics. Moving an existing course requires a separate migration request; registering or creating a topic must never migrate another course implicitly.
+After creating interactive HTML, run the selected topic's `build_script` (`build.py`) with the Python in `runtime.local.toml` from the vault root. The Python builder, CSS, and JavaScript runtime live alongside that topic's HTML. Build only the selected topic's files; skip the build when its interactive directory contains no HTML. See the [interactive kit guide](../interactives/README.md) for scaffolding and local customizations.
 
 ## Registry recovery
 
-If a registry is missing, inspect the existing root roadmap before doing any learning-file writes. If it contains concepts, infer its subject from its title and contents and register it once at the existing paths. If its subject is unclear, ask. A generic empty scaffold is not a course; use an empty registry with `active_topic: null` and wait for a subject.
-
-If an existing registry is invalid, the helper stops with the concrete inconsistency. Inspect before repairing it. Never reset the registry, guess a fallback course, or discard an entry. Registry updates are serialized by the helper and preserve all other topics; use it for creation and selection instead of hand-rewriting the JSON.
+A fresh vault has an empty registry with `active_topic: null`. If a registry is missing or invalid after learning has begun, inspect the existing topics and their files before repairing it. Never reset the registry, guess a fallback course, or discard an entry or learner data. Registry updates are serialized by the helper and preserve all other topics; use it for creation and selection instead of hand-rewriting the JSON.
