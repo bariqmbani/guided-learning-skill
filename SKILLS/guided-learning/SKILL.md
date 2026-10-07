@@ -1,7 +1,7 @@
 ---
 name: guided-learning
 metadata:
-  version: "3.6.2"
+  version: "3.6.3"
 description: >
   Guide ongoing courses with topic roadmaps, a spiral curriculum, personalized
   lessons, and spaced recall. Use to start or continue a course, work through
@@ -13,256 +13,126 @@ description: >
 
 # Guided Learning — Spiral Curriculum Sessions
 
-## Purpose
+Teach 1–3 concepts per session through a literature-backed spiral curriculum:
+explanation, learner attempts, application, connections, and spaced recall.
+Keep the full teaching sequence below; load specialized details only when needed.
+
+## Dispatch before topic selection
+
+- **Shared preferences:** `guided-learning onboard` (Codex `$` or Claude `/`) and
+  requests to set up/update shared preferences follow
+  [learner-profile](../learner-profile/SKILL.md). Stop after setup unless learning
+  was also requested. Do not select a topic or create/reset learning records.
+- **Courses:** Explicit `$guided-learning` or `/guided-learning` selects this
+  workflow, even with a concept name. Continuing a roadmap, studying its concepts
+  or assigned sources, spaced recall, quizzes, and course progress reviews belong
+  here. Honor an explicitly named skill.
+- **Focused lessons:** Independent one-concept or mechanism requests, including
+  a source aimed at that concept, follow [concept-learning](../concept-learning/SKILL.md)
+  before topic resolution. A question within the current course stays in its
+  pinned topic; an active topic alone does not make an unrelated question course work.
+- **Ambiguous scope:** Ask one short scope question only when focused learning
+  versus an ongoing course is unclear. A broad subject plus a curriculum request
+  selects this course workflow.
+
+## References and topic selection
+
+Read the indicated reference before its action. Reuse guidance already available
+in context; do not reload it at each phase or read every reference at startup.
+Links are relative to their containing canonical file, not a native agent entry.
+References use the same pinned paths and phase numbers as this core flow.
+
+| Reference | Required when |
+| --- | --- |
+| [Topic routing](references/topic-routing.md) | After course dispatch, before any course-file access; covers selection, paths, legacy layouts, and registry recovery. |
+| [Shared teaching](../learner-profile/references/teaching.md) | At lesson start: adaptive support, learner attempts, and honest assessment. |
+| [Bootstrapper](references/bootstrap.md) | The selected roadmap is missing or has no checked or unchecked concept entries. |
+| [Teach from source](references/teach-from-source.md) | A PDF, URL, file, or pasted source is assigned to this course. |
+| [Comprehension checks](references/comprehension-checks.md) | Selecting the Phase 2 check for the current pass and domain. |
+| [Interactives](references/interactives.md) | Before launching or building an interactive in Phase 1b or 3. |
+| [Session records](references/session-records.md) | Before writing the session protocol or execution log, including partial sessions. |
+| [Session review](references/session-review.md) | After every five sessions in this topic. |
+| [Personalization](../learner-profile/references/personalization.md) | Feedback suggests a lasting adjustment, or the learner asks to save/remove one. |
+
+Use `python3 SKILLS/guided-learning/scripts/topics.py` from the vault root as
+directed by topic routing. An
+explicit topic takes priority over the active default. Pin the returned topic ID
+and registry `paths` for the whole session. All `{roadmap}`, `{recall_queue}`,
+`{concepts_dir}`, `{papers_dir}`, `{protocols_dir}`, `{interactives_dir}`,
+`{glossary}`, `{skill_logs_dir}`, `{css_file}`, and `{build_script}` placeholders
+refer to those paths. Resolve them before access. Never use another topic as a
+fallback or reset existing progress. Recovery and migration follow topic routing.
+The bootstrapper creates missing course scaffolding; manual starter templates
+are in `examples/` and must be adapted to the pinned paths.
+
+## Personalization and domain modes
+
+Read `python3 SKILLS/learner-profile/scripts/profile.py show` from the vault root
+and the selected roadmap's **Teaching preferences**. Use the saved Python runtime
+when configured. Priority: current requests, approved topic preferences, then
+vault defaults. Topic overrides apply even when the global profile is unconfigured.
+
+For a configured profile, apply its language (including bilingual preferences) to
+explanations, recall, questions, exercises, and new lesson prose. Apply the time
+budget and access constraints. Background and broad goals guide examples and
+prerequisite probes, never establish mastery. Use non-`auto` learning context as
+a default for a new topic; preserve an existing topic's goals and mode.
+
+Choose methods from the task, observed responses, and constraints. `adaptive` is
+the default; legacy styles remain adjustable preferences, not fixed learner types.
+Preferred extras are priorities, not an allowlist. An empty list does not prohibit
+practice or visuals; explicit exclusions require usable alternatives. Worked
+examples, practice, feedback, and recall need no extra approval merely because an
+aid was not selected. Respect pauses and deferred checks; split heavy concepts
+rather than exceed the budget.
+
+If the profile is absent or unconfigured, offer `$learner-profile` or
+`/learner-profile` without blocking the lesson. Ask language and immediate time
+constraints only when needed; default English is not a learner answer. Bootstrap
+uses topic intake for missing goals and starting knowledge. Resume existing
+courses from their plan and recent protocol without rerunning intake. After an
+early lesson, invite one actionable adjustment to pace, difficulty, or examples
+unless feedback was already given.
+
+Repair current explanations immediately. For an inferred ongoing preference,
+follow the personalization reference: propose concrete wording and scope (topic,
+vault, or both), then wait for approval before saving or adopting it. A direct
+scoped request already authorizes the change. Store personal rules in the profile
+or selected roadmap, never shared skill files. Preference changes never mark or
+reset progress.
+
+**Domain mode** changes question framing, application context, and connection
+prompts; retain the Phase 1 explanation methods in every mode.
+
+| Mode | Context and framing |
+| --- | --- |
+| `research` | Papers, citations, research questions; conference/advisor pitches, Related Work, reviewer defense, hypotheses, dissertation argument maps. |
+| `professional` | Industry/project/process material; team or stakeholder briefings, design decisions, risk assessments, current projects, team knowledge dependencies. |
+| `self-study` | Personal or mixed material; everyday explanations, blog drafts, skeptic responses, practical/portfolio projects, personal concept maps. |
+
+During the first session, infer mode from the roadmap, concept notes, and purpose.
+If ambiguous and framing needs clarification, ask once whether to use academic,
+workplace, or personal framing; self-study is the default when purpose remains
+unclear. Store the choice in the roadmap or recall queue header and reuse it.
+The learner can override it at any time.
 
-Run structured learning sessions through a literature-backed concept collection using a spiral curriculum approach. Each session covers 1-3 concepts with explanations, comprehension checks, and hands-on application — including interactive HTML visualizations for concepts that benefit from them.
-
-## Dispatch Before Topic Selection
-
-Choose the workflow before resolving a topic or reading/writing course data:
-
-1. **Shared learner setup:** `$guided-learning onboard`, `/guided-learning onboard`,
-   or a request whose purpose is to set up/update shared learning preferences
-   forwards to [learner-profile](../learner-profile/SKILL.md). Follow its
-   conversational setup or targeted update flow, then stop unless the learner
-   also asked to learn. It requires no subject and never creates or resets a
-   course or concept session. Existing saved answers remain valid.
-2. **Explicit course choice:** `$guided-learning` or `/guided-learning` without
-   `onboard` selects this course workflow, including when a concept is supplied.
-   Requests to continue a roadmap, review a course, or learn a subject over time
-   also use this workflow. Honor an explicitly named learning skill; do not
-   silently redirect `/guided-learning bubble sort` to another skill.
-3. **Focused concept learning:** An independent request to understand one concept
-   or mechanism, without an explicit course command or an ongoing course lesson
-   context, uses [concept-learning](../concept-learning/SKILL.md). Route there
-   before `topics.py resolve` or `create`; its automatic session documents belong
-   under `concept-sessions/`, outside topics. A question within the current course
-   lesson stays in its pinned topic. A source request aimed at one concept can
-   use the focused workflow; a source explicitly assigned to a course stays here.
-4. **Ambiguous scope:** Ask one short scope question only if the request does not
-   distinguish a focused lesson from an ongoing course. A broad subject plus a
-   request for a curriculum clearly selects this skill; an active topic alone
-   does not turn an unrelated standalone concept question into course work.
-
-Both learning skills use the same profile and
-[shared tutoring principles](../learner-profile/references/teaching.md): guided
-small steps, learner attempts, adaptive support, feedback, and evidence from an
-independent demonstration. This skill adds course progression and spaced recall.
-
-## Prerequisites
-
-The skill uses the following vault structure. **All of these are created automatically** by the bootstrapper if they don't exist — you don't need to set anything up manually.
-
-| Path | Purpose | Created by |
-|------|---------|------------|
-| `{roadmap}` | Ordered list of concepts grouped by cluster and pass | Bootstrapper or manual |
-| `{recall_queue}` | Spaced repetition tracker | Bootstrapper or first session |
-| `{protocols_dir}` | Session protocols (learning journal) | First session |
-| `{interactives_dir}` | Generated HTML visualizations | First interactive build |
-| `{concepts_dir}` | Atomic concept notes (Zettelkasten-style) | Bootstrapper, teach-from-source, or manual |
-| `{glossary}` | Domain glossary | First session |
-
-For manual setup, see the `examples/` directory for starter templates.
-
-## Configuration and Topic Selection
-
-**After dispatch selects the course workflow and before any course-file read or write, read `references/topic-routing.md` relative to this skill directory and resolve the topic using `scripts/topics.py` from the vault root.** Shared profile setup and focused concept sessions do not use topic routing. Routing applies to the Bootstrapper, Teach-from-Source, every session phase, connection mapping, recall, and log analysis.
-
-```bash
-python3 SKILLS/guided-learning/scripts/topics.py resolve
-```
-
-This returns the active topic's entry and its vault-relative `paths`. Explicitly named topics take priority over the active default. Use the topic-routing reference for creating or switching tracks; do not default a new subject to an existing roadmap.
-
-Pin the selected topic ID and paths for the entire session. Every `{roadmap}`, `{recall_queue}`, `{protocols_dir}`, `{interactives_dir}`, `{concepts_dir}`, `{papers_dir}`, `{glossary}`, `{skill_logs_dir}`, `{css_file}`, and `{build_script}` below refers to that selected topic's registry entry. Join directory paths and filenames with exactly one slash. Placeholders must be resolved before file access.
-
-Every course uses its registered paths. New tracks use `topics/<topic-id>/`; existing or migrated courses retain their registered paths and note filenames. The root-level `learning/interactives/interactive.css` and `build.sh` remain shared templates for creating future topics; course-specific interactive pages and their copied CSS/build script belong to the selected topic. Never read or update another topic's learning files as a fallback. Never initialize or reset an existing roadmap or recall queue. Older examples and templates must be adapted to the selected track's paths before use.
-
-For a missing or invalid registry, follow the recovery rules in `references/topic-routing.md` before proceeding; do not invent a subject from generic placeholder files.
-
-## Domain Modes
-
-### Learner profile
-
-At the start of a session, read the vault profile with `python3 SKILLS/learner-profile/scripts/profile.py show`. If `configured` is true, use the preferred teaching language for explanations, recall questions, comprehension checks, exercise prompts, and new lesson prose, including any bilingual preference. Apply the approximate session budget and functional constraints. During shared learner setup, explicitly ask the language unless already provided; an unconfigured English placeholder is not an answer. Background and general goals guide examples and prerequisite probing; they do not establish mastery. Use `learning_context` as a default for a **new** topic when it is not `auto`. The selected topic's stored goals and domain mode take priority over global defaults; explicit requests in the current conversation take priority over all saved preferences.
-
-Choose teaching methods by the task, observed responses, and access constraints. `adaptive` is the default presentation; older saved styles remain valid, adjustable preferences rather than fixed learner types. Preferred extras are priorities, not an allowlist; an empty list does not disable practice or visuals. Respect explicit exclusions in `preferences` and provide usable alternatives. Worked examples, practice, feedback, and spaced recall belong in the teaching method when appropriate; no extra approval is needed merely because an aid was not selected. Respect requests to pause or defer checks. Split heavy concepts across sessions instead of exceeding the available time.
-
-If absent or unconfigured, offer `$learner-profile` or `/learner-profile` without blocking learning; ask about teaching language and immediate time constraints when needed. Use `references/topic-intake.md` for missing goals and starting knowledge in a new track. In an existing course, use its plan and recent protocol without rerunning intake. After an early lesson, invite one actionable adjustment to pace, difficulty, or examples if feedback has not already been given. Changing preferences never resets or marks progress.
-
-### Personalization from feedback
-
-Read the selected roadmap's **Teaching preferences** section alongside the vault
-profile before teaching. Current requests take priority, then approved topic
-preferences, then vault defaults; topic overrides also apply when the global
-profile is unconfigured. When feedback suggests an ongoing adjustment, read
-[shared personalization](../learner-profile/references/personalization.md). Repair the current explanation, propose concrete
-wording for the topic, the vault, or both, and wait for approval before saving or
-adopting the new ongoing rule. A direct request with explicit scope already
-authorizes that change. Personal adaptations belong in the profile or selected
-roadmap, never the shared skill source.
-
-### Topic domain mode
-
-The skill supports three domain modes that adapt session framing — comprehension checks, connection mapping prompts, and application context — to the learner's situation. The core explanation approach (Phase 1) stays the same across all modes; what changes is the *lens* through which the learner is asked to demonstrate and apply understanding.
-
-**Mode detection (Phase 0):** Do NOT require manual configuration. Instead, detect the mode automatically during the first session:
-
-1. **Read the concept notes and roadmap.** Academic papers, citations, and research questions signal `research`. Corporate/industry content, project documentation, and process descriptions signal `professional`. Mixed or personal content signals `self-study`.
-2. **If ambiguous, ask the learner once** at the start of the first session: "Your concepts look like [X] — should I frame sessions for academic writing, workplace application, or personal learning?" One question, then remember the answer for all future sessions.
-3. **Store the choice** in the recall queue file header or a comment in the roadmap, so subsequent sessions pick it up without re-asking.
-
-The learner can override the mode at any time by saying "switch to professional mode" or similar.
-
-### research
-
-Academic context: papers, Related Work, reviewer simulation, dissertation argument maps, advisor pitches. Best for PhD students, postdocs, and researchers working through academic literature.
-
-Comprehension checks ask the learner to pitch at a conference, defend to a reviewer, write Related Work sentences, or connect to hypotheses. Connection mapping prompts reference dissertation argument maps and academic discourse.
-
-### professional
-
-Workplace/industry context: stakeholder presentations, decision memos, team explanations, project applications. Best for professionals learning domain knowledge for their work (e.g., learning data science for product management, learning education theory for L&D roles).
-
-Comprehension checks ask the learner to brief their manager, defend a design decision to a skeptical colleague, write risk assessments, or connect to current projects. Connection mapping prompts reference team knowledge architectures and decision dependencies.
-
-### self-study (default when purpose is unclear)
-
-Personal learning context: teaching analogies, blog post drafts, practical projects, self-assessment. Best for independent learners working through a topic systematically.
-
-Comprehension checks ask the learner to explain at a dinner table, draft blog post openers, respond to Twitter skeptics, or connect to portfolio projects. Connection mapping prompts reference personal concept maps and learning trajectories.
-
-## When to Use
-
-- The learner explicitly invokes `$guided-learning` or `/guided-learning`.
-- The learner wants to start an ongoing course, follow a curriculum, or continue
-  a registered roadmap.
-- The learner wants to study a concept or source within their selected course.
-- The learner asks for spaced recall, course quizzes, or progress review.
-
-For an independent concept lesson use `concept-learning`; for shared preference
-setup use `learner-profile`. Dispatch these before topic selection as above.
-
-## Input
-
-One of:
-- **`onboard`** → compatibility alias for shared learner setup; do not select or initialize a topic.
-- **No input** after an explicit course invocation → pick the next unchecked item from the learning roadmap.
-- **Cluster name** in a course → work on the next item in that cluster.
-- **Concept name** with an explicit course invocation or course context → jump to that concept in the selected topic.
-- **"continue"** → resume the current course from its last session.
-- **A subject for ongoing study** → start or resume its course; a new empty track triggers the **Bootstrapper**.
-- **A PDF path, URL, or pasted text assigned to a course** → **Teach-from-Source** mode in that topic.
-
----
-
-## Bootstrapper — Start a New Topic
-
-After topic selection, when the selected track has no concept checklist entries yet, the skill bootstraps everything needed to start learning immediately.
-
-### When it triggers
-
-- Topic routing has selected the intended existing or newly created track.
-- Its roadmap does not exist or has no concept checklist entries (checked or unchecked).
-- Dispatch selected an ongoing course (for example, "build me a reinforcement learning curriculum" or `/guided-learning UX research methods`). An independent single-concept request has already routed to `concept-learning`.
-
-### What it does
-
-1. **Gather a short topic plan** using `references/topic-intake.md`: ask only for missing information about a useful outcome, starting knowledge, and realistic practice opportunities. Infer domain mode from the purpose; if unclear, use self-study. Optional deadlines and materials affect scope. Accept exploratory goals and skipped optional answers. Keep these decisions in the selected topic, separate from the global profile.
-
-2. **Generate a starter roadmap** with 10-20 concepts organized into 3-5 clusters:
-   - Use the learner's stated goal to pick relevant sub-topics
-   - Order clusters by dependency (foundations first)
-   - Each concept gets one line in the roadmap checklist
-   - Write the roadmap to `{roadmap}`
-   - Include a short **Learning plan** with the outcome, success demonstration, provisional starting point, practice opportunities, and domain mode. Unknowns stay unknown; do not invent a deadline or infer mastery.
-
-3. **Generate stub concept notes** for each concept in the roadmap:
-   - Create one file per concept in `{concepts_dir}`. For new tracks, use `<topic-id>--<concept-slug>.md` filenames and vault-relative wikilinks with display titles. Preserve existing legacy filenames and links.
-   - Each stub has: title, a 2-3 sentence core claim (from the agent's knowledge), empty Evidence and Implications sections, and placeholder source links
-   - These are starting points, not finished notes — the learner (or other skills like literature-intake) can enrich them later
-
-4. **Create the recall queue** only if missing and the `{protocols_dir}` directory if missing. Preserve all existing recall rows and files.
-
-5. **Create the glossary** if missing, then add the first few key terms from the topic without replacing any existing entries
-
-6. **Announce what was created**: Briefly show the outcome, clusters, and concept count. Explain that the learner can adjust the plan as they learn.
-
-7. **Start the first useful lesson** when the learner asked to learn. Give a short prerequisite prompt, explanation, and an attempt with feedback within the available time. Use the response to refine support; do not add a separate entrance test or redundant approval to begin. If they requested only a roadmap, stop after presenting it.
-
-### Quality guidelines
-
-- **Don't over-generate.** 10-20 concepts is enough for a solid foundation. The learner can always add more later. Breadth over exhaustiveness.
-- **Name concepts clearly.** Use descriptive titles that make sense in isolation: "Cohen's Kappa" not "Metric 3", "Retrieval-Augmented Generation" not "Advanced Technique".
-- **Cluster names should be meaningful.** "Statistical Foundations" not "Cluster 1".
-- **Calibrate the starting point.** Use self-report to choose an initial level, then adjust from a brief prerequisite task and subsequent attempts. A claim to know the basics does not by itself mark foundational concepts mastered. Reuse intake evidence rather than repeating the same probes.
-- **Stub notes should be useful, not empty.** The core claim should be accurate enough that the agent can teach from it in Pass 1. It's OK to use training knowledge for stubs — they'll be enriched with sources later.
-
----
-
-## Teach-from-Source — Learn from a PDF, URL, or Paste
-
-When a specific source (PDF, URL, or pasted text) is assigned to a course, the skill extracts concepts and teaches them within that topic. Dispatch an independent one-concept source lesson to `concept-learning` before topic selection.
-
-### When it triggers
-
-Course intent has already been established, and:
-
-- The learner provides a file path to a PDF or text file
-- The learner provides a URL to an article, paper, or documentation page
-- The learner pastes a block of text they want to understand
-- The learner says something like "teach me this paper", "explain this article", "help me understand this"
-
-### What it does
-
-After dispatch selects this course workflow, establish the intended topic using the topic-routing rules. Never silently add an unrelated source to the active roadmap.
-
-1. **Extract the source content:**
-   - PDF: read the full text (use available PDF reading tools)
-   - URL: fetch and extract the main content (use WebFetch or similar)
-   - Paste: use the provided text directly
-
-2. **Identify 3-7 key concepts** from the source:
-   - Each concept should be a distinct, teachable idea
-   - Order them by dependency (foundational concepts first)
-   - For academic papers: align with the paper's structure (background concepts, the main contribution, methodology, key findings)
-   - For articles/docs: extract the main ideas and their building blocks
-
-3. **Create a temporary session plan** (announced to the learner, not necessarily written to a file):
-   - "I found [N] key concepts in this source: [list]. I'll teach them in order, starting with [first concept]."
-   - Ask: "Want me to cover all of them, or focus on specific ones?"
-
-4. **For each selected concept, run a condensed session:**
-   - **Explain** using the appropriate archetype (Phase 1 logic), drawing on the source text as primary material
-   - **Build an interactive** if the concept warrants it (Phase 1b logic)
-   - **Comprehension check** (Phase 2 logic, one check per concept)
-   - Skip Phase 3 (application) and Phase 3b (connection mapping) for speed — this is a first-encounter mode, not deep study
-   - Concepts that deserve deeper treatment get flagged for the full session flow later
-
-5. **After the session, offer to persist:**
-   - "Want me to add these concepts to your learning roadmap for deeper study later?"
-   - If yes: create concept notes in `{concepts_dir}`, add them to the roadmap (or create one if it doesn't exist — chain into Bootstrapper), and schedule recall
-   - If no: just write a session protocol and move on
-
-### Guidelines
-
-- **Teach, don't summarize.** The learner can read the source themselves. The value is in explanation, context, prerequisite filling, and comprehension checking.
-- **Stay faithful to the source.** When teaching from a specific paper or article, the explanations should reflect what that source actually says, not generic knowledge about the topic.
-- **Handle prerequisites.** If the source assumes knowledge the learner doesn't have (detected via prerequisite probing), explain those first — even if they're not in the source itself.
-- **Respect scope.** A 3-page blog post yields 2-3 concepts. A 30-page paper yields 5-7. Don't force more concepts than the source supports.
-
----
-
-## Session Flow
+## Session flow
 
 ### Phase 0: Orient (1 min)
 
-1. **Confirm course dispatch, then resolve and pin the topic** using `references/topic-routing.md`, announce its title, then check for bootstrapper or teach-from-source triggers (see sections above). If triggered, follow that flow instead of the standard session flow.
-2. Read the learning roadmap to find the next unchecked concept(s), and apply its approved Teaching preferences alongside the vault profile.
-3. Determine which pass we're in (1 = Overview, 2 = Working Understanding, 3 = Fluency)
-4. **Detect or recall domain mode** (see Domain Modes section). On the first session, infer from content or ask. On subsequent sessions, read the stored preference.
-5. Tell the learner: "We're in **Pass X**, Cluster Y: *cluster name*. Next up: *concept name*."
-6. If resuming, briefly recall what was covered last session. Use the selected topic's learning plan and current time constraints to choose scope; no new intake is required merely because an older course lacks a plan section.
+1. Resolve and pin the course through topic routing; announce its title once.
+   A new subject starts/resumes its own track. Read the bootstrapper for an empty
+   selected track or teach-from-source for an assigned source; follow that branch
+   instead of the standard flow. Bootstrap retains the 10–20-concept roadmap and
+   per-concept stubs; source teaching retains its condensed first-encounter flow.
+2. Read the roadmap and approved preferences. With no input, choose the next
+   unchecked concept; with a cluster, its next item; with a concept, that item.
+   For "continue", resume from the last session.
+3. Determine pass (1 Overview, 2 Working Understanding, 3 Fluency) and recall the
+   saved domain mode or establish it as above.
+4. Announce: "We're in **Pass X**, Cluster Y: *cluster name*. Next up: *concept*."
+   Briefly recall the previous lesson when resuming. Use the plan and current time
+   constraints; an older course lacking a plan does not need fresh intake.
 
 ### Phase 0.5: Spaced Recall Check (2-5 min)
 
@@ -289,8 +159,6 @@ After dispatch selects this course workflow, establish the intended topic using 
 | [[concept-slug]] | YYYY-MM-DD | 7d | YYYY-MM-DD | solid | — |
 | [[concept-slug]] | YYYY-MM-DD | 3d | YYYY-MM-DD | fuzzy | missed key implication |
 ```
-
-Intervals: 3d -> 7d -> 21d -> removed. On "fuzzy", repeat same interval. On "blank", reset to 3d.
 
 These intervals are a practical starting heuristic, not universally optimal. Keep existing recall dates intact when applying onboarding preferences. Revisit important ideas in later application and transfer tasks even after a queue cycle is complete.
 
@@ -355,159 +223,45 @@ The learner understands the concept and its mechanism. Now they need to wield it
 - **Counter-evidence and honest limitations**: Name the strongest objection to this concept. Identify papers or findings that weaken it.
 - **Teaching test**: Explain this concept to a hypothetical student who needs to implement it.
 
-### Phase 1b: Launch Interactive in Background (concurrent with Phase 1)
+### Phase 1b: Launch interactive during explanation
 
-**Immediately after delivering the Phase 1 explanation**, check whether this concept warrants an interactive HTML visualization (see "Choosing the application method" in Phase 3). If yes:
+Immediately after explaining, apply Phase 3's selection criteria. Check access
+constraints, tools, and time first; a visual preference alone does not require an
+interactive. Use a static explanation or worked example for text-only preferences,
+inaccessible controls, or insufficient time. Otherwise read
+[interactives](references/interactives.md), launch the background build with the
+concept and pinned asset paths, and continue toward Phase 2 while it builds.
+The main agent must run the selected builder before announcing the page ready.
+The learner explores it before answering the comprehension check. Skip this phase
+for concepts better served by a scenario or writing exercise.
 
-First check the profile's access constraints and available tools. For text-only preferences, inaccessible controls, or a tight session budget, use a static explanation or worked example that serves the same learning goal. A visual presentation preference alone does not make an interactive necessary.
+### Phase 2: Explore and check comprehension (5–10 min)
 
-1. **Launch a background subagent** (Agent tool, `run_in_background: true`) to build the interactive HTML file.
-   - Pass the subagent the full concept content, the CSS design system path, the build script path, and the output filename.
-   - The subagent should follow all Interactive HTML Guidelines below.
-2. **Do not wait** — proceed immediately to Phase 2 (Comprehension Check). The learner reads your explanation while the interactive builds.
-3. When the subagent completes, **announce it** before the learner answers the comprehension check prompt: *"The interactive is ready — open `{interactives_dir}/YYYY-MM-DD_concept-slug.html` and explore it before answering."*
-4. If the concept does not warrant an interactive (e.g., it's a writing or scenario exercise), skip this phase entirely.
+If built, announce the interactive and invite exploration first. Then read
+[comprehension checks](references/comprehension-checks.md) and ask **one** question
+suited to the pass and domain. Do not reuse the previous session's `check_format`;
+record the chosen ID in the execution log. Wait for the learner's answer, address
+gaps, and re-explain those parts before moving on. Honor a request to defer or stop
+without inventing demonstrated understanding.
 
-**Why this order matters:** The interactive reinforces the explanation visually *before* the learner has to reproduce the concept — not after. Seeing the model in motion gives them something concrete to reason about during the comprehension check.
+### Phase 3: Apply (5–15 min, scaled to complexity)
 
----
+Apply the topic outcome, profile constraints, and current budget before choosing:
 
-### Phase 2: Explore Interactive + Comprehension Check (5-10 min)
+- **Interactive HTML:** Prefer for numbers, processes, and tradeoffs, including
+  distributions, ROC/calibration curves, Bayesian posteriors, adaptive testing,
+  probabilistic models, cost-quality spaces, and system pipelines/routing.
+  Follow [interactives](references/interactives.md) for construction. If already
+  built, guide deeper exploration of a preset or parameter combination showing
+  a non-obvious insight or edge case, then discuss observations.
+- **Scenario:** For decisions or system design, ask how to apply the concept to
+  a realistic domain scenario; connect to actual research questions or data when possible.
+- **Writing:** For framing, argumentation, or positioning, draft Related Work,
+  write a hypothesis, critique a claim with counter-evidence, or strengthen a weak
+  draft claim. Always consider writing in Pass 3.
 
-**If an interactive was built, the learner explores it first** — before answering the comprehension check. The interactive is a study tool, not a reward after the test.
-
-1. **Announce the interactive** and invite the learner to explore it freely.
-2. **After exploring**, ask the comprehension check question — pick ONE from the pool below. **Do not reuse the same format two sessions in a row.** Track the last format used in the execution log (`check_format` field).
-
-**Comprehension check pool — pick by pass, domain mode, and variety:**
-
-Use the pool matching the configured `domain_mode`. Checks marked "(shared)" are identical across all modes. **Do not reuse the same format two sessions in a row.**
-
----
-
-#### `research` mode
-
-**Pass 1 (any of these):**
-- **Conference pitch**: "Explain this to a fellow researcher at a poster session."
-- **Elevator pitch**: "You have 30 seconds — sell me on why this concept matters for your research."
-- **Predict the outcome**: "If [specific variable] changes from X to Y, what happens and why?" *(shared)*
-- **Spot the flaw**: Present a deliberately wrong one-sentence summary. "What's wrong with this claim: '[flawed statement]'?" *(shared)*
-- **Analogy check**: "Come up with your own analogy for this concept — different from the one I used." *(shared)*
-- **What breaks?**: "If we ignored this concept entirely in your system, what would go wrong?"
-
-**Pass 2 (any of these):**
-- **Advisor pitch**: "How would you explain this mechanism to your advisor?"
-- **Two-concept bridge**: "How does this connect to [[previously-learned-concept]]? What does one give you that the other doesn't?" *(shared)*
-- **Design decision**: "You're building your system — where exactly does this concept change your design, and how?"
-- **Devil's advocate**: "I think [opposing claim]. Convince me I'm wrong using this concept." *(shared)*
-- **Evidence check**: "What's the strongest piece of evidence for this claim, and what's its biggest limitation?"
-- **Predict the failure**: "Under what conditions would this approach fail? Give a concrete example from your domain."
-
-**Pass 3 (any of these):**
-- **Related Work sentence**: "Write the one sentence you'd put in a Related Work section about this."
-- **Reviewer simulation**: "I'm Reviewer 2 and I say your use of this concept is superficial. Defend it."
-- **Hypothesis link**: "Which of your hypotheses does this concept support, and how would you cite it as evidence?"
-- **Counter-argument**: "Name one paper or concept that could be used to argue *against* this claim." *(shared)*
-- **Teach it**: "Explain this to a student who has never read the paper. They need to understand it well enough to implement it."
-- **Write the limitation**: "Write the 2-sentence limitation paragraph for this concept as it applies to your system."
-
----
-
-#### `professional` mode
-
-**Pass 1 (any of these):**
-- **Team standup**: "Explain this to your team in 30 seconds at standup."
-- **Stakeholder pitch**: "Your VP asks why this matters for the product. What do you say?"
-- **Predict the outcome**: "If [specific variable] changes from X to Y, what happens and why?" *(shared)*
-- **Spot the flaw**: Present a deliberately wrong one-sentence summary. "What's wrong with this claim: '[flawed statement]'?" *(shared)*
-- **Analogy check**: "Come up with your own analogy for this concept — different from the one I used." *(shared)*
-- **What breaks?**: "If your team ignored this concept, what would go wrong in production?"
-
-**Pass 2 (any of these):**
-- **Manager briefing**: "Write a one-paragraph briefing for your manager on this."
-- **Two-concept bridge**: "How does this connect to [[previously-learned-concept]]? What does one give you that the other doesn't?" *(shared)*
-- **Design decision**: "You're architecting the system — where does this change your design?"
-- **Devil's advocate**: "I think [opposing claim]. Convince me I'm wrong using this concept." *(shared)*
-- **Cost-benefit**: "What's the cost of implementing this vs. the cost of not implementing it?"
-- **Predict the failure**: "Under what conditions would this fail in a real deployment?"
-
-**Pass 3 (any of these):**
-- **Decision memo**: "Write the one-paragraph recommendation for the decision doc."
-- **Pushback simulation**: "Your skeptical colleague says this is over-engineered. Defend it."
-- **Project link**: "Which current project would benefit most from this, and how?"
-- **Counter-argument**: "Name one paper or concept that could be used to argue *against* this claim." *(shared)*
-- **Teach it**: "Explain this to a new team member who starts Monday."
-- **Write the risk**: "Write the 2-sentence risk assessment for NOT applying this."
-
----
-
-#### `self-study` mode
-
-**Pass 1 (any of these):**
-- **Dinner table**: "Explain this to a curious friend over dinner."
-- **Elevator pitch**: "In one sentence, why should anyone care about this?"
-- **Predict the outcome**: "If [specific variable] changes from X to Y, what happens and why?" *(shared)*
-- **Spot the flaw**: Present a deliberately wrong one-sentence summary. "What's wrong with this claim: '[flawed statement]'?" *(shared)*
-- **Analogy check**: "Come up with your own analogy for this concept — different from the one I used." *(shared)*
-- **What breaks?**: "If this concept didn't exist, what problems would remain unsolved?"
-
-**Pass 2 (any of these):**
-- **Teach a friend**: "How would you explain the mechanism to someone smart but unfamiliar?"
-- **Two-concept bridge**: "How does this connect to [[previously-learned-concept]]? What does one give you that the other doesn't?" *(shared)*
-- **Build something**: "If you were building a project using this, what's the first thing you'd implement?"
-- **Devil's advocate**: "I think [opposing claim]. Convince me I'm wrong using this concept." *(shared)*
-- **Evidence check**: "What's the strongest piece of evidence for this claim, and what's its biggest limitation?"
-- **Edge case**: "What's the weirdest or most extreme scenario where this still applies?"
-
-**Pass 3 (any of these):**
-- **Blog post opener**: "Write the opening paragraph of a blog post explaining this."
-- **Skeptic response**: "Someone on Twitter says this concept is overrated. Draft your reply."
-- **Portfolio link**: "How would you demonstrate understanding of this in a portfolio project?"
-- **Counter-argument**: "Name one paper or concept that could be used to argue *against* this claim." *(shared)*
-- **Teach it**: "Explain this to a motivated beginner. They want to understand, not just memorize."
-- **Write the caveat**: "Write the 2-sentence 'but here's the catch' paragraph."
-
-If gaps appear, re-explain those parts. Don't move on until the core idea clicks.
-
-### Phase 3: Apply (5-15 min, scaled to complexity)
-
-**Choose the application method based on concept type.**
-
-Apply the topic's outcome, profile constraints, and current time budget before
-choosing a method. These take priority over the preferences below. Use a usable
-alternative when an interactive or tool is inaccessible, excluded, or too costly
-for the available session.
-
-For HTML-interactive concepts where an interactive was already built, Phase 3 becomes **guided deep exploration**: ask the learner to try a specific preset or parameter combination that illustrates a non-obvious insight or edge case, then discuss what they see.
-
-For non-interactive concepts, choose from:
-
-**A) Interactive HTML Visualization** — for concepts that are inherently visual/dynamic:
-- Statistical concepts (distributions, ROC curves, Bayesian posteriors, calibration curves)
-- Sequential processes (adaptive testing, probabilistic models)
-- Tradeoff spaces (accuracy-coverage, cost-quality)
-- System architectures (pipeline flows, routing logic)
-
-Create a self-contained HTML file with:
-- Interactive controls (sliders, toggles, input fields)
-- Real-time visualization that responds to parameter changes
-- Brief explanatory text embedded in the page
-- "What to notice" prompts that guide exploration
-- Realistic values from the learner's research domain
-- Save to `{interactives_dir}/YYYY-MM-DD_concept-slug.html`
-
-**B) Scenario Exercise** — for design/decision concepts:
-- Present a realistic scenario from the learner's domain and ask how they would apply the concept
-- Connect to the learner's actual research questions or experimental data where possible
-
-**C) Writing Exercise** — for argumentation and framing:
-- Draft a paragraph for Related Work using this concept
-- Write a hypothesis that builds on this concept
-- Critique a claim using this concept as counter-evidence
-- Rewrite a weak claim from a draft using this concept as support
-
-**Choosing the application method:**
-Prefer A for concepts that involve numbers, processes, or tradeoffs. Use B when the concept is about decision-making or system design. Use C when the concept is about framing, argumentation, or positioning — and always consider C in Pass 3.
+Use an accessible alternative when tools or interactives are excluded,
+inaccessible, or too costly for the available session.
 
 ### Phase 3b: Connection Mapping (2-5 min)
 
@@ -528,6 +282,10 @@ If new connections are discovered that aren't in the concept notes, update the s
 
 ### Phase 4: Update & Log (2 min)
 
+Read [session records](references/session-records.md) for both templates,
+correction tags, and formatting. Write only observed evidence; keep unfinished
+assessment distinct from success.
+
 1. **Update roadmap**: Check off the concept in the learning roadmap
 2. **Link protocol from roadmap**: Add an indented protocol link below the checked-off concept:
    ```
@@ -538,45 +296,12 @@ If new connections are discovered that aren't in the concept notes, update the s
 4. **Update progress summary** at the top of the roadmap
 5. **Update glossary**: Add any key terms introduced during the session to the glossary (alphabetical order, with research-domain context)
 6. **Schedule recall**: Add the concept to the recall queue with `interval: 3d` and `next_recall` set to today + 3 days. If the concept is already in the queue (Pass 2/3 revisit), reset its interval to 3d.
-7. **Write session protocol** to `{protocols_dir}/YYYY-MM-DD_concept-slug.md` (see template below)
-8. **Write execution log** to `{skill_logs_dir}/YYYY-MM-DD_sessionNN.md` (see Execution Logging section)
+7. **Write session protocol** to `{protocols_dir}/YYYY-MM-DD_concept-slug.md` (use the session-records template)
+8. **Write execution log** to `{skill_logs_dir}/YYYY-MM-DD_sessionNN.md` (use the session-records template; categorize corrections and record `check_format`)
 9. **Ask**: "Want to do another concept, or is this a good stopping point?"
+10. **Every five sessions**, read [session review](references/session-review.md)
+    and review only this topic's logs; propose persistent adaptations for approval.
 
----
-
-## Interactive HTML Guidelines
-
-When creating interactive HTML pages:
-
-- **Shared design system**: Every interactive uses the universal stylesheet from `{css_file}`. New interactives should link it via:
-  ```html
-  <link rel="stylesheet" href="interactive.css">
-  ```
-  Then run the build script to inline the CSS (required for Obsidian compatibility):
-  ```bash
-  bash "{build_script}"
-  ```
-  The script replaces the `<link>` tag with an inline `<style>` block wrapped in `<!-- interactive.css:start -->` / `<!-- interactive.css:end -->` markers. It's idempotent — re-running after CSS edits updates all HTML files. Page-specific styles go in a separate inline `<style>` block.
-- **Class conventions**: Use the standard classes from `interactive.css`:
-  - Layout: `.layout` (sidebar+main), `.two-col`, `.container`, `.page-padding`
-  - Surfaces: `.panel`, `.card`, `.notice`, `.notice--bar`
-  - Controls: `.slider-row`, `.slider-label`, `.slider-val`, `.control-group`
-  - Buttons: `.btn`, `.btn-secondary`, `.btn-sm`, `.btn-row`, `.preset-row`, `.preset-btn`
-  - Metrics: `.metric` (inline), `.metric-row` + `.metric-bar-bg` + `.metric-bar-fill` (bar)
-  - Navigation: `.nav`, `.tab-content`, `.header`, `.bottom-nav`
-  - Content: `.formula`, `.explain`, `.prompt-box`, `.copy-btn`, `.tag`
-  - Colors: use CSS vars (`var(--accent)`, `var(--green)`, etc.) or utility classes (`.color-tp`, `.color-cyan`, etc.)
-- **Educational**: Not a tech demo — designed to teach. Include "What to notice" prompts and guided exploration steps.
-- **Parameter exploration**: Let the user change inputs and see what happens in real time.
-- **Domain-contextualized**: Use realistic values from the learner's research domain.
-- **Mobile-friendly**: Should work in any modern browser.
-- **Visually clean**: Use a simple, readable design. No flashy animations — clarity over aesthetics.
-- **Cross-tab data provenance**: When an interactive has multiple tabs where later tabs depend on data configured in earlier tabs, always make this dependency explicit. Label the source tab as the shared data source, add a live summary at the end of the source tab previewing what flows into later tabs, and reference the source tab by name in later tabs' introductions. Never assume the learner tracks implicit state across tabs.
-- **Toggle/switch components**: Custom toggles must use `<label for="inputId">` for the clickable track element, not `<div>`. The hidden-checkbox + styled-sibling pattern requires the visual element to be a `<label>` with a `for` attribute. CSS selectors targeting labels inside control rows must use the direct-child combinator (`>`) to avoid styling nested labels (e.g., `.toggle-row > label` not `.toggle-row label`).
-- **Running build.sh**: The interactive subagent may not have Bash permission. After the subagent completes, the main agent MUST run `bash "{build_script}"` to inline the CSS. Do not rely on the subagent to do this. If the learner reports missing styles in Obsidian, build.sh was not run.
-- **Store in**: `{interactives_dir}` with naming scheme `YYYY-MM-DD_concept-slug.html`.
-
----
 
 ## Multi-Concept Sessions
 
@@ -597,137 +322,3 @@ A session is successful when the learner can:
 | **Pass 1** | State the core idea in one sentence and say why it matters for their research |
 | **Pass 2** | Explain the mechanism AND identify how it connects to >=2 other concepts |
 | **Pass 3** | Use the concept fluently in writing or argumentation without prompting |
-
----
-
-## Struggle Patterns
-
-Track recurring correction types to adapt explanations preemptively.
-
-**In every execution log**, categorize each correction given during the session using one or more of these tags:
-
-| Tag | Meaning | Example |
-|-----|---------|---------|
-| `implication-gap` | Understands the mechanism but misses the "so what" for their system | "Undersold the routing implication" |
-| `terminology-confusion` | Confuses or misuses a technical term | "Used 'calibration' when meaning 'correlation'" |
-| `math-gap` | Lacks prerequisite statistical/mathematical knowledge | "Didn't know what Cohen's kappa measures" |
-| `scope-creep` | Explains too broadly, loses the specific claim | "Described all of Bayesian stats instead of the specific method" |
-| `shallow-framing` | Describes the algorithm but not why it matters or when to use it | "Described EM steps but couldn't say when DS beats MV" |
-| `connection-blind` | Fails to see how this concept relates to previously learned ones | "Didn't connect annotation quality to uncertainty quantification" |
-
-**Every 5 sessions in the selected topic**, review only its logs and count tag frequencies. If any tag appears in >=3 of the last 5 sessions:
-- **Surface it to the learner**: "I've noticed a pattern — [tag] has come up in X of our last 5 sessions."
-- **Propose an ongoing adjustment**: For `implication-gap`, suggest an explicit "What this means for your system" paragraph. For `math-gap`, suggest a longer prerequisite probe. For `terminology-confusion`, suggest a glossary sidebar. Show the concrete change and ask which scope to save it in, following [shared personalization](../learner-profile/references/personalization.md).
-- **Save approved adaptations** in the vault profile or selected topic's Teaching preferences. Record actual feedback and the approval in the topic journal; do not write learner-specific changes into the shared CHANGELOG.
-
----
-
-## Adaptation & Self-Improvement
-
-Use feedback to propose better lesson preferences. After every 5 sessions in the selected topic, briefly review only its logs:
-
-- Which application methods worked best for which concept types?
-- Which concepts needed re-explanation?
-- Is the cluster ordering effective or should it be adjusted?
-- Are sessions the right length?
-- **Check struggle pattern frequencies** (see above)
-- Ask before adopting new ongoing preferences; apply only approved changes at the chosen scope. Ordinary corrective teaching remains part of the current lesson.
-
----
-
-## Session Protocol
-
-After each session, write a human-readable protocol to `{protocols_dir}/YYYY-MM-DD_concept-slug.md`. This is the learning journal — it captures what worked, what needed correction, and what to revisit. Unlike the execution log (which is operational), the protocol is written for the learner to review later.
-
-```markdown
----
-date: "YYYY-MM-DD"
-topic: "<selected-topic-id>"
-pass: <1|2|3>
-cluster: <cluster name>
-concept: <concept wikilink slug>
-complexity: <light|medium|heavy>
-duration: ~XX min
-comprehension: <passed|partial|needs-revisit>
----
-
-# Session: <concept title in plain language>
-
-## Recall checks
-- <concept recalled>: <solid|fuzzy|blank> — <brief note if fuzzy/blank>
-- <omit this section if no recalls were due>
-
-## What we covered
-- <bullet points: key ideas explained>
-
-## How we learned it
-- <which methods were used: conversational explanation, interactive HTML, scenario exercise, writing exercise, connection mapping>
-
-## Artifacts
-- <link to any interactives created, e.g. `[[{interactives_dir}/YYYY-MM-DD_concept-slug.html]]`>
-- <omit this section if no artifacts were created>
-
-## What worked well
-- <which moments, presets, examples, or methods produced "aha" moments>
-
-## Corrections given
-- <any terminology fixes, misconceptions addressed, or gaps filled during the comprehension check>
-
-## Connections made
-- <which concepts the learner linked this to, and how>
-
-## Next up
-- <what concept comes next on the roadmap>
-```
-
----
-
-## Obsidian Formatting
-
-Use Obsidian Flavored Markdown to make learning protocols rich:
-
-- **LaTeX**: `$formula$` and `$$block$$` for mathematical notation — essential when concepts involve statistics, probability, or metrics
-- **Callouts**: `> [!question]` for comprehension checks, `> [!tip]` for key insights, `> [!example]` for worked examples
-- **Mermaid diagrams**: process flows, concept relationship maps, decision trees
-- **Highlights**: `==key insight==` for the "aha" moments worth remembering
-
----
-
-## Execution Logging
-
-After each session, write a log to `{skill_logs_dir}/YYYY-MM-DD_sessionNN.md` (where NN is the next session number):
-
-**YAML quoting rule:** Always quote all string values in frontmatter. Unquoted `~20` parses as null, bare `none` parses as null, and strings with colons or dashes can break Obsidian's YAML parser. Only leave numeric and boolean values unquoted.
-
-```yaml
----
-skill: "guided-learning"
-version: "3.6.2"
-topic: "<selected-topic-id>"
-trigger: "<how the session was initiated>"
-pass: <1|2|3>
-cluster: "<cluster name>"
-concepts_covered:
-  - "<concept-1>"
-  - "<concept-2>"
-complexity: "<light|medium|heavy>"
-application_method: "<html-interactive|scenario|writing|connection-mapping>"
-check_format: "<conference-pitch|elevator-pitch|predict-outcome|spot-flaw|analogy-check|what-breaks|advisor-pitch|two-concept-bridge|design-decision|devils-advocate|evidence-check|predict-failure|related-work|reviewer-sim|hypothesis-link|counter-argument|teach-it|write-limitation|team-standup|stakeholder-pitch|manager-briefing|cost-benefit|decision-memo|pushback-sim|project-link|write-risk|dinner-table|teach-a-friend|build-something|edge-case|blog-post-opener|skeptic-response|portfolio-link|write-caveat>"
-artifacts_created:
-  - "<path to interactive HTML or other output>"
-comprehension_check: "<passed|partial|needs-revisit>"
-recall_results:
-  - concept: "<concept-slug>"
-    result: "<solid|fuzzy|blank>"
-struggle_tags:
-  - "<implication-gap|terminology-confusion|math-gap|scope-creep|shallow-framing|connection-blind>"
-session_duration_minutes: "<approximate, e.g. ~20>"
-status: "<completed|partial|needs-followup>"
-issues: "<any problems encountered>"
-user_corrections: "<any feedback the learner gave about the process>"
----
-
-## Session Notes
-
-<Brief narrative: what was covered, what clicked, what needs revisit>
-```

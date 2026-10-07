@@ -13,9 +13,9 @@ curriculum and spaced recall.
 Profile setup is optional. Both teaching skills use the same saved preferences
 and can begin before the profile is configured.
 
-Current releases: [learner-profile 1.0.0](SKILLS/learner-profile/CHANGELOG.md),
+Current releases: [learner-profile 1.0.1](SKILLS/learner-profile/CHANGELOG.md),
 [concept-learning 1.0.1](SKILLS/concept-learning/CHANGELOG.md), and
-[guided-learning 3.6.2](SKILLS/guided-learning/CHANGELOG.md). Versions are recorded
+[guided-learning 3.6.3](SKILLS/guided-learning/CHANGELOG.md). Versions are recorded
 in each skill's `metadata.version`; generated vaults preserve those versions and
 the complete changelogs.
 
@@ -64,8 +64,8 @@ The installer remembers Python in `runtime.local.toml` for future sessions.
 See [runtime configuration](INSTALLATION.md#python-in-a-new-session-or-an-existing-vault)
 to refresh it or configure a shared ZIP.
 
-Interactive HTML builds use Bash; on Windows, use WSL or Git
-Bash for those builds. The destination must be a new directory outside the source
+Interactive HTML builds use Python on all platforms. The destination must be a
+new directory outside the source
 setup directory, including all its subdirectories. When generating another vault
 from an installed vault, choose a destination outside that source vault as well.
 

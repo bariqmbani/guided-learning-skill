@@ -1,7 +1,7 @@
 ---
 name: learner-profile
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 description: >
   Set up or update shared teaching preferences for guided-learning courses and
   concept-learning sessions in an installed learning vault. Use for learner
@@ -25,8 +25,9 @@ never require repeat onboarding just because the skills have been separated.
   defaults are not answers. The legacy `$guided-learning onboard` and
   `/guided-learning onboard` commands forward to this same flow before any topic
   selection.
-- For a targeted update, read the current profile, change only the requested
-  fields, validate and save. Do not run a full questionnaire or ask again for
+- For a targeted update, read [profile schema and saving](references/profile-schema.md),
+  read the current profile, change only the requested fields, validate and save.
+  Do not run a full questionnaire or ask again for
   permission the learner's scoped instruction already provides. Preserve
   unrelated answers and compatible older preferences.
 - For an adjustment inferred from feedback, read
@@ -34,18 +35,10 @@ never require repeat onboarding just because the skills have been separated.
   explanation, then propose wording and scope before persisting a future rule.
   Ordinary adaptive tutoring does not require a saved preference or approval.
 
-Run the helper from the installed vault root:
-
-```bash
-python3 SKILLS/learner-profile/scripts/profile.py show
-python3 SKILLS/learner-profile/scripts/profile.py save --input /path/to/temporary-profile.json
-```
-
-Use a structured file write for temporary input; preserve the full schema and
-remove the temporary file after saving. `--vault <path>` before the subcommand
-selects another installed vault. Read the saved result to verify it. The old
-`SKILLS/guided-learning/scripts/profile.py` command remains a compatible entry
-point with the same API.
+For every profile write, use [profile schema and saving](references/profile-schema.md)
+for the complete field contract, helper commands, and verification. Reuse references
+already available in context. The former guided-learning profile helper remains
+compatible.
 
 ## Shared boundaries
 

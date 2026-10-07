@@ -1,9 +1,9 @@
 # Installation and dependency recovery
 
 Installation and the learning helpers require **Python 3.9 or newer**, with no
-third-party Python packages. Git is optional. Bash is required only for the
-optional interactive HTML builder. PowerShell 5.1+ can install and run the
-Python helpers directly.
+third-party Python packages. Git is optional. Interactive HTML builds use the
+same Python interpreter; Bash is not required. PowerShell 5.1+ can install and
+run the Python helpers directly.
 
 ## Agent preflight
 
@@ -146,8 +146,7 @@ for the `&` call operator.
 - `concept-sessions/` contains only its explanatory `README.md`.
 - The source checkout contains no learner data, and licenses remain in the vault.
 
-Report the vault path, the working Python invocation for future helpers, and any
-remaining optional limitation (such as unavailable Bash for HTML builds). Open
+Report the vault path and working Python invocation for future helpers. Open
 the destination folder as a vault in Obsidian. Run Codex or Claude Code there;
 profile setup and learning begin only when requested.
 

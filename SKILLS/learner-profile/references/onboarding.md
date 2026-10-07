@@ -92,37 +92,9 @@ Personalized lessons mean adapting to the learner's interests, pace, goals, and 
 
 Save after every pending field has been answered or explicitly skipped, or when the learner chooses to finish early or requests a targeted update. Do not require a separate confirmation of answers already provided. Start from the result of `show` and update only answered fields. For first setup, use `adaptive` explanations and no aid priorities unless the learner states otherwise. Keep the existing schema and saved choices compatible with earlier vaults. `schema_version` and `configured` are system metadata; never ask the learner to fill them in. All nine learner-facing fields are optional; the complete JSON object retains valid defaults for skipped choices.
 
-```json
-{
-  "schema_version": 1,
-  "configured": true,
-  "name": "",
-  "background": "",
-  "goals": "",
-  "language": "English",
-  "learning_context": "auto",
-  "session_minutes": 20,
-  "explanation_style": "adaptive",
-  "preferred_extras": [],
-  "preferences": ""
-}
-```
-
-- `language`: any nonempty teaching language or bilingual preference. Apply to explanations, recall questions, comprehension checks, exercises, and newly written lesson prose. Studying a language as a topic does not automatically change this field.
-- `session_minutes`: integer 5–180, an approximate budget. Record a shorter available window in `preferences` and adapt the session if the learner cannot use the minimum. Split a heavy concept across sessions instead of overrunning the budget.
-- `preferences`: constraints, accommodations, available tools, and free-text requests. Store a desired restriction such as "no interactives" here; an empty extras list is not a ban on teaching aids.
-- `explanation_style`: `adaptive`, `step-by-step`, `concise`, `visual`, `discussion`, or `hands-on`. This is an adjustable presentation preference, never a diagnosis or proof of an effective method.
-- `preferred_extras`: optional priorities from `worked_examples`, `practice_exercises`, `interactive_visualizations`, `code_examples`, `mini_projects`, `writing_exercises`, or `source_reading`. An empty list means no priorities stated. Practice and feedback remain part of teaching.
-- `learning_context`: `auto`, `self-study`, `professional`, or `research`; use the learner's stated purpose. Each course or concept session may differ.
-- `name`, `background`, `goals`: optional general context. Store a particular course's goal and evidence of starting knowledge in that course, and a focused lesson's goal in its session note, not as universal facts about the learner.
-
-Write a complete object to a temporary JSON file using a structured write; do not interpolate learner text into a shell command. Save it:
-
-```bash
-python3 SKILLS/learner-profile/scripts/profile.py save --input /path/to/temporary-profile.json
-```
-
-The helper validates before writing, sets `configured: true`, and updates only `learner-profile.json` and `Learner Profile.md`. Delete the temporary input. Explain that preferences are stored in these local vault files; the learning chat runs through the learner's chosen AI service. Do not request credentials or unrelated private material.
+Read [profile schema and saving](profile-schema.md) for field values and the
+read–merge–save–verify procedure. Keep schema details there; this conversation
+collects only the learner's answers.
 
 Read the saved result and summarize the resulting teaching plan in a few sentences, connecting answers to specific choices of examples, pace, explanation, practice, and feedback. Identify retained defaults and skipped details without presenting them as personal facts. Give an illustrative lesson approach, not a fabricated completed lesson. Explain that `$concept-learning <concept>` / `/concept-learning <concept>` starts a focused session, while `$guided-learning <topic>` / `/guided-learning <topic>` starts or continues a course, and setup can be revisited anytime. If a session is already in progress, apply the preferences while preserving its pinned topic or concept-session path and current position. Setup never edits course goals, checkboxes, recall dates, journals, or concept-session records.
 

@@ -48,8 +48,8 @@ downloads without Git, missing Python, and direct Python invocation when
 PowerShell script execution is blocked.
 
 The destination must be new and outside the source setup or vault directory tree.
-Python 3.9 or newer is required. Interactive HTML
-builds use Bash; Windows users can use WSL or Git Bash. Open the generated folder
+Python 3.9 or newer is required, including for interactive HTML builds on Windows,
+macOS, and Linux. Open the generated folder
 in Obsidian and run `codex` or `claude` there. All three skills are registered for
 both agents; the new vault has an empty topic registry, an unconfigured profile,
 and no learner concept sessions.

@@ -35,6 +35,7 @@ ASSETS = [
     "SKILLS/learner-profile/CHANGELOG.md",
     "SKILLS/learner-profile/scripts/profile.py",
     "SKILLS/learner-profile/references/onboarding.md",
+    "SKILLS/learner-profile/references/profile-schema.md",
     "SKILLS/learner-profile/references/onboarding-example.md",
     "SKILLS/learner-profile/references/onboarding-evidence.md",
     "SKILLS/learner-profile/references/personalization.md",
@@ -49,6 +50,12 @@ ASSETS = [
     "SKILLS/guided-learning/scripts/profile.py",
     "SKILLS/guided-learning/references/installation-prompt.md",
     "SKILLS/guided-learning/references/topic-intake.md",
+    "SKILLS/guided-learning/references/bootstrap.md",
+    "SKILLS/guided-learning/references/teach-from-source.md",
+    "SKILLS/guided-learning/references/comprehension-checks.md",
+    "SKILLS/guided-learning/references/interactives.md",
+    "SKILLS/guided-learning/references/session-records.md",
+    "SKILLS/guided-learning/references/session-review.md",
     "SKILLS/guided-learning/SKILL.md",
     "SKILLS/guided-learning/CHANGELOG.md",
     "SKILLS/guided-learning/PEDAGOGY.md",
@@ -60,7 +67,7 @@ ASSETS = [
     "SKILLS/guided-learning/examples/session-protocol.md",
     "SKILLS/guided-learning/scripts/topics.py",
     "SKILLS/guided-learning/interactives/interactive.css",
-    "SKILLS/guided-learning/interactives/build.sh",
+    "SKILLS/guided-learning/interactives/build.py",
     "SKILLS/guided-learning/interactives/example-interactive.html",
 ]
 
@@ -70,68 +77,25 @@ Treat this directory as the vault root. All learning paths are relative to it.
 
 """ + runtime.RUNTIME_GUIDANCE + """
 
-Choose the learning workflow before selecting a topic or writing learning data:
+Choose the workflow before selecting a topic or writing learning data:
 
-- Profile setup or preference updates: read `SKILLS/learner-profile/SKILL.md`.
-  `guided-learning onboard` is a compatibility alias for this same flow.
-- A focused concept, a bounded source explanation, or resuming a concept session:
-  read `SKILLS/concept-learning/SKILL.md`. Every session creates and maintains
-  `note.md`, `mentor-feedback.md`, and `practice.md` in its own `concept-sessions/`
-  folder. Use its session helper; do not create or select a course for this route.
-- A course, roadmap, scheduled recall, or continuing a topic: read
-  `SKILLS/guided-learning/SKILL.md` and `references/topic-routing.md` inside that
-  skill. Use its `scripts/topics.py` to resolve, create, or select the intended
-  course from `topics/registry.json`.
+- Shared preferences or `guided-learning onboard`: follow
+  [learner-profile](SKILLS/learner-profile/SKILL.md).
+- A focused concept, bounded source explanation, or concept-session resume:
+  follow [concept-learning](SKILLS/concept-learning/SKILL.md).
+- A course, roadmap, spaced recall, or topic continuation: follow
+  [guided-learning](SKILLS/guided-learning/SKILL.md).
 
-Honor an explicit skill choice. If a request is ambiguous between a focused
-lesson and a course, ask one short scope question. Named concept sessions resume
-their own documents; an existing active course is not a default save destination.
+Honor an explicit skill choice. Ask one scope question only if focused learning
+versus a course is unclear. Follow the selected skill's reference-loading rules.
+Full onboarding is optional and never blocks learning.
 
-In the course workflow, subjects have independent folders under `topics/<topic-id>/`. Each has its
-own roadmap, concepts, sources, recall queue, glossary, journals, and logs.
-Pin the selected topic ID and paths for the whole session. Never reset an
-existing topic or fall back to another topic's roadmap.
-
-For `learner-profile` or `guided-learning onboard`, follow the shared profile
-skill's onboarding conversation before topic selection. Save only the profile and
-its readable note; do not create a subject or change learning progress.
-For general setup, offer each unanswered editable profile field one question at
-a time, accepting skips or an early finish. Optional fields still deserve an
-invitation; do not complete onboarding by silently saving defaults or asking
-only language and time. For a targeted update, change only the requested
-preferences and preserve everything else without restarting the questionnaire.
-Use the harness's interactive question tool when available in the current mode.
-Keep one question outstanding and continue after its answer; use chat as fallback.
-
-Both teaching skills read `SKILLS/learner-profile/scripts/profile.py show`.
-Full onboarding is optional and must not block a lesson. Use the configured
-language, session budget, and access constraints to tailor teaching. Its
-background and goals are context, not evidence that concepts have been learned.
-Use its learning context as a default for new topics; preserve an existing
-topic's stored goals and domain mode. Requests in the current conversation take
-priority over saved preferences. Ask only for missing topic-specific details.
-
-For feedback that suggests an ongoing teaching preference, follow
-`SKILLS/learner-profile/references/personalization.md`: propose the wording and scope, then wait for
-approval. Vault defaults live in the profile; topic overrides live in the selected
-roadmap's Teaching preferences section. Concept-session goals and adjustments
-belong in that session's note. Never infer mastery from preferences or background.
-
-Tutor one step at a time, wait for attempts, and adapt examples and support to
-the actual responses. Update session documents as the lesson proceeds. Feedback
-must distinguish demonstrated understanding from pending assessment; never invent
-learner answers. Concept sessions can become course material only on explicit
-request; preserve their original records and all existing course progress.
-
-In course work, bootstrap only a selected topic with no concept checklist entries,
-checked or unchecked. Follow `SKILLS/guided-learning/references/topic-intake.md` for the outcome, starting
-knowledge, and feasible practice; keep the plan in that topic. Preserve existing
-notes and progress, and record learning only from actual sessions.
-
-Use topic-prefixed filenames and full vault-relative Obsidian wikilinks for new
-concept and paper notes. Shared CSS and the HTML builder live in
-`learning/interactives/`; each new topic receives its own copies. Run the selected
-topic's registered builder after creating HTML.
+Use the owning skill's helpers and pin its course or concept-session paths.
+Preserve existing records and progress; never fall back to another topic.
+The active course is not a destination for unrelated concept lessons. Course
+handoffs require an explicit request. Keep learner data in this vault, never the
+setup checkout or shared skill sources. Record actual attempts; never invent
+learner answers or mastery.
 """
 
 TOPICS = """# Learning Topics
@@ -262,7 +226,7 @@ def make_files(source, name):
         # Keep exported scripts usable in Bash/POSIX even from a CRLF source ZIP.
         files[relative] = content.replace(b"\r\n", b"\n") if path.suffix in {".py", ".sh", ".ps1"} else content
     # Source assets stay with the skill; installed vaults also need shared templates.
-    for asset_filename in ["interactive.css", "build.sh", "example-interactive.html"]:
+    for asset_filename in ["interactive.css", "build.py", "example-interactive.html"]:
         files[f"learning/interactives/{asset_filename}"] = files[f"SKILLS/guided-learning/interactives/{asset_filename}"]
     onboarding_example = files["SKILLS/learner-profile/references/onboarding-example.md"].decode("utf-8").rstrip("\n")
     installation_prompt = files["SKILLS/guided-learning/references/installation-prompt.md"].decode("utf-8").rstrip("\n")
@@ -366,8 +330,8 @@ If you cloned this as a public template, first run
 `python3 scripts/create_vault.py ../my-learning` and use that new folder for
 your learning. Keep the template checkout separate from personal study records.
 
-Python 3.9 or newer is required for the helpers and setup script. Interactive
-HTML builds also use Bash; on Windows use WSL or Git Bash for those builds.
+Python 3.9 or newer is required for setup, helpers, and interactive HTML builds.
+Run `build.py` with the Python recorded in `runtime.local.toml` on any platform.
 No Python packages are required. Skills are registered for both agents using
 small entry files that load each canonical skill; symlinks are unnecessary.
 See [installation and dependency recovery](INSTALLATION.md) if Git or Python is

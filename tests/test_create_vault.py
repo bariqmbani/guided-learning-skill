@@ -4,6 +4,7 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -69,7 +70,7 @@ class CreateVaultTests(unittest.TestCase):
         self.assertEqual(registry, {"schema_version": 1, "active_topic": None, "topics": []})
         self.assertEqual({p.name for p in (destination / "topics").iterdir()}, {"README.md", "registry.json"})
         self.assertEqual({p.name for p in (destination / "concept-sessions").iterdir()}, {"README.md"})
-        self.assertEqual({p.name for p in (destination / "learning/interactives").iterdir()}, {"build.sh", "interactive.css", "example-interactive.html"})
+        self.assertEqual({p.name for p in (destination / "learning/interactives").iterdir()}, {"build.py", "interactive.css", "example-interactive.html"})
         self.assertEqual(
             (destination / "learning/interactives/example-interactive.html").read_bytes(),
             (ROOT / "SKILLS/guided-learning/interactives/example-interactive.html").read_bytes(),
@@ -128,6 +129,14 @@ class CreateVaultTests(unittest.TestCase):
         vault = self.base / "learning"
         setup.create_vault(ROOT, vault, "Learning")
         first = self.helper(vault, "create", "japanese", "--title", "日本語")
+        self.assertTrue(first["paths"]["build_script"].endswith("/build.py"))
+        builder = vault / first["paths"]["build_script"]
+        lesson = builder.parent / "lesson.html"
+        lesson.write_text('<link rel="stylesheet" href="interactive.css">', encoding="utf-8")
+        built = subprocess.run([sys.executable, str(builder), lesson.name],
+                               cwd=self.base, text=True, capture_output=True)
+        self.assertEqual(built.returncode, 0, built.stderr)
+        self.assertIn("interactive.css:start", lesson.read_text(encoding="utf-8"))
         self.assertEqual(self.helper(vault, "resolve", "日本語")["id"], "japanese")
         roadmap = vault / first["paths"]["roadmap"]
         roadmap.write_text("# Japanese\n\n- [x] [[topics/japanese/concepts/japanese--word-order|Word order]]\n")
@@ -147,7 +156,7 @@ class CreateVaultTests(unittest.TestCase):
     def test_skill_versions_and_release_history_survive_installation(self):
         vault = self.base / "versioned"
         setup.create_vault(ROOT, vault, "Versioned")
-        versions = {"guided-learning": "3.6.2", "concept-learning": "1.0.1", "learner-profile": "1.0.0"}
+        versions = {"guided-learning": "3.6.3", "concept-learning": "1.0.1", "learner-profile": "1.0.1"}
         for name, version in versions.items():
             source = ROOT / "SKILLS" / name
             installed = vault / "SKILLS" / name
@@ -160,6 +169,54 @@ class CreateVaultTests(unittest.TestCase):
                 self.assertEqual(entry.read_text().split("---", 2)[1], header)
         upstream = json.loads((vault / "SKILLS/guided-learning/UPSTREAM.json").read_text())
         self.assertEqual(upstream["local_version"], versions["guided-learning"])
+
+    def test_instruction_references_survive_install_zip_and_reexport(self):
+        # Follow local Markdown links from canonical entry points, rather than
+        # duplicating the installer's asset list: a new reference omitted from
+        # ASSETS must fail this test, including references reached transitively.
+        pending = [ROOT / "SKILLS" / name / "SKILL.md" for name in setup.SKILL_NAMES]
+        references = set()
+        while pending:
+            path = pending.pop().resolve()
+            relative = path.relative_to(ROOT)
+            if relative in references:
+                continue
+            self.assertTrue(path.is_file(), str(relative))
+            references.add(relative)
+            content = re.sub(r"```.*?```", "", path.read_text(), flags=re.DOTALL)
+            for target in re.findall(r"\]\(([^)\n]+)\)", content):
+                if "://" in target or target.startswith("#"):
+                    continue
+                target = target.split("#", 1)[0]
+                if target:
+                    pending.append(path.parent / target)
+
+        vault = self.base / "reference vault"
+        archive = self.base / "references.zip"
+        setup.create_vault(ROOT, vault, "References", archive)
+        extracted = self.base / "extracted"
+        with zipfile.ZipFile(archive) as bundle:
+            bundle.extractall(extracted)
+        portable = extracted / vault.name
+        reexported = self.base / "reexported"
+        setup.create_vault(portable, reexported, "Reexported")
+
+        for installed in (vault, portable, reexported):
+            with self.subTest(vault=installed.name):
+                for relative in references:
+                    self.assertEqual(
+                        (installed / relative).read_bytes(),
+                        (ROOT / relative).read_bytes(),
+                        str(relative),
+                    )
+                registry = json.loads((installed / "topics/registry.json").read_text())
+                self.assertEqual(registry["topics"], [])
+                self.assertIsNone(registry["active_topic"])
+                self.assertEqual(
+                    {p.name for p in (installed / "concept-sessions").iterdir()},
+                    {"README.md"},
+                )
+                self.assertFalse(json.loads((installed / "learner-profile.json").read_text())["configured"])
 
     def test_refuses_existing_destinations_and_archives(self):
         destination = self.base / "existing"
@@ -208,11 +265,10 @@ class CreateVaultTests(unittest.TestCase):
         for path in destination.rglob("*"):
             if path.suffix in {".py", ".sh"}:
                 self.assertNotIn(b"\r\n", path.read_bytes(), str(path))
-        if shutil.which("bash"):
-            builder = destination / "learning/interactives/build.sh"
-            result = subprocess.run(["bash", str(builder), "example-interactive.html"],
-                                    cwd=self.base, capture_output=True, text=True)
-            self.assertEqual(result.returncode, 0, result.stderr)
+        builder = destination / "learning/interactives/build.py"
+        result = subprocess.run([sys.executable, str(builder), "example-interactive.html"],
+                                cwd=self.base, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(self.session_helper(destination, "list"), {"sessions": []})
         self.assertEqual(self.helper(destination, "list")["topics"], [])
 
@@ -234,6 +290,35 @@ class CreateVaultTests(unittest.TestCase):
         self.assertFalse(archive.exists())
         for path, contents in before.items():
             self.assertEqual(path.read_bytes(), contents)
+
+    def test_legacy_migration_preserves_shell_builder_and_python_companion(self):
+        topic_spec = importlib.util.spec_from_file_location(
+            "migration_topics", ROOT / "SKILLS/guided-learning/scripts/topics.py")
+        topics = importlib.util.module_from_spec(topic_spec)
+        topic_spec.loader.exec_module(topics)
+        for companion in (False, True):
+            with self.subTest(companion=companion):
+                vault = self.base / f"legacy-{companion}"
+                setup.create_vault(ROOT, vault, "Legacy")
+                paths = {**topics.SUFFIXES, "build_script": "learning/interactives/build.sh"}
+                legacy = {"id": "legacy", "title": "Legacy", "aliases": [],
+                          "root": ".", "layout": "legacy", "paths": paths}
+                (vault / "topics/registry.json").write_text(json.dumps({
+                    "schema_version": 1, "active_topic": "legacy", "topics": [legacy],
+                }))
+                shared = vault / "learning/interactives"
+                (shared / "build.sh").write_text("#!/bin/sh\n# Original standalone builder\n")
+                if not companion:
+                    (shared / "build.py").unlink()
+                original = (shared / "build.sh").read_bytes()
+                (shared / "lesson.html").write_text("Existing lesson")
+                migrated = self.helper(vault, "migrate", "legacy")
+                builder = vault / migrated["paths"]["build_script"]
+                self.assertEqual(builder.name, "build.sh")
+                self.assertEqual(builder.read_bytes(), original)
+                self.assertEqual((builder.parent / "build.py").exists(), companion)
+                self.assertEqual((builder.parent / "lesson.html").read_text(), "Existing lesson")
+                self.assertTrue((shared / "build.sh").exists())
 
     @unittest.skipUnless(shutil.which("bash"), "Bash entry point requires Bash")
     def test_shell_installer_handles_spaces_and_initializes_skills(self):

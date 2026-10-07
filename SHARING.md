@@ -25,7 +25,7 @@ In PowerShell, run:
 Both wrappers detect a working Python 3.9+ interpreter. They do not install
 dependencies automatically. Or run
 `python3 scripts/create_vault.py ../friend-learning` directly. On Windows, use `py -3 scripts/create_vault.py C:/path/to/new-vault`. Interactive HTML builds
-use Bash; Windows users can use WSL or Git Bash for those optional builds.
+use the same Python interpreter on all platforms.
 Neither Git nor Bash is required for vault generation or Python learning helpers.
 
 The destination must be a new directory outside the source setup directory and

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1] — 2026-10-07
+
+### Changed — Instruction organization
+
+- Separate profile fields, validation, and saving into an on-demand schema reference so targeted updates do not load the onboarding questionnaire.
+- Preserve all nine optional onboarding invitations, the existing profile schema, saved preferences, and compatibility helper entry points.
+
 ## [1.0.0] — 2026-10-07
 
 ### Added

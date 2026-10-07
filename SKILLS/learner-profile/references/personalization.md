@@ -9,8 +9,8 @@ for permission to do what the learner already requested.
 ## Read the relevant preferences
 
 Read the vault profile with `python3 SKILLS/learner-profile/scripts/profile.py show`.
-In the course workflow, resolve and pin the selected topic's ID using
-[topic-routing.md](../../guided-learning/references/topic-routing.md) and read its
+In the course workflow, reuse the pinned topic; if none is resolved yet, resolve
+and pin its ID using [topic-routing.md](../../guided-learning/references/topic-routing.md). Read its
 registered `{roadmap}`, including any **Teaching preferences** section.
 This section may be absent in an existing course; that means no topic overrides.
 Do not create a topic just to record a preference. During a focused concept session, read its `note.md` and current request instead; never resolve an unrelated active course to obtain preferences.
@@ -78,10 +78,9 @@ the proposed preferences govern future lessons only if approved.
 to an existing field when it fits: `language`, `session_minutes`,
 `explanation_style`, or `preferred_extras`, for example. Merge free-text teaching
 rules into `preferences`, keeping unrelated rules and all unanswered fields.
-Read [onboarding.md](onboarding.md) for valid values; never add ad hoc schema fields.
-Save with `profile.py save --input <temporary-json>` using a structured file write,
-verify the result, and remove the temporary input. This updates only
-`learner-profile.json` and `Learner Profile.md`.
+Read [profile schema and saving](profile-schema.md) for valid values and the
+read–merge–save–verify procedure; do not start onboarding for this update.
+This updates only `learner-profile.json` and `Learner Profile.md`.
 
 **Topic scope:** Add or edit a small `## Teaching preferences` section in the
 selected topic's registered `{roadmap}`. Store concise approved instructions as

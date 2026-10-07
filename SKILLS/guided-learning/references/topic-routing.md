@@ -37,7 +37,7 @@ topics/<topic-id>/
     protocols/
     interactives/
       interactive.css
-      build.sh
+      build.py
   concepts/
   literature/papers/
   research/glossary.md
@@ -63,7 +63,7 @@ to propose and get approval for new ongoing preferences. Use the pinned roadmap
 path for topic preferences, including legacy courses. Vault preferences belong in
 the learner profile; learner feedback must not rewrite the shared skill source.
 
-After creating interactive HTML, run `bash "<resolved build_script>"` from the vault root. The builder and CSS live alongside that topic's HTML. Do not run the legacy builder for another topic; skip the build when the selected interactive directory contains no HTML.
+After creating interactive HTML, run the resolved `build_script` with the Python in `runtime.local.toml` from the vault root. See [interactives](interactives.md) for shell syntax and older `build.sh` registrations. The builder and CSS live alongside that topic's HTML. Do not run the legacy builder for another topic; skip the build when the selected interactive directory contains no HTML.
 
 ## Existing and migrated courses
 

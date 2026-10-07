@@ -1,5 +1,18 @@
 # Guided Learning — Changelog
 
+## [3.6.3] — 2026-10-07
+
+### Changed — Instruction organization
+
+- Keep the complete teaching flow and quality gates in the core skill; load bootstrap, source teaching, comprehension questions, interactive construction, session records, and five-session review details when needed.
+- Deduplicate shared questions while retaining domain variants, pass eligibility, and existing check-format identifiers.
+- Shorten generated vault instructions and package every new reference for portable installations. Teaching, recall, bootstrap, and learning-record contracts remain unchanged.
+
+### Changed — Portable interactive builds
+
+- Replace the Bash CSS builder with `build.py`, using the vault's saved Python interpreter on Windows, macOS, and Linux. Update installer assets, topic scaffolding, and the modular interactive instructions together.
+- Escape filenames that the terminal cannot represent so progress messages do not abort a build. Keep CSS and HTML content in UTF-8; test Unicode filenames with strict CP1252 and ASCII output encodings.
+
 ## [3.6.2] — 2026-10-07
 
 ### Fixed — Portable vault installation

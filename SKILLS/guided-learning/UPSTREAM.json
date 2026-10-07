@@ -11,8 +11,10 @@
     "Agent installation prompt and Russian-language onboarding example; public setup distributed from main.",
     "Shared learner-profile skill with backward-compatible guided-learning onboarding and profile helper aliases.",
     "Personalized concept-learning sessions with automatic notes, mentor feedback, and practice outside course topics.",
-    "Three native Codex and Claude Code skill entries; fresh exports omit all concept-session learner data."
+    "Three native Codex and Claude Code skill entries; fresh exports omit all concept-session learner data.",
+    "Modular instruction references, deduplicated question variants, and separate shared profile schema guidance.",
+    "Portable Python interactive CSS builder with encoding-safe filename diagnostics."
   ],
-  "local_version": "3.6.2",
+  "local_version": "3.6.3",
   "fork_repository": "https://github.com/bariqmbani/guided-learning-skill"
 }
