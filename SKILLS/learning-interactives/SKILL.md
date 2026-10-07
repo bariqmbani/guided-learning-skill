@@ -1,11 +1,12 @@
 ---
 name: learning-interactives
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 description: >
   Build or adapt an offline interactive learning activity with shared accessible
   components and tested lesson templates. Use when a learner or teaching skill
-  requests an explorable model, process trace, scenario, or practice activity.
+  requests an animated explanation, explorable model, process trace, scenario,
+  or practice activity.
   Owns artifact construction and verification; the teaching skill owns learner
   assessment, course progress, and session records.
 ---
@@ -33,7 +34,13 @@ each copy has self-contained relative references. No network is needed to build.
 
 ## Authoring workflow
 
-1. Pick the simplest pattern that exposes the model. If undecided, read
+1. Pick the simplest pattern that exposes the model. **For requested animation,
+   or when movement explains the relationship, read [explanatory motion](references/motion.md)
+   and use its matching scene template.** Animate the operation itself; changing
+   captions or highlighting successive states alone is not an animation.
+   Map each operation to visible evidence and verify its intermediate values,
+   not just the final answer.
+   If undecided, read
    [pattern selection](references/patterns.md). Load one selected template and
    only the relevant [component sections](COMPONENTS.md), not the entire runtime,
    gallery, or all references.

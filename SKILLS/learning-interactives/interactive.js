@@ -5,7 +5,7 @@
  * Modules, in order:
  *   1. utilities      clamp, round, fmt, seededRandom, announce, theme, motion
  *   2. controls       bindRange, bindChoice, bindCheckbox
- *   3. sequence       mountStepper
+ *   3. sequence       createScene, mountStepper
  *   4. questions      mountQuestion, mountQuiz, mountPrediction, mountHints,
  *                     mountSelfExplain, mountSortable, mountMatching
  *   5. math           math.tex, math.render, math.update, math.toText
@@ -38,7 +38,7 @@
     'theme.light': 'Light mode',
     'theme.switchDark': 'Switch to dark mode',
     'theme.switchLight': 'Switch to light mode',
-    'stepper.reducedMotion': 'Reduced motion is on. Use Previous and Next to explore each step.',
+    'stepper.reducedMotion': 'Reduced motion is on. Play is available, or use Back and Next to explore each step.',
     'stepper.pause': 'Pause',
     'stepper.replay': 'Replay',
     'stepper.play': 'Play',
@@ -452,11 +452,301 @@
 
   /* ======================================================== 3. sequence == */
 
+  /* Educational scenes have their own clock and explicit learner intent. They
+   * are independent of the small, pointer-only decorative motion helpers. */
+  function createScene(root, options = {}) {
+    if (!root || root.nodeType !== 1) throw new TypeError('createScene needs a root element.');
+    const token = global.getComputedStyle(root);
+    const durationToken = token.getPropertyValue('--motion-explain').trim();
+    const tokenDuration = parseFloat(durationToken) * (durationToken.endsWith('ms') ? 1 : 1000);
+    const duration = options.duration === undefined ? (Number.isFinite(tokenDuration) ? tokenDuration : 500) : options.duration;
+    const easing = options.easing || token.getPropertyValue('--ease-in-out').trim() || 'cubic-bezier(0.77, 0, 0.175, 1)';
+    function validDuration(value) {
+      if (!Number.isFinite(value) || value < 0) throw new RangeError('Scene duration must be a finite, nonnegative number.');
+      return value;
+    }
+    validDuration(duration);
+    const motionPolicy = options.motion === undefined ? true : options.motion;
+    if (typeof motionPolicy !== 'boolean' && motionPolicy !== 'system') {
+      throw new TypeError('Scene motion must be true, false, or system.');
+    }
+    const checkbox = root.querySelector('input[type="checkbox"][data-motion]');
+    const jobs = new Map(), values = new Map(), idleListeners = new Set();
+    let preference = null, paused = doc.hidden, destroyed = false, instant = false, rate = 1, frame = 0, renderKeys = null;
+    const enabled = () => !destroyed && (preference === null
+      ? (motionPolicy === 'system' ? !motion.reduced() : motionPolicy) : preference);
+    if (checkbox) checkbox.checked = enabled();
+    function idle() {
+      // A replacement or reset can create jobs in the same turn. Do not deliver
+      // an old completion to the new scene or to a destroyed player.
+      Promise.resolve().then(() => {
+        if (!destroyed && !jobs.size) idleListeners.forEach(handler => handler());
+      });
+    }
+    function remove(job, freeze = false) {
+      if (jobs.get(job.key) !== job) return;
+      if (freeze && job.animation) {
+        const computed = global.getComputedStyle(job.element);
+        const pose = {};
+        Object.keys(job.target).forEach(name => { pose[name] = computed[name]; });
+        Object.assign(job.element.style, pose);
+      }
+      jobs.delete(job.key);
+      if (job.animation) {
+        job.animation.onfinish = null;
+        job.animation.cancel();
+      }
+      if (job.cleanup) job.cleanup();
+      if (!jobs.size) idle();
+    }
+    function complete(job) {
+      if (jobs.get(job.key) !== job) return;
+      if (job.update) {
+        job.value = job.to;
+        values.set(job.key, job.to);
+        job.update(job.to);
+      }
+      remove(job);
+    }
+    function tick(now) {
+      frame = 0;
+      if (paused || destroyed) return;
+      [...jobs.values()].forEach(job => {
+        if (!job.update || jobs.get(job.key) !== job) return;
+        job.elapsed = Math.min(job.duration, job.elapsed + Math.max(0, now - job.last) * rate);
+        job.last = now;
+        job.value = lerp(job.from, job.to, job.elapsed / job.duration);
+        values.set(job.key, job.value);
+        job.update(job.value);
+        if (job.elapsed >= job.duration) remove(job);
+      });
+      requestTick();
+    }
+    function requestTick() {
+      if (!frame && !paused && !destroyed && [...jobs.values()].some(job => job.update)) {
+        frame = global.requestAnimationFrame(tick);
+      }
+    }
+    function flushTweens() {
+      if (frame) global.cancelAnimationFrame(frame);
+      frame = 0;
+      if (!paused) tick(global.performance.now());
+      if (frame) global.cancelAnimationFrame(frame);
+      frame = 0;
+    }
+    function targetElement(element) {
+      if (!element || element.nodeType !== 1 || !root.contains(element)) {
+        throw new TypeError('A scene target must be an element inside its root.');
+      }
+    }
+    function samePose(name, before, after) {
+      if (String(before) === String(after)) return true;
+      if (name !== 'transform') return false;
+      const Matrix = global.DOMMatrixReadOnly || global.DOMMatrix;
+      if (!Matrix) return false;
+      try {
+        const from = new Matrix(before === 'none' ? undefined : before).toFloat64Array();
+        const to = new Matrix(after === 'none' ? undefined : after).toFloat64Array();
+        return from.every((value, index) => value === to[index]);
+      } catch (_) { return false; }
+    }
+    function animateElement(element, target, settings = {}, overrides = {}) {
+      targetElement(element);
+      const names = Object.keys(target || {});
+      if (!names.length || names.some(name => !['transform', 'opacity', 'clipPath'].includes(name))) {
+        throw new TypeError('scene.to supports only transform, opacity, and clipPath.');
+      }
+      const milliseconds = validDuration(settings.duration === undefined ? duration : settings.duration);
+      if (destroyed) return null;
+      if (renderKeys) renderKeys.add(element);
+      const previous = jobs.get(element);
+      if (previous) remove(previous, true);
+      const computed = global.getComputedStyle(element), start = {};
+      names.forEach(name => { start[name] = computed[name]; });
+      Object.assign(start, overrides.start);
+      Object.assign(element.style, target);
+      if (instant || settings.instant || !enabled() || milliseconds === 0 || typeof element.animate !== 'function') return null;
+      const end = Object.assign({}, target, overrides.end);
+      // Compare rendered endpoints, not CSS spellings: a percentage translation
+      // and its computed matrix can describe exactly the same geometry. Keep the
+      // authored endpoint inline so relative units still respond to later resize.
+      const endpoint = global.getComputedStyle(element), normalizedEnd = {};
+      names.forEach(name => { normalizedEnd[name] = endpoint[name]; });
+      Object.assign(normalizedEnd, overrides.end);
+      if (names.every(name => samePose(name, start[name], normalizedEnd[name]))) return null;
+      const animation = element.animate([start, end], { duration: milliseconds, easing: settings.easing || easing });
+      animation.playbackRate = rate;
+      if (paused) animation.pause();
+      const job = { key: element, element, target, animation, start, end };
+      jobs.set(element, job);
+      animation.onfinish = () => complete(job);
+      return job;
+    }
+    const api = {
+      enabled,
+      get active() { return jobs.size; },
+      to(element, target, settings) {
+        animateElement(element, target, settings);
+        return api;
+      },
+      transfer(marker, from, to, settings = {}) {
+        [marker, from, to].forEach(targetElement);
+        const container = marker.closest('[data-scene]');
+        if (!container || marker.parentElement !== container || !container.contains(from) || !container.contains(to)) {
+          throw new TypeError('A transfer marker must be a direct child of [data-scene], containing both endpoints.');
+        }
+        if (destroyed) return api;
+        // Coordinates belong to this scene, not the page or viewport. Axis-aligned
+        // CSS scaling is accounted for; SVG and rotated coordinate systems use tween.
+        function centre(element) {
+          const bounds = container.getBoundingClientRect(), rect = element.getBoundingClientRect();
+          const sx = bounds.width ? container.offsetWidth / bounds.width : 1;
+          const sy = bounds.height ? container.offsetHeight / bounds.height : 1;
+          const x = (rect.left + rect.width / 2 - bounds.left) * sx - container.clientLeft + container.scrollLeft;
+          const y = (rect.top + rect.height / 2 - bounds.top) * sy - container.clientTop + container.scrollTop;
+          return 'translate(' + x + 'px, ' + y + 'px) translate(-50%, -50%)';
+        }
+        const interrupted = jobs.has(marker);
+        Object.assign(marker.style, { position: 'absolute', left: '0px', top: '0px', pointerEvents: 'none' });
+        marker.setAttribute('aria-hidden', 'true');
+        if (!interrupted) marker.style.transform = centre(from);
+        const job = animateElement(marker, { transform: centre(to), opacity: '0' }, settings, {
+          start: { opacity: '1' }, end: { opacity: '1' }
+        });
+        if (!job) return api;
+        let previousSize = [container.clientWidth, container.clientHeight, from.offsetWidth, from.offsetHeight, to.offsetWidth, to.offsetHeight].join(',');
+        const resize = () => {
+          const size = [container.clientWidth, container.clientHeight, from.offsetWidth, from.offsetHeight, to.offsetWidth, to.offsetHeight].join(',');
+          if (jobs.get(marker) !== job || size === previousSize) return;
+          previousSize = size;
+          if (!interrupted) job.start.transform = centre(from);
+          job.end.transform = centre(to);
+          marker.style.transform = job.end.transform;
+          // Updating keyframes preserves currentTime and playState. A text wrap
+          // may move an endpoint, but must never cancel the explanatory movement.
+          job.animation.effect.setKeyframes([job.start, job.end]);
+        };
+        if (typeof global.ResizeObserver === 'function') {
+          const observer = new global.ResizeObserver(resize);
+          [container, from, to].forEach(element => observer.observe(element));
+          job.cleanup = () => observer.disconnect();
+        } else {
+          global.addEventListener('resize', resize);
+          job.cleanup = () => global.removeEventListener('resize', resize);
+        }
+        return api;
+      },
+      tween(key, settings = {}) {
+        const { to, update } = settings;
+        if (key === undefined || typeof update !== 'function') throw new TypeError('scene.tween needs a stable key and update callback.');
+        requireFinite(to, 'A tween endpoint');
+        const milliseconds = validDuration(settings.duration === undefined ? duration : settings.duration);
+        if (destroyed) return api;
+        if (renderKeys) renderKeys.add(key);
+        flushTweens();
+        const previous = jobs.get(key);
+        const from = previous && previous.update ? previous.value
+          : settings.from === undefined ? (values.has(key) ? values.get(key) : 0) : settings.from;
+        requireFinite(from, 'A tween starting value');
+        if (previous) remove(previous, true);
+        if (instant || settings.instant || !enabled() || milliseconds === 0 || from === to) {
+          values.set(key, to);
+          update(to);
+          requestTick();
+          return api;
+        }
+        const job = { key, from, to, update, value: from, elapsed: 0, duration: milliseconds, last: global.performance.now() };
+        jobs.set(key, job);
+        values.set(key, from);
+        update(from);
+        requestTick();
+        return api;
+      },
+      // A model render can make many scene calls. This boundary makes all of
+      // them immediate for initial state, reset, replay and continuous seeking.
+      render(callback, { instant: settle = false } = {}) {
+        if (typeof callback !== 'function') throw new TypeError('scene.render needs a callback.');
+        if (destroyed) return api;
+        const before = instant, previousKeys = renderKeys, previousJobs = [...jobs.values()];
+        renderKeys = new Set();
+        instant = instant || settle;
+        try {
+          if (settle) api.finish();
+          callback();
+          previousJobs.forEach(job => { if (!renderKeys.has(job.key)) remove(job); });
+        } finally {
+          if (previousKeys) renderKeys.forEach(key => previousKeys.add(key));
+          renderKeys = previousKeys;
+          instant = before;
+        }
+        return api;
+      },
+      pause() {
+        if (destroyed || paused) return api;
+        flushTweens();
+        paused = true;
+        jobs.forEach(job => { if (job.animation) job.animation.pause(); });
+        return api;
+      },
+      resume() {
+        if (destroyed || !paused || doc.hidden) return api;
+        paused = false;
+        const now = global.performance.now();
+        jobs.forEach(job => { if (job.animation) job.animation.play(); else job.last = now; });
+        requestTick();
+        return api;
+      },
+      finish() {
+        if (frame) global.cancelAnimationFrame(frame);
+        frame = 0;
+        [...jobs.values()].forEach(complete);
+        return api;
+      },
+      setRate(value) {
+        if (!Number.isFinite(value) || value <= 0) throw new RangeError('Scene playback rate must be positive and finite.');
+        if (destroyed) return api;
+        flushTweens();
+        rate = value;
+        jobs.forEach(job => { if (job.animation) job.animation.updatePlaybackRate(value); });
+        requestTick();
+        return api;
+      },
+      onIdle(handler) {
+        if (typeof handler !== 'function') throw new TypeError('scene.onIdle needs a callback.');
+        if (!destroyed) idleListeners.add(handler);
+        return () => idleListeners.delete(handler);
+      },
+      destroy() {
+        if (destroyed) return;
+        api.finish();
+        destroyed = true;
+        values.clear();
+        idleListeners.clear();
+        stopWatchingMotion();
+        doc.removeEventListener('visibilitychange', visibility);
+        if (checkbox) checkbox.removeEventListener('change', chooseMotion);
+      }
+    };
+    function chooseMotion() {
+      preference = checkbox.checked;
+      if (!enabled()) api.finish();
+    }
+    function visibility() { if (doc.hidden) api.pause(); }
+    const stopWatchingMotion = motion.onChange(matches => {
+      if (matches) api.pause();
+      if (preference === null && checkbox) checkbox.checked = enabled();
+      if (!enabled()) api.finish();
+    });
+    if (checkbox) checkbox.addEventListener('change', chooseMotion);
+    doc.addEventListener('visibilitychange', visibility);
+    return api;
+  }
+
   /* Finite, learner-paced playback over a known list of states.
    * Required controls: data-back, data-next, data-play, data-reset, data-position.
    * Optional: data-speed (select), data-progress (bar), data-scrub (range),
    * data-step-list (ordered list), data-step-summary (announced explanation). */
-  function mountStepper(root, { count, render, interval = 900, labels } = {}) {
+  function mountStepper(root, { count, render, interval = 900, labels, scene } = {}) {
     if (!root) throw new TypeError('mountStepper needs a root element.');
     if (!Number.isInteger(count) || count < 1 || typeof render !== 'function') {
       throw new TypeError('A stepper needs at least one step and a render function.');
@@ -479,20 +769,31 @@
     motionNote.className = 'explain motion-note';
     motionNote.textContent = translate('stepper.reducedMotion');
     root.append(motionNote);
-    let index = 0, playing = false, timer, destroyed = false;
+    if (scene && (typeof scene.render !== 'function' || typeof scene.onIdle !== 'function')) {
+      throw new TypeError('Stepper scene must come from LearningUI.createScene.');
+    }
+    const readRate = () => speed && Number.isFinite(Number(speed.value)) && Number(speed.value) > 0 ? Number(speed.value) : 1;
+    let index = 0, playing = false, timer = null, destroyed = false;
+    let remaining = interval, startedAt = 0, rate = readRate(), waitingForScene = false, finalPending = false, manualRunning = false, manualPaused = false;
     const listeners = [];
     function listen(target, type, handler) {
       target.addEventListener(type, handler);
       listeners.push(() => target.removeEventListener(type, handler));
     }
     function controls() {
+      const focused = doc.activeElement;
       back.disabled = index === 0;
       next.disabled = index === count - 1;
-      play.disabled = motion.reduced() || count === 1;
-      play.textContent = translate(playing ? 'stepper.pause' : index === count - 1 ? 'stepper.replay' : 'stepper.play');
-      play.setAttribute('aria-pressed', String(playing));
+      play.disabled = count === 1;
+      // Disabling the focused boundary button otherwise moves focus to BODY,
+      // stranding subsequent arrow-key steps outside this player's listener.
+      if (inputMethod === 'keyboard' && (focused === back || focused === next) && focused.disabled && !play.disabled) {
+        play.focus({ preventScroll: true });
+      }
+      play.textContent = translate(playing || manualRunning ? 'stepper.pause' : index === count - 1 && !finalPending && (!scene || !scene.active) ? 'stepper.replay' : 'stepper.play');
+      play.setAttribute('aria-pressed', String(playing || manualRunning));
       position.textContent = translate('stepper.position', { current: index + 1, total: count });
-      motionNote.hidden = !motion.reduced();
+      motionNote.hidden = Boolean(scene) || !motion.reduced() || count === 1;
       if (progress) progress.style.width = (count === 1 ? 100 : (index / (count - 1)) * 100) + '%';
       if (scrub && Number(scrub.value) !== index) scrub.value = String(index);
       if (scrub) scrub.setAttribute('aria-valuetext', labels && labels[index] ? labels[index] : position.textContent);
@@ -505,50 +806,146 @@
         });
       }
     }
+    function consumeTime() {
+      if (timer !== null) {
+        remaining = Math.max(0, remaining - (global.performance.now() - startedAt) * rate);
+        clearTimeout(timer);
+        timer = null;
+      }
+    }
     function pause() {
-      clearTimeout(timer);
+      if (destroyed) return;
+      consumeTime();
       playing = false;
+      manualPaused = manualRunning || manualPaused;
+      manualRunning = false;
+      if (scene) scene.pause();
       controls();
     }
-    function draw() {
-      render(index);
+    function draw(reason = 'step', instant = false, fromIndex = index) {
+      const context = { fromIndex, direction: Math.sign(index - fromIndex), reason, instant };
+      if (scene) scene.render(() => render(index, context), { instant });
+      else render(index, context);
       controls();
     }
-    function go(value, { silent = false } = {}) {
+    function go(value, { silent = false, reason = 'seek', instant = true } = {}) {
       if (destroyed || !Number.isFinite(value)) return;
       pause();
+      manualPaused = false;
+      waitingForScene = false;
+      finalPending = false;
+      remaining = interval;
+      // Commit the outgoing operation before selecting a new model state. Its
+      // completion may atomically update counters or membership used by Next.
+      if (scene) scene.finish();
+      const fromIndex = index;
       index = clamp(Math.trunc(value), 0, count - 1);
-      draw();
+      // An arrow at a boundary inspects the settled checkpoint; it must not
+      // replay a domain operation when there is no change of state.
+      instant = instant || index === fromIndex;
+      if (scene) scene.resume();
+      draw(reason, instant, fromIndex);
+      manualRunning = Boolean(scene && scene.active && !instant);
+      controls();
       if (!silent) {
         const summary = find('step-summary');
         announce(translate('stepper.announce', { position: position.textContent, summary: summary ? summary.textContent : '' }));
       }
     }
-    function schedule() {
-      const rate = speed ? Number(speed.value) : 1;
-      const delay = Math.max(200, interval / (Number.isFinite(rate) && rate > 0 ? rate : 1));
-      timer = setTimeout(() => {
-        if (!playing || destroyed) return;
-        index += 1;
-        if (index >= count - 1) pause();
-        draw();
-        if (playing) schedule();
-        else announce(translate('stepper.finished', { position: position.textContent }));
-      }, delay);
-    }
-    listen(back, 'click', () => go(index - 1));
-    listen(next, 'click', () => go(index + 1));
-    listen(resetButton, 'click', () => go(0));
-    listen(play, 'click', () => {
-      if (playing) { pause(); announce(position.textContent); return; }
-      if (motion.reduced() || destroyed || doc.hidden || count === 1) return;
-      if (index === count - 1) { index = 0; draw(); }
-      playing = true;
+    function finished() {
+      consumeTime();
+      playing = false;
+      manualRunning = false;
+      manualPaused = false;
+      finalPending = false;
+      waitingForScene = false;
       controls();
-      schedule();
+      announce(translate('stepper.finished', { position: position.textContent }));
+    }
+    function advance() {
+      if (!playing || destroyed) return;
+      waitingForScene = false;
+      if (scene) scene.finish();
+      const fromIndex = index;
+      index += 1;
+      remaining = interval;
+      // Keep playback running while the last visual completes. Pausing before
+      // rendering the final state would freeze it halfway through its movement.
+      finalPending = index === count - 1;
+      draw('play', false, fromIndex);
+      if (finalPending) {
+        if (!scene || !scene.active) finished();
+      } else schedule();
+    }
+    function schedule() {
+      if (!playing || destroyed || finalPending) return;
+      if (remaining <= 0) {
+        if (scene && scene.active) waitingForScene = true;
+        else advance();
+        return;
+      }
+      startedAt = global.performance.now();
+      timer = setTimeout(() => {
+        timer = null;
+        remaining = 0;
+        if (!playing || destroyed) return;
+        if (scene && scene.active) waitingForScene = true;
+        else advance();
+      }, remaining / rate);
+    }
+    function start() {
+      if (destroyed || doc.hidden || count === 1 || playing) return;
+      if (manualPaused && scene && scene.active) {
+        manualPaused = false;
+        manualRunning = true;
+        scene.resume();
+        controls();
+        return;
+      }
+      if (index === count - 1 && scene && scene.active) finalPending = true;
+      if (index === count - 1 && !finalPending) {
+        const fromIndex = index;
+        index = 0;
+        remaining = interval;
+        waitingForScene = false;
+        draw('replay', true, fromIndex);
+      }
+      playing = true;
+      manualRunning = false;
+      if (scene) scene.resume();
+      controls();
+      if (finalPending) {
+        if (!scene || !scene.active) finished();
+      } else schedule();
+    }
+    function keepSceneVisible() {
+      if (!scene) return;
+      const drawing = root.querySelector('.motion-scene, [data-scene]');
+      if (!drawing) return;
+      const row = play.closest('.btn-row') || play;
+      const diagram = drawing.getBoundingClientRect(), controlsBox = row.getBoundingClientRect();
+      const top = Math.min(diagram.top, controlsBox.top), bottom = Math.max(diagram.bottom, controlsBox.bottom);
+      const margin = 12, height = global.innerHeight;
+      // Only a scene and its playback row that fit together can be kept in view.
+      // Do not steal focus or continuously scroll while a learner watches a run.
+      if (bottom - top > height - margin * 2) return;
+      const delta = top < margin ? top - margin : bottom > height - margin ? bottom - height + margin : 0;
+      if (delta) global.scrollBy({ top: delta, behavior: 'instant' });
+    }
+    listen(back, 'click', () => { go(index - 1, { reason: 'back', instant: false }); keepSceneVisible(); });
+    listen(next, 'click', () => { go(index + 1, { reason: 'next', instant: false }); keepSceneVisible(); });
+    listen(resetButton, 'click', () => go(0, { reason: 'reset' }));
+    listen(play, 'click', () => {
+      if (playing || manualRunning) { pause(); announce(position.textContent); }
+      else { start(); keepSceneVisible(); }
     });
-    if (speed) listen(speed, 'change', () => { if (playing) { clearTimeout(timer); schedule(); } });
-    if (scrub) listen(scrub, 'input', () => go(Number(scrub.value)));
+    if (speed) listen(speed, 'change', () => {
+      consumeTime();
+      rate = readRate();
+      if (scene) scene.setRate(rate);
+      if (playing) schedule();
+    });
+    if (scrub) listen(scrub, 'input', () => go(Number(scrub.value), { reason: 'scrub' }));
     /* Arrow keys step the trace, except inside a field that uses them itself. */
     listen(root, 'keydown', event => {
       const tag = event.target.tagName;
@@ -556,21 +953,35 @@
       const moves = { ArrowRight: index + 1, ArrowLeft: index - 1, Home: 0, End: count - 1 };
       if (!(event.key in moves)) return;
       event.preventDefault();
-      go(moves[event.key]);
+      const instant = event.key === 'Home' || event.key === 'End';
+      const reason = event.key === 'ArrowLeft' ? 'back' : instant ? 'seek' : 'step';
+      go(moves[event.key], { reason, instant });
     });
     listen(doc, 'visibilitychange', () => { if (doc.hidden) pause(); });
     const stopWatchingMotion = motion.onChange(matches => { if (matches) pause(); controls(); });
     listeners.push(stopWatchingMotion);
-    draw();
+    if (scene) {
+      scene.setRate(rate);
+      listeners.push(scene.onIdle(() => {
+        if (destroyed) return;
+        if (finalPending) finished();
+        else if (playing && waitingForScene) advance();
+        else { manualRunning = false; manualPaused = false; controls(); }
+      }));
+    }
+    draw('init', true);
     return {
       go,
       get: () => index,
-      reset: () => go(0),
+      reset: () => go(0, { reason: 'reset' }),
+      play: start,
       pause,
-      destroy() {
+      destroy({ preserveScene = false } = {}) {
+        if (destroyed) return;
         pause();
         destroyed = true;
         listeners.forEach(remove => remove());
+        if (scene) { if (preserveScene) scene.finish(); else scene.destroy(); }
         motionNote.remove();
       }
     };
@@ -2234,7 +2645,7 @@
     /* controls */
     bindRange, bindChoice, bindCheckbox,
     /* sequence and questions */
-    mountStepper, mountQuestion, mountQuiz, mountPrediction, mountHints,
+    createScene, mountStepper, mountQuestion, mountQuiz, mountPrediction, mountHints,
     mountSelfExplain, mountSortable, mountMatching,
     /* notation and drawing */
     math, svg,

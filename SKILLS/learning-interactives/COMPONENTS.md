@@ -174,19 +174,22 @@ clickable visual a `<label for="id">` so the control and its text share one targ
 
 ### `mountStepper(root, options)`
 
-A finite, learner-paced walk through known states.
+A finite, learner-paced walk through known states. `mountStepper` schedules
+states and coordinates an optional `createScene` controller. The author supplies
+the model and the geometry to animate in `render`. Existing text-only steppers
+need no scene and remain compatible.
 
 ```html
 <section id="trace" class="workspace" aria-labelledby="trace-title">
   <div class="controls stack">
     <h2 id="trace-title">Walk the trace</h2>
     <div class="btn-row">
-      <button class="btn btn-secondary" type="button" data-back>Back</button>
-      <button class="btn" type="button" data-next>Next step</button>
-    </div>
-    <div class="btn-row">
       <button class="btn btn-secondary" type="button" data-play>Play</button>
       <button class="btn btn-secondary" type="button" data-reset>Reset trace</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" type="button" data-back>Back</button>
+      <button class="btn" type="button" data-next>Next step</button>
     </div>
     <label for="speed">Playback speed</label>
     <select id="speed" data-speed>
@@ -221,12 +224,12 @@ const trace = LearningUI.mountStepper($('trace'), {
     $('step-explanation').textContent = steps[index].explanation;
   }
 });
-trace.go(2); trace.get(); trace.pause(); trace.reset(); trace.destroy();
+trace.go(2); trace.get(); trace.play(); trace.pause(); trace.reset(); trace.destroy();
 ```
 
 | Attribute | Required | Purpose |
 | --- | --- | --- |
-| `data-back`, `data-next`, `data-play`, `data-reset` | yes | Buttons |
+| `data-play`, `data-reset`, `data-back`, `data-next` | yes | Buttons, in that order |
 | `data-position` | yes | "Step 3 of 7" |
 | `data-speed` | no | Playback multiplier `<select>` |
 | `data-scrub` | no | Range input that jumps to a step |
@@ -236,10 +239,153 @@ trace.go(2); trace.get(); trace.pause(); trace.reset(); trace.destroy();
 | `data-step-summary` | no | Text announced after a manual step |
 
 Playback never starts on load, pauses in a hidden tab, and stops at the last
-step. Under reduced motion, Play is disabled and Back/Next still work; the
-component adds its own note saying so. Arrow keys, Home, and End step the trace
-when focus is inside the root and not in a field. Call `destroy()` before
-removing the markup.
+step. Play remains available under reduced motion, alongside Back/Next. Turning
+on reduced motion pauses active playback; the learner can press Play to resume.
+Without a scene, the component adds a reduced-motion note explaining these
+controls. Scene players use their movement checkbox instead. Pass a `createScene`
+controller to adapt educational movement while preserving every state and
+explanation. A single-state trace keeps Play disabled. Arrow keys,
+Home, and End step the trace when focus is inside the root and not in a field.
+When a keyboard action disables the focused Back/Next button at a boundary,
+focus moves to Play so further arrow-key steps remain inside the player.
+Call `destroy()` before removing the markup.
+
+---
+
+### `createScene(root, options)`
+
+A scene is an optional, local animation controller for an explanation: moving a
+value between stages, rotating a model, drawing a construction, or showing a
+continuous trajectory. It has no subject-specific rules. Keep the model and its
+final state in `render`; the scene supplies interruption, timing and cleanup.
+Create one scene per player and pass it to `mountStepper`. Preserve the scene
+template's `.scene-toolbar`: a balanced four-button transport, compact seek row,
+and visible playback speed and movement settings.
+Keep essential live evidence inside `.motion-scene`, with secondary detail below
+the toolbar. Check that the scene and primary controls fit together on a phone;
+see the composition budget in [explanatory motion](references/motion.md).
+
+```html
+<!-- Inside the player root, before the playback controls. -->
+<div class="motion-scene" data-scene>
+  <span id="origin">Source</span>
+  <span id="destination">Destination</span>
+  <div id="object">Model object</div>
+  <span class="scene-transfer" id="copy" aria-hidden="true">Value</span>
+</div>
+<!-- Alongside Play, Back and Next; use a native, labelled checkbox. -->
+<label><input type="checkbox" data-motion checked> Show movement in this explanation</label>
+```
+
+```js
+const scene = LearningUI.createScene($('trace'), { duration: 500 });
+const player = LearningUI.mountStepper($('trace'), {
+  count: steps.length,
+  interval: 1200,
+  scene,
+  render(index, { fromIndex, direction, reason, instant }) {
+    const step = steps[index];
+    $('step-explanation').textContent = step.explanation;
+    scene.to($('object'), { transform: `translateX(${step.x}px)`, opacity: 1 });
+    scene.tween('angle', {
+      to: step.angle,                       // radians or any finite model scalar
+      update(angle) { drawGeometry(angle); } // SVG, Canvas or a model-driven frame
+    });
+    // Checkpoints store the operation that led into them. Back reverses the
+    // operation we are leaving, rather than replaying the earlier operation.
+    const operation = steps[direction < 0 ? fromIndex : index];
+    if (!instant && operation.moved) {
+      const from = direction < 0 ? $('destination') : $('origin');
+      const to = direction < 0 ? $('origin') : $('destination');
+      scene.transfer($('copy'), from, to);
+    }
+    // No lifecycle logic here: initial state, reset and seeking are immediate.
+  }
+});
+```
+
+Use a persistent object for `to`, a separate hidden copy for `transfer`, and a
+stable key for each independent `tween`. All targets must be inside the scene
+root. Show the same information in text; animation never replaces the final
+state, explanatory sentence, formula, or table.
+
+| Method | Contract |
+| --- | --- |
+| `scene.to(element, styles, options?)` | Animate only `transform`, `opacity`, and/or `clipPath`. CSS string values are accepted. An interrupted motion starts at the current computed pose; final inline styles persist. Equivalent computed poses settle without a stationary animation. |
+| `scene.transfer(marker, fromElement, toElement, options?)` | Move a separate marker between endpoint centers. The marker is visible during transit and hidden on arrival; both original entities remain intact. The marker must be a direct child of a positioned HTML `[data-scene]` containing both endpoints. |
+| `scene.tween(key, { to, update, from?, duration?, instant? })` | Call `update(value)` with linear interpolation of a finite scalar. An active key retargets from its current value. Otherwise an explicit `from` wins, then the last value for that key, then `0`. Use normalized 0–1 values for paths or interpolate physical model time. |
+| `scene.render(callback, { instant: true })` | Apply an entire model render immediately, including all scene calls inside it. `mountStepper` supplies this boundary automatically. Without `instant`, keys omitted by the next render are cancelled. |
+| `scene.pause()` / `scene.resume()` | Freeze/resume actual element and numeric animation progress. Restoring a hidden tab does not resume by itself. |
+| `scene.finish()` | Set every active job to its endpoint, then remove its animation and pending frames. |
+| `scene.setRate(2)` | Change speed without restarting progress. Rates must be positive and finite. The stepper forwards its speed control automatically. |
+| `scene.enabled()` | Whether this scene currently permits educational movement. |
+| `scene.active` | Number of unfinished jobs, including paused jobs. |
+| `scene.onIdle(callback)` | Subscribe to completed/settled jobs; returns an unsubscribe function. Not called after destruction. Usually only the stepper needs this. |
+| `scene.destroy()` | Settle jobs and remove all scene listeners. Later animation calls have no effect. The owning stepper calls it on destruction by default. |
+
+`createScene` defaults to `--motion-explain` (500ms) and `--ease-in-out`.
+Its optional `duration` and `easing` override those defaults. `to` and `transfer`
+accept `{ duration, easing, instant }`; numeric tweens deliberately remain
+linear, so time, rotation and physical-model interpolation do not acquire a UI
+easing curve. Durations must be finite and nonnegative; zero settles immediately.
+Methods that animate, render or control playback return the scene for chaining.
+Do not set CSS transitions on properties owned by the scene.
+
+`transfer` uses local HTML coordinates, accounts for container borders, scroll
+and axis-aligned scaling, and updates its route when the container or endpoints
+resize. Label wrapping never cancels a trip. Use `tween` to draw SVG, Canvas,
+rotated coordinate systems, non-straight paths or other domain geometry. If
+`element.animate` is unavailable, CSS scenes settle at the correct endpoint;
+numeric drawing still uses the same pausable frame clock.
+
+Educational movement defaults **on**, including when the device requests
+reduced motion. An optional `[data-motion]` checkbox therefore starts checked.
+Nothing autoplays: Play or Next is still required to run an operation. Changing
+the checkbox affects this scene in this page only; it never changes the OS
+setting, decorative UI motion, another scene, or storage. Unchecking it settles
+the current scene immediately, and Reset preserves that local choice. Turning
+on the device's reduced-motion preference pauses ongoing playback; pressing
+Play resumes with the current scene choice. Scene players show their actual
+choice through the checkbox; the device-preference note is only shown for
+steppers without a scene.
+
+Supplied scene templates use this enabled default. An author can explicitly pass
+`{ motion: 'system' }` to follow the OS preference until the learner changes the
+checkbox, or `{ motion: false }` to start a particular scene with movement off.
+`motion` accepts only `true`, `false`, or `'system'`; the default is `true`.
+These options do not alter decorative feedback's reduced-motion policy.
+Without a checkbox, the selected scene policy still applies.
+
+The render context reports `fromIndex` (the outgoing committed checkpoint),
+`direction` (`-1`, `0`, or `1`), `reason` (`init`, `play`, `next`, `back`, `step`,
+`seek`, `scrub`, `reset`, or `replay`) and `instant`. Initial render has direction
+`0`. Initial render, reset, replay's initial state, `go(index)`, Home/End and
+scrubbing settle immediately. Next/ArrowRight and Back/ArrowLeft animate toward
+the selected checkpoint. For Back, reverse the operation associated with
+`fromIndex`: swap transfer endpoints, reverse a path or interpolate the model
+toward the target. Update captions and quantities to describe this reversal;
+showing the earlier checkpoint's forward operation is not the inverse action.
+Before selecting any new index, the stepper finishes the outgoing scene so its
+completion commits counters and memberships used by the next render. Rapid
+Back/Next clicks therefore cannot read an unfinished prior state. An arrow at a
+boundary settles without replaying an operation.
+`go(index, { instant: false })` can request a discrete animated change. The next playback state waits for both its
+interval and its scene to finish, at the selected rate. The same speed control
+changes both forward and backward scene motion, including a paused operation,
+without restarting its progress. The last visual finishes
+before the player offers Replay; pausing during it offers Play to resume.
+A manual step also shows Pause while its scene moves, so it can be frozen directly.
+Resuming a paused manual movement completes only that step; a subsequent Play
+starts the sequence.
+Explicit Play/Back/Next clicks also keep the scene and its primary playback row
+in view when they fit together in the viewport, using a minimal immediate scroll
+without moving focus. Autoplay, scrubbing and pausing never trigger this scroll.
+
+For a changed model with a different step count, call
+`player.destroy({ preserveScene: true })`, then mount a new stepper with the
+same scene. This settles old jobs while retaining the learner's local motion
+choice. Ordinary `player.destroy()` also destroys its scene. One scene belongs
+to one mounted player at a time.
 
 ---
 
@@ -750,7 +896,9 @@ and text instead of another card. Quiz choices always occupy separate rows.
 | `--radius`, `--radius-lg`, `--radius-pill` | Corners |
 | `--font-sans`, `--font-mono`, `--font-math` | Prose, code, mathematics |
 | `--shadow-sm`, `--shadow-md` | Elevation |
-| `--ease-out` | Shared `cubic-bezier(0.23, 1, 0.32, 1)` curve |
+| `--ease-out` | Feedback curve: `cubic-bezier(0.23, 1, 0.32, 1)` |
+| `--ease-in-out` | Educational on-screen movement: `cubic-bezier(0.77, 0, 0.175, 1)` |
+| `--motion-explain` | Educational scene duration: 500ms; may be longer when the explanation needs it |
 | `--motion-press`, `--motion-reveal`, `--motion-fade`, `--motion-disclosure` | Press, reveal, gentle fade, and disclosure durations: 120/180/120/200ms |
 
 ---
@@ -781,8 +929,11 @@ the same curve. Height is limited to this disclosure behavior, where content
 must make room for the explanation. Browsers without the required CSS support
 keep immediate native disclosures.
 
-Keyboard actions and continuous range updates are immediate. Under
-`prefers-reduced-motion: reduce`, reveals and disclosures use only a gentle
-120ms opacity change, button movement is removed, the stepper disables
-playback, and charts skip tweens. Never make motion the only signal: the
+Decorative feedback is immediate for keyboard actions and continuous range
+updates. Under `prefers-reduced-motion: reduce`, reveals and disclosures use only
+a gentle 120ms opacity change, button movement is removed, and charts skip
+tweens. Educational scenes use the separate `createScene` policy above: Play
+remains available, and educational movement starts enabled. The learner can
+turn it off for immediate states; authors can explicitly choose a system-following
+scene when needed. Never make motion the only signal: the
 resulting state stays visible as text, selection, or data.

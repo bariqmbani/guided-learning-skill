@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>From a circle to a wave · Motion explainer</title>
+  <link rel="stylesheet" href="../interactive.css">
+  <style>
+    /* EDIT: model-specific drawing; transport and motion policy come from the kit. */
+    .projection-diagrams { display: grid; grid-template-columns: 1fr 2fr; align-items: center; gap: 8px; }
+    .projection-diagrams svg { display: block; width: 100%; height: auto; overflow: visible; }
+    .projection-diagrams text { font: 20px var(--font-sans); fill: var(--muted); }
+    .projection-diagrams .axis { stroke: var(--graphic-neutral); stroke-width: 1; }
+    .projection-diagrams .guide { stroke: var(--series-2); stroke-width: 2; stroke-dasharray: 5 4; }
+    .projection-diagrams .orbit, .projection-diagrams .wave { fill: none; stroke: var(--series-1); stroke-width: 3; }
+    .projection-diagrams .reference { fill: none; stroke: var(--border-strong); stroke-width: 1; stroke-dasharray: 3 5; }
+    .projection-diagrams .point { fill: var(--series-1); stroke: var(--surface); stroke-width: 2; }
+    .projection-diagrams .radius { stroke: var(--series-1); stroke-width: 2; }
+    .motion-readout { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; font-size: .8125rem; font-variant-numeric: tabular-nums; }
+    .motion-readout > span { display: grid; gap: 2px; }
+    .motion-readout strong { color: var(--text-bright); }
+    @container scene-player (max-width: 34rem) {
+      .projection-diagrams { grid-template-columns: minmax(0, 1fr); gap: 0; }
+      #circle { width: 128px; margin: auto; }
+      #wave { max-height: 146px; }
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to lesson</a>
+<main id="main" class="lesson">
+  <!-- EDIT: lesson content. Keep the model, checkpoints, question, and table aligned. -->
+  <header class="lesson-header">
+    <p class="eyebrow">Motion explainer · Waves &amp; circular motion</p>
+    <h1>A circle leaves a wave</h1>
+    <p class="subtitle">A point turns at a constant rate. Track just its height, and a sine wave appears.</p>
+  </header>
+  <section class="prompt-card stack" aria-labelledby="warmup-title">
+    <h2 id="warmup-title">01 · Warm up: find the height</h2>
+    <p><strong>Your goal:</strong> explain how constant circular motion produces a changing vertical speed.</p>
+    <form id="warmup" class="stack">
+      <fieldset><legend>The point starts on the right and turns counterclockwise. After one quarter-turn, what is its height above the center?</legend>
+        <label><input type="radio" name="answer" value="zero" required> Zero: it is back at the center’s height.</label>
+        <label><input type="radio" name="answer" value="top"> One radius: it has reached the top.</label>
+        <label><input type="radio" name="answer" value="half"> Half a radius: one quarter of the turn is complete.</label>
+      </fieldset>
+      <div class="btn-row"><button class="btn" type="submit" data-check>Check answer</button><button class="btn btn-secondary" type="button" data-retry>Try again</button></div>
+      <p class="feedback" data-feedback hidden></p>
+    </form>
+  </section>
+  <section id="projection" class="stage stack" aria-labelledby="motion-title">
+    <h2 id="motion-title">02 · Follow one complete turn</h2>
+    <p class="explain">Play follows the point around the circle. The other point records that same height against model time. Dashed guides mark their equal height.</p>
+    <div class="scene-player">
+      <!-- EDIT: keep only the moving diagram, essential live evidence, and a short
+           caption here. At 320×568, aim for <=420px so transport stays visible.
+           Put secondary diagnostics and full explanations below the toolbar. -->
+      <div class="motion-scene stack stack--tight">
+        <div class="projection-diagrams">
+          <svg id="circle" viewBox="0 0 200 200" role="img" aria-labelledby="circle-title" aria-describedby="model-summary">
+            <title id="circle-title">Point moving counterclockwise on a unit circle</title>
+            <path class="axis" d="M22 100 H178 M100 22 V178"/>
+            <circle class="reference" cx="100" cy="100" r="64"/>
+            <path id="arc-trail" class="orbit" d="M164 100"/>
+            <line id="circle-height" class="guide" x1="24" y1="100" x2="182" y2="100"/>
+            <line id="radius" class="radius" x1="100" y1="100" x2="164" y2="100"/>
+            <circle id="orbit-point" class="point" cx="164" cy="100" r="6"/>
+            <text x="5" y="41">+1</text><text x="5" y="169">−1</text>
+            <text x="100" y="197" text-anchor="middle">Circular position</text>
+          </svg>
+          <svg id="wave" viewBox="0 0 400 200" role="img" aria-labelledby="wave-title" aria-describedby="model-summary">
+            <title id="wave-title">The circular point’s height plotted against model time</title>
+            <path class="axis" d="M34 24 V176 M34 100 H378"/>
+            <path id="wave-reference" class="reference"/>
+            <path id="wave-trail" class="wave" d="M34 100"/>
+            <line id="wave-height" class="guide" x1="34" y1="100" x2="378" y2="100"/>
+            <line id="time-guide" class="guide" x1="34" y1="100" x2="34" y2="176"/>
+            <circle id="wave-point" class="point" cx="34" cy="100" r="6"/>
+            <text x="2" y="41">+1</text><text x="11" y="105">0</text><text x="2" y="169">−1</text>
+            <text x="34" y="194" text-anchor="middle">0</text><text x="120" y="194" text-anchor="middle">2</text><text x="206" y="194" text-anchor="middle">4</text><text x="292" y="194" text-anchor="middle">6</text><text x="378" y="194" text-anchor="middle">8 s</text>
+          </svg>
+        </div>
+        <div class="motion-readout" aria-label="Current model values"><span>Time <strong id="model-time">0.00 s</strong></span><span>Angle <strong id="model-angle">0°</strong></span><span>Height <strong id="model-height">0.00</strong></span></div>
+        <p class="equation equation--plain scene-equation" data-math="y(t) = \sin\left(\frac{2\pi t}{8}\right)" data-math-display="block"></p>
+        <h3 class="scene-caption" id="checkpoint-title">Start at the right</h3>
+      </div>
+    <div class="scene-controls scene-toolbar" aria-label="Playback controls">
+      <div class="btn-row scene-transport">
+        <button class="btn" type="button" data-play>Play</button>
+        <button class="btn btn-secondary" type="button" data-reset>Reset</button>
+        <button class="btn btn-secondary" type="button" data-back>Back</button>
+        <button class="btn btn-secondary" type="button" data-next>Next</button>
+      </div>
+      <div class="scene-seek">
+        <div class="scene-status"><label for="checkpoint">Quarter-turn</label><p class="step-position" data-position>Step 1 of 5</p></div>
+        <input id="checkpoint" type="range" data-scrub value="0">
+        <output id="checkpoint-value" class="sr-only" data-scrub-value for="checkpoint"></output>
+      </div>
+      <div class="scene-preferences">
+        <label class="scene-speed" for="speed">Speed<select id="speed" data-speed><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label>
+        <label class="motion-toggle scene-motion"><input type="checkbox" data-motion checked> Animate changes</label>
+      </div>
+    </div>
+    </div>
+    <p class="explain">One physical turn is always 8 model seconds. Playback speed only changes how quickly you watch. Turn animation off to inspect still checkpoints; Play remains available.</p>
+    <p id="model-summary" data-step-summary>At 0.00 model seconds, the angle is 0° and the height is 0.00 radii.</p>
+    <article class="stack stack--tight"><p id="checkpoint-explanation">The point starts at the center’s height and begins rising. Both graphs show height zero.</p></article>
+    <details><summary>Read the complete cycle as a table</summary><div class="table-wrap"><table class="data-table"><caption>Unit radius, one counterclockwise turn in 8 model seconds</caption><thead><tr><th scope="col">Time (s)</th><th scope="col">Angle</th><th scope="col">Height</th><th scope="col">What happens next</th></tr></thead><tbody><tr><th scope="row">0</th><td>0°</td><td>0</td><td>Rises toward the top</td></tr><tr><th scope="row">2</th><td>90°</td><td>+1 radius</td><td>Turns downward</td></tr><tr><th scope="row">4</th><td>180°</td><td>0</td><td>Falls toward the bottom</td></tr><tr><th scope="row">6</th><td>270°</td><td>−1 radius</td><td>Turns upward</td></tr><tr><th scope="row">8</th><td>360°</td><td>0</td><td>One full cycle is complete</td></tr></tbody></table></div></details>
+  </section>
+  <section class="two-col" aria-label="Explain and transfer">
+    <article class="panel stack"><h2>03 · Explain the bend</h2><p>The angle changes equally each second. Why does height change slowly near the top and bottom, but quickly as the point passes the center’s height?</p><details><summary>Check your explanation</summary><p>Near the top and bottom, most of the motion is sideways. Near the center’s height, most of it is vertical. Equal changes in angle do not make equal changes in height.</p></details></article>
+    <article class="panel stack"><h2>Transfer the idea</h2><p>If the radius doubled and the period stayed 8 seconds, what would change in the wave?</p><details><summary>Check your answer</summary><p>The heights would double to range from −2 to +2, but the quarter-turns would still occur at 2, 4, 6, and 8 seconds. Radius sets amplitude; period sets the timing.</p></details></article>
+  </section>
+  <aside class="notice"><strong>Model limits.</strong> This is an ideal point with unit radius and constant angular speed. The wave is a height-versus-time graph; it is not a second object moving through space, and this animation does not model forces or energy.</aside>
+  <noscript><p class="notice">Playback needs JavaScript. The table gives the complete cycle: at 0, 2, 4, 6, and 8 seconds, the heights are 0, +1, 0, −1, and 0. These are the checkpoints of a sine wave.</p></noscript>
+  <footer class="lesson-footer">Follow one quantity through two representations.</footer>
+  <!-- END EDIT: lesson content. -->
+</main>
+<p class="sr-only" data-announcer role="status" aria-live="polite" aria-atomic="true"></p>
+<script src="../interactive.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const scene = LearningUI.createScene($('projection'), { duration: 2000 });
+  // EDIT: continuous model. Tween phase, never point endpoints: the path stays circular.
+  // When replacing it, verify position/direction on both sides of each checkpoint
+  // and a full-cycle return; an invariant alone cannot detect a mirrored-path jump.
+  const period = 8, fullTurn = 2 * Math.PI;
+  const checkpoints = [
+    ['Start at the right', 'The point starts at the center’s height and begins rising. Both graphs show height zero.'],
+    ['A quarter-turn: the top', 'At 2 model seconds, height reaches +1 radius. Its vertical change slows to zero before turning downward.'],
+    ['A half-turn: cross the center', 'At 4 model seconds, height is zero again. This time the point is moving downward.'],
+    ['Three quarters: the bottom', 'At 6 model seconds, height reaches −1 radius. Its vertical change slows to zero before turning upward.'],
+    ['A complete turn', 'At 8 model seconds, the point returns to the starting height and direction. The graph contains one complete sine cycle.']
+  ];
+  const clean = value => Math.abs(value) < 1e-9 ? 0 : value;
+  const fixed = value => LearningUI.fmt.fixed(clean(value), 2);
+  const attr = (element, values) => Object.entries(values).forEach(([name, value]) => element.setAttribute(name, value));
+  // Sampling traces draws the history; the moving points use the exact model.
+  function path(phase, position) {
+    const samples = Math.max(1, Math.ceil(phase / fullTurn * 160));
+    return Array.from({ length: samples + 1 }, (_, index) => {
+      const [x, y] = position(phase * index / samples);
+      return (index ? 'L' : 'M') + x.toFixed(2) + ',' + y.toFixed(2);
+    }).join(' ');
+  }
+  const onCircle = phase => [100 + 64 * Math.cos(phase), 100 - 64 * Math.sin(phase)];
+  const onWave = phase => [34 + 344 * phase / fullTurn, 100 - 64 * Math.sin(phase)];
+  $('wave-reference').setAttribute('d', path(fullTurn, onWave));
+  function draw(phase) {
+    const [cx, cy] = onCircle(phase), [wx, wy] = onWave(phase);
+    const time = phase / fullTurn * period, angle = phase / fullTurn * 360, height = clean(Math.sin(phase));
+    attr($('orbit-point'), { cx, cy });
+    attr($('radius'), { x2: cx, y2: cy });
+    attr($('circle-height'), { y1: cy, y2: cy });
+    attr($('wave-point'), { cx: wx, cy: wy });
+    attr($('wave-height'), { y1: wy, y2: wy });
+    attr($('time-guide'), { x1: wx, x2: wx, y1: wy });
+    $('arc-trail').setAttribute('d', path(phase, onCircle));
+    $('wave-trail').setAttribute('d', path(phase, onWave));
+    $('model-time').textContent = fixed(time) + ' s';
+    $('model-angle').textContent = LearningUI.fmt.fixed(angle, 0) + '°';
+    $('model-height').textContent = fixed(height);
+    // This description stays available to assistive technology without per-frame announcements.
+    $('model-summary').textContent = 'At ' + fixed(time) + ' model seconds, the angle is ' + LearningUI.fmt.fixed(angle, 0) +
+      '° and the height is ' + fixed(height) + ' radii.';
+  }
+  function render(index, { instant, direction }) {
+    const target = index * fullTurn / 4;
+    scene.tween('phase', { to: target, instant, update(phase) {
+      draw(phase);
+      const arrived = Math.abs(phase - target) < 1e-9;
+      $('checkpoint-title').textContent = (arrived ? '' : direction < 0 ? 'Returning: ' : 'Destination: ') + checkpoints[index][0];
+      $('checkpoint-explanation').textContent = arrived ? checkpoints[index][1]
+        : direction < 0
+          ? 'Retrace the arc toward the previous checkpoint. Model time decreases, and both points still share the same height.'
+          : 'Watch the height change along the arc. Pause to compare the two points at the same model time.';
+    } });
+  }
+  // END EDIT: the shared stepper owns timers, pause, speed, reset, and interruptions.
+  LearningUI.mountQuestion($('warmup'), {
+    correct: 'top',
+    feedback: {
+      top: 'Yes. A quarter-turn brings the point to the top, one radius above the center.',
+      zero: 'Height is zero at the start and half-turn. A quarter-turn puts the point at the top.',
+      half: 'The angle advances by a quarter-turn, but height is not proportional to angle. At the top it is one full radius.'
+    }
+  });
+  LearningUI.math.render(document);
+  LearningUI.mountStepper($('projection'), {
+    count: checkpoints.length, render, scene, interval: 2000,
+    labels: checkpoints.map((checkpoint, index) => index * 2 + ' model seconds · ' + checkpoint[0])
+  });
+})();
+</script>
+</body>
+</html>

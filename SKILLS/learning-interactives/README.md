@@ -1,7 +1,7 @@
 # Learning Interactives
 
 An offline authoring skill shared by Guided Learning and Concept Learning.
-Ten working templates use HTML, shared CSS/JavaScript, and Python 3.9+ helpers;
+Eleven working templates use HTML, shared CSS/JavaScript, and Python 3.9+ helpers;
 no framework, package manager, CDN, account, or server is required.
 
 Invoke `$learning-interactives` in Codex or `/learning-interactives` in Claude Code
@@ -13,6 +13,7 @@ teaching, assessment, and learning records.
 | --- | --- |
 | Build or adapt an activity | [Skill workflow](SKILL.md) |
 | Select a template | [Pattern selector](references/patterns.md) |
+| Explain with movement, flow, geometry, or continuous change | [Explanatory motion](references/motion.md) |
 | Preview the activities | [Catalog](index.html) |
 | Use a helper or style | Relevant section of [COMPONENTS.md](COMPONENTS.md) |
 | See component markup | [Component gallery](components.html) |
@@ -37,3 +38,8 @@ changes; generated vaults must remain empty. Optional browser checks use
 `node tests/interactive_browser_smoke.cjs` with a development Playwright/browser
 installation. `LEARNING_PLAYWRIGHT_PATH` and `LEARNING_BROWSER_EXECUTABLE` can point
 to existing installations; learner pages have no dependency on them.
+
+For changes to motion authoring, also assess fresh agent generations of a
+discrete process, a flow, and a continuous model. Inspect raw output for each
+operation's motion and intermediate values, interruption behavior, and phone
+readability. A manually repaired lesson is not proof of generation quality.

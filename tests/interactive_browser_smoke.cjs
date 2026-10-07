@@ -13,11 +13,13 @@ const { pathToFileURL } = require('node:url');
 const { execFileSync } = require('node:child_process');
 const { chromium } = require(process.env.LEARNING_PLAYWRIGHT_PATH || 'playwright');
 const { checkLocalization } = require('./interactive_locale_checks.cjs');
+const { checkScenes } = require('./interactive_scene_checks.cjs');
+const { checkTemplateMotion } = require('./interactive_template_motion_checks.cjs');
 const kit = path.resolve(__dirname, '../SKILLS/learning-interactives');
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'learning-browser-'));
 const python = process.env.LEARNING_PYTHON || 'python3';
 const templates = ['parameter-explorer', 'step-sequence', 'comparison', 'probability-lab',
-  'decision-scenario', 'practice-set', 'order-steps', 'system-map', 'data-explorer', 'geometry-lab'];
+  'decision-scenario', 'practice-set', 'order-steps', 'system-map', 'data-explorer', 'geometry-lab', 'motion-explainer'];
 const galleries = ['example-interactive', 'components', 'index'];
 const allPages = [...templates, ...galleries];
 
@@ -45,6 +47,11 @@ const allPages = [...templates, ...galleries];
     page.on('request', request => { if (/^https?:/.test(request.url())) failures.push('Network request: ' + request.url()); });
     const open = name => page.goto(pathToFileURL(path.join(temporary, name + '.html')).href);
     const text = selector => page.locator(selector).innerText();
+    const selectSpeed = async value => {
+      assert.equal(await page.locator('[data-speed]').isVisible(), true,
+        'animation speed must be directly available in the toolbar');
+      await page.selectOption('[data-speed]', value);
+    };
     const hasOutline = element => {
       const style = getComputedStyle(element);
       return style.outlineStyle !== 'none' && parseFloat(style.outlineWidth) > 0;
@@ -74,7 +81,7 @@ const allPages = [...templates, ...galleries];
         const failures = [];
         for (const [selector, property, minimum] of [
           ['body, .subtitle, .faint, .hint-count, .btn:not(:disabled)', 'color', 4.5],
-          ['.chart-trail, #map .edge', 'stroke', 3]
+          ['.chart-trail, .map-links .edge', 'stroke', 3]
         ]) {
           document.querySelectorAll(selector).forEach(element => {
             if (!element.getClientRects().length) return;
@@ -310,23 +317,133 @@ const allPages = [...templates, ...galleries];
     await question('right');
     assert.equal(await page.locator('[data-back]').isDisabled(), true);
     await page.click('[data-next]');
-    assert.equal(await text('#mid'), '3');
+    assert.equal(await text('#mid'), '—', 'the midpoint readout commits when its value arrives');
+    await page.waitForTimeout(250);
+    const transfer = await page.evaluate(() => {
+      const center = selector => { const r = document.querySelector(selector).getBoundingClientRect(); return (r.top + r.bottom) / 2; };
+      return { from: center('#items li:nth-child(4) strong'), current: center('#search-copy'), to: center('#comparison-value') };
+    });
+    assert.ok(transfer.current > transfer.from + 1 && transfer.current < transfer.to - 1,
+      'midpoint value must visibly travel from the array into the comparison');
     await page.click('[data-back]');
-    assert.equal(await text('#mid'), '-');
+    await page.waitForTimeout(250);
+    const reverseTransfer = await page.evaluate(() => {
+      const center = selector => { const r = document.querySelector(selector).getBoundingClientRect(); return (r.top + r.bottom) / 2; };
+      return { from: center('#comparison-value'), current: center('#search-copy'), to: center('#items li:nth-child(4) strong') };
+    });
+    assert.ok(reverseTransfer.current > reverseTransfer.to + 1 && reverseTransfer.current < reverseTransfer.from - 1,
+      'Back must visibly return the comparison value to its source');
+    assert.equal(await text('#mid'), '3', 'the outgoing checkpoint remains readable during reversal');
+    await page.click('[data-play]');
+    await page.waitForTimeout(40); // Let the WAAPI pause settle before comparing poses.
+    const reversePaused = await page.locator('#search-copy').evaluate(element => getComputedStyle(element).transform);
+    await page.waitForTimeout(100);
+    assert.equal(await page.locator('#search-copy').evaluate(element => getComputedStyle(element).transform), reversePaused,
+      'Pause must freeze the reverse transfer');
+    await selectSpeed('2');
+    await page.click('[data-play]');
+    await page.waitForFunction(() => document.querySelector('[data-play]').textContent === 'Play');
+    assert.equal(await text('#mid'), '—');
     for (let i = 0; i < 6; i += 1) await page.click('[data-next]');
     assert.equal(await text('#step-title'), 'Return index 4');
     assert.equal(await page.locator('[data-next]').isDisabled(), true);
-    await page.selectOption('[data-speed]', '2');
+    await page.waitForFunction(() => document.querySelector('[data-play]').textContent === 'Replay');
+    await selectSpeed('2');
     await page.click('[data-play]');
-    await page.waitForFunction(() => document.querySelector('[data-next]').disabled, null, { timeout: 8000 });
+    await page.waitForFunction(() => document.querySelector('[data-play]').textContent === 'Replay', null, { timeout: 10000 });
     assert.equal(await page.locator('[data-play]').getAttribute('aria-pressed'), 'false');
     await page.click('[data-reset]');
+
+    // A newly reduced-motion preference pauses playback without locking Play.
+    await selectSpeed('2');
+    await page.click('[data-play]');
+    await page.waitForFunction(() => document.querySelector('[data-scrub]').value === '1');
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.waitForFunction(() => document.querySelector('[data-play]').disabled, null, { timeout: 2000 });
-    assert.equal(await page.locator('[data-play]').isDisabled(), true);
+    await page.waitForFunction(() => document.querySelector('[data-play]').getAttribute('aria-pressed') === 'false');
+    assert.equal(await page.locator('[data-play]').isDisabled(), false);
+    assert.equal(await page.locator('.motion-note').isVisible(), false, 'scene preference must not be mislabeled by the OS preference');
+    const preferencePause = await text('[data-position]');
+    await page.waitForTimeout(900);
+    assert.equal(await text('[data-position]'), preferencePause, 'preference change left a playback timer running');
+    await page.click('[data-play]');
+    await page.waitForFunction(() => document.querySelector('[data-scrub]').value === '2');
+    await page.click('[data-play]');
+    assert.equal(await page.locator('[data-play]').getAttribute('aria-pressed'), 'false');
+    const manualPause = await text('[data-position]');
+    await page.waitForTimeout(900);
+    assert.equal(await text('[data-position]'), manualPause, 'Pause did not stop reduced-motion playback');
+    await page.click('[data-back]');
+    assert.equal(await page.locator('[data-scrub]').inputValue(), '1');
     await page.click('[data-next]');
-    assert.equal(await text('#mid'), '3');
+    assert.equal(await page.locator('[data-scrub]').inputValue(), '2');
+    await page.locator('[data-play]').press('End');
+    assert.equal(await text('#step-title'), 'Return index 4');
+    await page.locator('[data-play]').press('Home');
+    assert.equal(await page.locator('[data-scrub]').inputValue(), '0');
+    await range('scrub', 3);
+    assert.equal(await page.locator('[data-scrub]').inputValue(), '3');
     await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.waitForFunction(() => document.querySelector('.motion-note').hidden);
+    assert.equal(await page.locator('[data-play]').getAttribute('aria-pressed'), 'false');
+
+    // Loading with reduced motion preserves deliberate Play, finite end, and replay.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await open('step-sequence');
+    assert.equal(await page.locator('[data-play]').isDisabled(), false);
+    assert.equal(await page.locator('.motion-note').isVisible(), false);
+    assert.equal(await page.locator('[data-motion]').isChecked(), true, 'scene animation must start enabled');
+    assert.equal(await page.locator('[data-play]').evaluate(button => getComputedStyle(button).transitionDuration), '0s', 'Play availability bypassed reduced-motion CSS');
+    await page.waitForTimeout(1700);
+    assert.equal(await text('[data-position]'), 'Step 1 of 7', 'reduced-motion trace started on load');
+    assert.equal(await page.locator('[data-play]').getAttribute('aria-pressed'), 'false');
+    await selectSpeed('2');
+    await page.click('[data-play]');
+    assert.equal(await page.locator('[data-play]').getAttribute('aria-pressed'), 'true');
+    await page.waitForFunction(() => document.querySelector('[data-play]').textContent === 'Replay', null, { timeout: 10000 });
+    assert.equal(await text('#step-title'), 'Return index 4');
+    assert.equal(await text('[data-play]'), 'Replay');
+    assert.equal(await page.locator('[data-play]').getAttribute('aria-pressed'), 'false');
+    await page.waitForTimeout(900);
+    assert.equal(await text('[data-position]'), 'Step 7 of 7', 'reduced-motion playback looped after the last state');
+    await page.click('[data-play]');
+    assert.equal(await text('[data-position]'), 'Step 1 of 7');
+    assert.equal(await page.locator('[data-play]').getAttribute('aria-pressed'), 'true');
+
+    // Hidden tabs still pause and cannot start, even through a programmatic click.
+    await page.evaluate(() => {
+      Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+      document.dispatchEvent(new Event('visibilitychange'));
+      document.querySelector('[data-play]').click();
+    });
+    assert.equal(await page.locator('[data-play]').getAttribute('aria-pressed'), 'false');
+    await page.waitForTimeout(900);
+    assert.equal(await text('[data-position]'), 'Step 1 of 7');
+    await page.evaluate(() => {
+      delete document.hidden;
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    assert.equal(await page.locator('[data-play]').getAttribute('aria-pressed'), 'false');
+    await page.click('[data-play]');
+    await page.click('[data-reset]');
+    await page.waitForTimeout(1700);
+    assert.equal(await text('[data-position]'), 'Step 1 of 7', 'Reset did not cancel reduced-motion playback');
+    assert.equal(await page.locator('[data-play]').getAttribute('aria-pressed'), 'false');
+
+    // One-state traces have nothing to play under either motion preference.
+    await page.evaluate(() => {
+      const root = document.createElement('section');
+      root.id = 'single-state';
+      root.innerHTML = '<button data-back>Back</button><button data-next>Next</button><button data-play>Play</button><button data-reset>Reset</button><p data-position></p>';
+      document.querySelector('main').append(root);
+      LearningUI.mountStepper(root, { count: 1, render() {} });
+      root.querySelector('[data-play]').dispatchEvent(new MouseEvent('click'));
+    });
+    assert.equal(await page.locator('#single-state [data-play]').isDisabled(), true);
+    assert.equal(await page.locator('#single-state [data-play]').getAttribute('aria-pressed'), 'false');
+    assert.equal(await page.locator('#single-state .motion-note').isVisible(), false);
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.waitForFunction(() => document.querySelector('#single-state .motion-note').hidden);
+    assert.equal(await page.locator('#single-state [data-play]').isDisabled(), true);
 
     await open('probability-lab');
     await question('no');
@@ -503,18 +620,19 @@ const allPages = [...templates, ...galleries];
     }
 
     await open('system-map');
-    const picker = page.locator('#picker');
-    await picker.getByRole('radio', { name: 'Compile', exact: true }).check();
+    const compileNode = page.locator('.map-node[data-id="compile"]');
+    await compileNode.click();
     assert.match(await text('#map-desc'), /Waits for Checkout/);
-    await page.keyboard.press('ArrowRight');
-    assert.equal(await picker.getByRole('radio', { name: 'Unit tests', exact: true }).isChecked(), true);
-    await page.click('#reset');
     const assertNodeBounds = async () => {
-      const clipped = await page.locator('#map .node').evaluateAll(nodes => nodes.flatMap(node => {
-        const rect = node.querySelector('.node-box').getBBox();
-        return [...node.querySelectorAll('text')].filter(text => {
-          const bounds = text.getBBox();
-          return bounds.x < rect.x - 1 || bounds.y < rect.y - 1 || bounds.x + bounds.width > rect.x + rect.width + 1 || bounds.y + bounds.height > rect.y + rect.height + 1;
+      const overlayHeight = await page.locator('.map-links').evaluate(svg => ({
+        scene: svg.parentElement.getBoundingClientRect().height, overlay: svg.getBoundingClientRect().height
+      }));
+      assert.ok(Math.abs(overlayHeight.scene - overlayHeight.overlay) < 1, 'shared SVG defaults clipped the dependency overlay');
+      const clipped = await page.locator('.map-node').evaluateAll(nodes => nodes.flatMap(node => {
+        const rect = node.getBoundingClientRect();
+        return [...node.querySelectorAll('strong, .node-status')].filter(text => {
+          const bounds = text.getBoundingClientRect();
+          return bounds.left < rect.left - 1 || bounds.top < rect.top - 1 || bounds.right > rect.right + 1 || bounds.bottom > rect.bottom + 1;
         }).map(text => node.dataset.id + ': ' + text.textContent);
       }));
       assert.deepEqual(clipped, [], 'map text escapes its node');
@@ -524,31 +642,52 @@ const allPages = [...templates, ...galleries];
       await assertNodeBounds();
     }
     await page.setViewportSize({ width: 1280, height: 900 });
-    const compileNode = page.locator('#map [data-id="compile"]');
     await compileNode.hover();
     await page.mouse.down();
     assert.equal(await compileNode.evaluate(hasOutline), false, 'map node shows a pointer outline');
-    assert.equal(await compileNode.locator('.node-focus').evaluate(element => getComputedStyle(element).opacity), '0', 'map node shows a keyboard ring during pointer press');
     await page.mouse.up();
     assert.match(await text('#map-desc'), /Waits for Checkout/);
-    assert.equal(await page.locator('#map .node[data-role="downstream"]').count(), 3);
+    assert.equal(await page.locator('.map-node[data-role="downstream"]').count(), 3);
     await assertNodeBounds();
     await page.keyboard.press('Tab');
     await page.keyboard.press('Shift+Tab');
     assert.equal(await compileNode.evaluate(element => element === document.activeElement && element.matches(':focus-visible')), true, 'map node lost keyboard focus');
-    assert.equal(await compileNode.locator('.node-focus').evaluate(element => getComputedStyle(element).opacity), '1', 'map node keyboard focus ring is hidden');
+    assert.equal(await compileNode.evaluate(hasOutline), true, 'map node keyboard focus ring is hidden');
+    await page.keyboard.press('Tab');
     await page.keyboard.press('Enter');
     assert.equal(await compileNode.getAttribute('aria-pressed'), 'false');
+    await page.keyboard.press('Shift+Tab');
     await page.keyboard.press('Enter');
     assert.equal(await compileNode.getAttribute('aria-pressed'), 'true');
-    // Clicking the same keyboard-focused SVG must switch focus appearance too.
+    // Clicking the same keyboard-focused node must switch focus appearance too.
     await compileNode.hover();
     await page.mouse.down();
-    assert.equal(await compileNode.locator('.node-focus').evaluate(element => getComputedStyle(element).opacity), '0', 'map retained its keyboard ring after switching to pointer');
     assert.equal(await compileNode.evaluate(hasOutline), false);
     await page.mouse.up();
-    await page.click('#reset');
-    assert.match(await text('#map-desc'), /Select a stage/);
+    await page.click('[data-next]');
+    await page.click('[data-next]');
+    const testNode = page.locator('.map-node[data-id="test"]');
+    await page.waitForFunction(() => document.querySelector('.map-node[data-id="test"]').dataset.state === 'blocked');
+    await page.click('[data-back]');
+    await page.waitForTimeout(220);
+    assert.match(await text('#flow-title'), /^Rewind: Unit tests → Compile/);
+    assert.equal(await testNode.getAttribute('data-state'), 'blocked', 'reverse transfer retains the outgoing state until arrival');
+    const reverseDependency = await page.evaluate(() => {
+      const center = element => { const rect = element.getBoundingClientRect(); return rect.left + rect.width / 2; };
+      const pulse = [...document.querySelectorAll('.pipeline-pulse')].find(element => Number(getComputedStyle(element).opacity) > .5);
+      return {
+        current: pulse ? center(pulse) : null,
+        from: center(document.querySelector('.map-node[data-id="test"] [data-side="left"]')),
+        to: center(document.querySelector('.map-node[data-id="compile"] [data-side="right"]'))
+      };
+    });
+    assert.ok(reverseDependency.current !== null && reverseDependency.current > reverseDependency.to + 1 && reverseDependency.current < reverseDependency.from - 1,
+      'Back retraces the dependency from its destination toward its source');
+    await page.waitForFunction(() => document.querySelector('.map-node[data-id="test"]').dataset.state === 'idle');
+    assert.equal(await testNode.locator('.node-status').innerText(), 'Depends on it');
+    assert.equal(await text('#flow-title'), 'Compile fails');
+    await page.click('[data-reset]');
+    assert.equal(await compileNode.locator('.node-status').innerText(), 'Selected');
 
     await open('data-explorer');
     assert.match(await text('#observation'), /treatment B leads/);
@@ -577,6 +716,8 @@ const allPages = [...templates, ...galleries];
     assert.equal(await text('#tp'), '15');
     assert.equal(await text('#fp'), '4');
     assert.deepEqual(failures, []);
+    await checkTemplateMotion({ page, open });
+    assert.deepEqual(failures, [], 'template motion checks emitted browser errors');
     await context.close();
 
     // Follow the OS until the learner makes a choice, then retain that choice.
@@ -640,7 +781,8 @@ const allPages = [...templates, ...galleries];
       }
     }
     await checkLocalization(browser);
-    console.log('PASS: 13 standalone pages offline; static checks, MathML notation, desktop/mobile, pointer and keyboard focus, segmented choices, matching verdicts and isolated descriptions, chart cursor, models, reset/retry, playback/reduced motion, interrupted reveals and native disclosures, quiz layout, map bounds, seeded replay, branches, ordering, theme controls and persistence, restricted storage, no-JS fallbacks, and localized runtime controls/feedback.');
+    await checkScenes({ browser });
+    console.log('PASS: 14 standalone pages offline; static checks, MathML notation, desktop/mobile, pointer and keyboard focus, segmented choices, matching verdicts and isolated descriptions, chart cursor, models, reset/retry, playback/reduced motion, explanatory scenes, interrupted reveals and native disclosures, quiz layout, map bounds, seeded replay, branches, ordering, theme controls and persistence, restricted storage, no-JS fallbacks, and localized runtime controls/feedback.');
   } finally {
     if (browser) await browser.close();
     fs.rmSync(temporary, { recursive: true, force: true });

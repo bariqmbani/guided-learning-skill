@@ -23,6 +23,18 @@ work through the owning teaching workflow.
 - **Behavior:** Every control works; reset restores a coherent baseline; retry
   clears stale feedback; changing a scenario/input cannot leave stale evidence.
   Playback stops at its end and pauses/resets correctly. A seeded run is repeatable.
+- **Requested animation:** Observe the actual operation in motion, including an
+  intermediate frame. A changing label or playback timer alone is insufficient.
+  Observe intermediate movement on both Next and Back, including reverse routes
+  and their live values. Check visible speed controls, pause, interruption, replay,
+  and reset. The animation toggle starts on,
+  including when the device requests reduced motion; turning it off settles
+  each checkpoint. Play remains usable in either mode.
+  For transfers inspect the route and arrival; for geometry inspect an
+  intermediate construction; for continuous models compare the moving object
+  and readout at the same model time. Speed must not change the answer. On a
+  320×568 phone, confirm the moving object, essential live values, and primary
+  playback buttons fit together, including the longest in-motion caption.
 - **Access:** Tab through the page, operate controls without a pointer, and check
   a narrow viewport and zoom. Check both themes, reduced motion, text/table alternatives,
   visible focus, meaningful labels, and feedback without color dependence.

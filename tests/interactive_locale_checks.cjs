@@ -91,7 +91,7 @@ async function checkLocalization(browser) {
       'matching.complete': 'Alle zugeordnet.', 'matching.incomplete': '{correct}/{answered}; bitte alle wählen.',
       'stepper.play': 'Start', 'stepper.replay': 'Wiederholen', 'stepper.position': 'Schritt {current}/{total}',
       'stepper.scrub': '{current}/{total}', 'stepper.finished': 'Fertig: {position}.',
-      'stepper.reducedMotion': 'Einzelschritte verwenden.',
+      'stepper.reducedMotion': 'Reduzierte Bewegung ist aktiv. Start, Zurück und Weiter bleiben verfügbar.',
       'math.root': 'Wurzel[{index}]', 'chart.caption': '{y} über {x}',
       'chart.description': '{caption}: {series}.{cursor} Tabelle unten.', 'chart.series': 'Reihe',
       'chart.cursorDescription': ' Pfeiltasten verwenden.', 'chart.cursorHint': 'Werte mit Pfeiltasten lesen.',
@@ -167,8 +167,16 @@ async function checkLocalization(browser) {
     assert.equal(await content('#stepper [data-scrub-value]'), '2/2');
     assert.equal(await page.locator('#stepper [data-scrub]').getAttribute('aria-valuetext'), 'Schritt 2/2');
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    assert.equal(await content('#stepper .motion-note'), 'Einzelschritte verwenden.');
-    await page.waitForFunction(() => document.querySelector('#stepper [data-play]').disabled);
+    await page.waitForFunction(() => !document.querySelector('#stepper .motion-note').hidden);
+    assert.equal(await content('#stepper .motion-note'), 'Reduzierte Bewegung ist aktiv. Start, Zurück und Weiter bleiben verfügbar.');
+    assert.equal(await page.locator('#stepper [data-play]').isDisabled(), false);
+    await page.locator('#stepper [data-reset]').click();
+    assert.equal(await content('#stepper [data-play]'), 'Start');
+    await page.locator('#stepper [data-play]').click();
+    assert.equal(await content('#stepper [data-play]'), 'Pause');
+    await page.waitForFunction(() => document.querySelector('#stepper [data-play]').getAttribute('aria-pressed') === 'false');
+    await announcement('Fertig: Schritt 2/2.');
+    assert.equal(await content('#stepper [data-play]'), 'Wiederholen');
 
     assert.equal(await page.evaluate(() => LearningUI.math.toText('\\sqrt[3]{x}')), 'Wurzel[3]x');
     assert.equal(await page.locator('#chart svg').getAttribute('aria-label'), 'Wert über Zeit: A. Pfeiltasten verwenden. Tabelle unten.');

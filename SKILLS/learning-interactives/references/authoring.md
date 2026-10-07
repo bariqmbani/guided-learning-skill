@@ -25,6 +25,13 @@ learners, expose a boundary case or competing explanation. Use the learner's
 language and relevant domain without inventing facts about their background.
 Do not duplicate the tutor's entire lesson inside the page.
 
+## When the learner asks for animation
+
+Follow [explanatory motion](motion.md) for choosing a representation, sequencing
+operations, and reusing the scene lifecycle. Preserve the teaching question and
+accurate intermediate states; decorative transitions cannot substitute for the
+requested explanation.
+
 ## What to edit and what to reuse
 
 Each template marks lesson markup with `<!-- EDIT: ... -->` and model code with
@@ -60,5 +67,7 @@ scaffolding succeed.
 
 Translate the lesson prose and configure runtime strings through
 [localization](localization.md). Do not copy or translate the runtime itself.
+Translate complete labels, not substrings: replacing “Play” everywhere corrupts
+“Playback settings”. Check the visible settings and in-motion text as well.
 For specialized models, use the extension guidance in [patterns](patterns.md).
 Use [COMPONENTS.md](../COMPONENTS.md) for shared markup, styling, and motion contracts.

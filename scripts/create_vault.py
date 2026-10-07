@@ -28,13 +28,14 @@ INTERACTIVE_ASSETS = (
     "interactive.css", "interactive.js", "build.py", "scaffold.py", "verify.py",
     "SKILL.md", "LICENSE", "CHANGELOG.md", "README.md", "COMPONENTS.md",
     "references/patterns.md", "references/authoring.md", "references/verification.md",
-    "references/localization.md", "references/evidence.md", "index.html", "components.html",
+    "references/localization.md", "references/evidence.md", "references/motion.md", "index.html", "components.html",
     "example-interactive.html",
     "templates/parameter-explorer.html", "templates/step-sequence.html",
     "templates/comparison.html", "templates/probability-lab.html",
     "templates/decision-scenario.html", "templates/practice-set.html",
     "templates/order-steps.html", "templates/system-map.html",
     "templates/data-explorer.html", "templates/geometry-lab.html",
+    "templates/motion-explainer.html",
 )
 ASSETS = [
     ".gitattributes",

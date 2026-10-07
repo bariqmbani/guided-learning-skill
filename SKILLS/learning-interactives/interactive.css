@@ -78,10 +78,12 @@
   --pop-fp-text: light-dark(#18271d, #f1f6f2);
   --pop-fn-text: light-dark(#18271d, #f1f6f2);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --motion-press: 120ms;
   --motion-reveal: 180ms;
   --motion-fade: 120ms;
   --motion-disclosure: 200ms;
+  --motion-explain: 500ms;
   /* Surfaces and segmented groups 10px, controls 6px, presets pill-shaped. */
   --radius: 6px;
   --radius-lg: 10px;
@@ -203,6 +205,61 @@ var, .var { font-family: var(--font-math); font-style: italic; font-size: 1.06em
 .spread { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 12px; }
 .workspace > *, .two-col > *, .three-col > *, .stack > *, .cluster > * { min-width: 0; }
 .motion-note { grid-column: 1 / -1; }
+/* Explanatory players center the scene and controls on shared edges.
+ * Use scene-toolbar for the portable authoring recipe. */
+.scene-player { min-width: 0; display: grid; gap: 12px; container: scene-player / inline-size; }
+.lesson > .stage { margin-block: 24px; }
+.motion-scene { position: relative; min-width: 0; width: 100%; isolation: isolate; margin-top: 24px }
+.scene-player > .motion-scene { inline-size: 100%; max-inline-size: 42rem; margin-inline: auto; }
+:where(.motion-scene > svg) { display: block; width: 100%; height: auto; }
+.scene-controls, .scene-controls.stack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 16px;
+  inline-size: 100%;
+  min-inline-size: 0;
+  container: scene-controls / inline-size;
+}
+.scene-toolbar { max-inline-size: 42rem; margin-inline: auto; margin-block-end: 24px; }
+.scene-controls > *, .scene-controls :is(.btn-row, .control-group, label) { min-inline-size: 0; }
+.scene-controls > .btn-row, .scene-controls .scene-transport {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 8px;
+  margin: 0;
+}
+.scene-controls .btn { padding: 9px 12px; min-inline-size: 0; white-space: normal; overflow-wrap: anywhere; }
+.scene-controls label { display: flex; align-items: center; gap: 8px; }
+.scene-controls .control-group { margin: 0; }
+.scene-controls [data-scrub] { flex: none; inline-size: 100%; min-inline-size: 0; block-size: 44px; margin: 0; }
+.scene-controls [data-position] { font-variant-numeric: tabular-nums; }
+.scene-controls [data-motion] { flex: none; }
+.scene-seek { display: grid; gap: 0; min-inline-size: 0; }
+.scene-status { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; }
+.scene-status [data-position] { color: var(--muted); font-size: .8125rem; }
+.scene-presets, .scene-fields { display: grid; gap: 8px; min-inline-size: 0; }
+.scene-presets { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.scene-presets .preset-btn { min-inline-size: 0; padding-inline: 8px; white-space: normal; overflow-wrap: anywhere; }
+.scene-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.scene-preferences { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: center; gap: 8px 16px; }
+.scene-preferences--with-reset { grid-template-columns: repeat(2, minmax(0, 1fr)) auto; }
+.scene-preferences :is(.scene-speed, .motion-toggle) { font-size: .875rem; overflow-wrap: anywhere; }
+.scene-preferences .scene-speed { flex-wrap: wrap; gap: 4px 8px; }
+.scene-preferences .scene-speed select { inline-size: 5rem; max-inline-size: 100%; min-block-size: 44px; }
+.scene-preferences .motion-toggle { min-block-size: 44px; }
+.scene-caption { margin-block-start: 12px; font-size: .9375rem; line-height: 1.4; }
+.motion-scene.stack { gap: 8px; }
+.motion-scene.stack > .scene-caption { margin-block-start: 0; }
+.scene-equation { margin: 0; padding-block: 4px; }
+.scene-player .motion-note { font-size: .8125rem; }
+@container scene-controls (max-width: 28rem) {
+  .scene-controls > .btn-row, .scene-controls .scene-transport { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .scene-preferences--with-reset { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .scene-preferences--with-reset > .btn { grid-column: 1 / -1; justify-self: end; }
+}
+.scene-transfer { position: absolute; inset: 0 auto auto 0; pointer-events: none; opacity: 0; z-index: 2; }
 /* Sticky without an inner scroller: a panel taller than the viewport keeps
  * scrolling with the page instead of hiding its end behind a nested scrollbar. */
 .is-sticky { position: sticky; top: 12px; }

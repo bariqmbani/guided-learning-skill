@@ -16,6 +16,7 @@ import sys
 
 # One line per template: the pattern name and the question it answers.
 TEMPLATES = {
+    "motion-explainer": "Animate a continuous model with inspectable phases and shared playback controls.",
     "parameter-explorer": "Change an input and read the relationship it drives.",
     "step-sequence": "Walk a finite process one inspectable state at a time.",
     "comparison": "Run two models on shared inputs and shared axes.",
@@ -25,7 +26,7 @@ TEMPLATES = {
     "order-steps": "Arrange steps and justify what forces the order.",
     "system-map": "Select a node and trace what depends on what.",
     "data-explorer": "Filter a documented dataset and read what grouping changes.",
-    "geometry-lab": "Drag a construction and read the quantity it changes.",
+    "geometry-lab": "Change a construction and read the quantity it changes.",
 }
 ASSETS = ("interactive.css", "interactive.js", "build.py")
 KIT = Path(__file__).resolve().parent
