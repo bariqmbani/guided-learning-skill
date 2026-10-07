@@ -47,8 +47,7 @@ Open the installed folder in Obsidian and run Codex or Claude Code there. Choose
 | A course with a roadmap and spaced recall | `$guided-learning probability` | `/guided-learning probability` |
 
 Profile setup offers every field one question at a time, accepts skips and early
-completion, and supports targeted updates. The old `guided-learning onboard`
-command remains an alias. Both teaching skills read the same root
+completion, and supports targeted updates. Both teaching skills read the same root
 `learner-profile.json` and `Learner Profile.md`; profile setup is not required to
 start learning. The canonical profile helper is
 `SKILLS/learner-profile/scripts/profile.py`, with the former guided-learning path

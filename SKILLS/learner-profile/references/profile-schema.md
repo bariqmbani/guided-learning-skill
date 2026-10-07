@@ -1,13 +1,14 @@
 # Profile Schema and Saving
 
-Read for a profile write or field validation. This reference does not start an
-onboarding conversation. The helper in `../scripts/profile.py` validates the
-existing schema; do not add fields or discard compatible older preferences.
+Use for field validation and authorized profile writes. This is a terminal
+reference: do not load another workflow. The caller supplies explicit answers or
+approved changes; if authorization is missing, do not save inferred preferences.
 
-## Fields and defaults
+## Complete object and defaults
 
-All nine learner-facing fields are optional. Metadata is managed by the helper,
-not asked of the learner. Unconfigured defaults are placeholders, not answers.
+The helper validates this existing schema. Supply exactly these fields; do not
+add keys. The nine learner-facing fields are optional. Metadata is not a question;
+unconfigured defaults are placeholders, not learner answers.
 
 ```json
 {
@@ -25,51 +26,46 @@ not asked of the learner. Unconfigured defaults are placeholders, not answers.
 }
 ```
 
-- Supply exactly these fields in a complete JSON object. `schema_version` is 1;
-  `configured` is boolean and becomes `true` on a successful save.
-- `name`, `background`, `goals`, `language`, and `preferences` are strings.
-  Name, background, and goals are optional general context. Course goals and
-  starting-knowledge evidence belong in the course; focused objectives and
-  attempts belong in the concept-session note.
-- `language` must be nonempty after trimming. Preserve any teaching language or
-  bilingual preference. It applies to explanations, questions, recall, exercises,
-  and new lesson prose. Studying a language does not itself change this field.
-- `learning_context`: `auto`, `self-study`, `professional`, or `research`, based
-  on stated purpose. Individual courses and concept sessions may differ.
-- `session_minutes`: integer 5–180, not a boolean. Use a representative integer
-  for a range and retain the range in `preferences`. Record shorter available
-  windows there too; adapt scope rather than overrunning the learner's budget.
-- `explanation_style`: `adaptive`, `step-by-step`, `concise`, `visual`,
-  `discussion`, or `hands-on`. These are adjustable preferences, not learner types.
-- `preferred_extras`: a list without duplicates, drawn from `worked_examples`,
+- `schema_version`: 1. `configured`: boolean, set to `true` by a successful save.
+- `name`, `background`, `goals`, `language`, `preferences`: strings. The first three
+  are general context, not course objectives or evidence of learning.
+- `language`: nonempty after trimming; preserve bilingual wording. Applies to
+  teaching and new lesson prose. Studying a language does not itself change it.
+- `learning_context`: `auto`, `self-study`, `professional`, or `research`.
+- `session_minutes`: integer 5–180, not boolean. For a range, save a representative
+  integer and preserve the range in `preferences`. Record shorter windows there
+  too and reduce lesson scope to fit them.
+- `explanation_style`: `adaptive`, `step-by-step`, `concise`, `visual`, `discussion`,
+  or `hands-on`; adjustable preferences, not learner types.
+- `preferred_extras`: list without duplicates, drawn from `worked_examples`,
   `practice_exercises`, `interactive_visualizations`, `code_examples`,
-  `mini_projects`, `writing_exercises`, or `source_reading`. Empty means no
-  priorities, not a ban on aids. Practice and feedback remain part of teaching.
+  `mini_projects`, `writing_exercises`, `source_reading`. Empty means no priorities,
+  not a ban on aids; practice and feedback remain part of teaching.
 - `preferences`: free-text constraints, accommodations, tools, and requests.
-  Store explicit exclusions such as “no interactives” here.
+  Store exclusions such as “no interactives” here.
 
 ## Read, merge, save, verify
 
-1. Use the installed vault root and its saved Python runtime. Read the profile:
-   `python3 SKILLS/learner-profile/scripts/profile.py show`.
-   `--vault <path>` before the subcommand selects another installed vault.
-   An absent profile returns defaults without writing. If invalid, repair only
-   the concrete error; never replace existing answers with defaults.
-2. Merge only supplied answers or explicitly approved changes into that complete
-   object. Preserve unrelated fields and free-text rules. For inferred ongoing
-   preferences, obtain wording/scope approval through
-   [personalization](personalization.md) before this step; explicit scoped requests
-   and onboarding answers already authorize their changes.
-3. Write the complete object to a temporary JSON file using a structured write;
-   never interpolate learner text into a shell command. Save with:
-   `python3 SKILLS/learner-profile/scripts/profile.py save --input /path/to/temporary-profile.json`.
-4. The helper validates before writing, sets `configured: true`, and updates only
-   `learner-profile.json` and `Learner Profile.md`. Read the saved result, verify
-   the requested changes, remove the temporary input, and summarize what changed.
+Use the saved Python runtime from the installed vault root:
 
-The former `SKILLS/guided-learning/scripts/profile.py` entry remains compatible.
-Profile writes require an installed vault; do not create a course or vault just
-to save preferences. Report a requested save that cannot be made. Profile changes
-never update learning progress or concept-session records. Profile files are
-local; the learning chat uses the learner's chosen AI service. Do not request
-credentials or unrelated private material.
+```sh
+python3 SKILLS/learner-profile/scripts/profile.py show
+python3 SKILLS/learner-profile/scripts/profile.py save --input /path/to/temporary-profile.json
+```
+
+`--vault <path>` before the subcommand selects another installed vault. Reuse the
+current `show` result if already available; missing profiles return defaults
+without writing. Repair invalid data only at the concrete error, preserving answers.
+Merge only supplied/approved changes into the complete object, retaining unrelated
+fields, free-text rules, and compatible older preferences. Explicit scoped requests
+and onboarding answers need no extra confirmation.
+
+Write temporary JSON with a structured file write; never interpolate learner text
+into a shell command. Save, read the result to verify the requested changes,
+remove the temporary input, and summarize. Validation precedes writes; only
+`learner-profile.json` and `Learner Profile.md` change. The former guided-learning
+profile helper remains compatible. No schema or helper API changes are needed.
+
+Writes require an installed vault. Do not create a vault/course/session to save
+preferences, or change learning records. Report an unavailable requested save.
+Profile files are local; chat uses the learner's AI service.

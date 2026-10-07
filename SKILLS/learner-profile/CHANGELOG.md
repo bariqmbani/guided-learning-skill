@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.2] — 2026-10-07
+
+### Changed — Onboarding instruction overhead
+
+- Condense setup instructions while preserving all nine optional invitations, question delivery, learner controls, and safe profile saving.
+- Make schema/save a terminal reference; load onboarding, targeted updates, and inferred-feedback guidance through separate one-way paths.
+- Use learner-profile as the sole onboarding command. Preserve the profile schema and Python helper compatibility alias; keep lesson-time guidance in the shared teaching reference.
+
 ## [1.0.1] — 2026-10-07
 
 ### Changed — Instruction organization

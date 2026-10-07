@@ -9,7 +9,8 @@ Read shared profile defaults and the selected course or current session's
 approved preferences. Current explicit requests take priority. Use the learner's
 language, time, goals, interests, and access constraints to choose examples and
 activities. Do not resolve an active topic for a standalone concept session.
-An absent profile never blocks a lesson or forces onboarding.
+An absent profile never blocks a lesson or forces onboarding; offer learner-profile
+setup and ask language or immediate time constraints only when needed.
 
 Choose one observable outcome for the current lesson. Reuse context already
 supplied; ask only a missing question that will change teaching. A brief
@@ -35,6 +36,8 @@ Adapt ordinary pacing and examples from observed responses. A persistent rule
 inferred from feedback follows [personalization.md](personalization.md); do not
 seek permission for every useful teaching adjustment. Respect requests to pause,
 skip, defer a check, or finish. Reduce lesson scope to fit the current budget.
+After an early lesson, invite one actionable adjustment to pace, difficulty, or
+examples unless the learner has already given feedback.
 
 ## Assess the outcome honestly
 

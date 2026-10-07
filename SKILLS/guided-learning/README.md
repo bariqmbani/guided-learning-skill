@@ -58,8 +58,7 @@ and no learner concept sessions.
 
 Run `$learner-profile` in Codex or `/learner-profile` in Claude Code to set up
 preferences. Every answer is optional, and you can skip questions or finish
-early. For later changes, request only the fields you want to update. The old
-`$guided-learning onboard` and `/guided-learning onboard` commands remain aliases.
+early. For later changes, request only the fields you want to update.
 See [the full onboarding example](../../README.md#onboarding-example).
 
 Both learning skills read the root `learner-profile.json` and `Learner Profile.md`.

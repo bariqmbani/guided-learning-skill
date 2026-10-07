@@ -80,4 +80,4 @@ I am starting from the basics and can return three times a week.
 
 The tutor then records a separate plan for that topic and starts a useful lesson.
 
-For a focused lesson instead, use `$concept-learning bubble sort` or `/concept-learning bubble sort`. The legacy `guided-learning onboard` command still opens this same shared setup flow.
+For a focused lesson instead, use `$concept-learning bubble sort` or `/concept-learning bubble sort`.

@@ -79,7 +79,7 @@ Treat this directory as the vault root. All learning paths are relative to it.
 
 Choose the workflow before selecting a topic or writing learning data:
 
-- Shared preferences or `guided-learning onboard`: follow
+- Shared preferences: follow
   [learner-profile](SKILLS/learner-profile/SKILL.md).
 - A focused concept, bounded source explanation, or concept-session resume:
   follow [concept-learning](SKILLS/concept-learning/SKILL.md).
@@ -265,8 +265,7 @@ explains the method. This setup builds on the MIT-licensed
 [WSE Research guided-learning skill](https://github.com/WSE-research/guided-learning-skill).
 
 [Learner Profile](../learner-profile/SKILL.md) guides every optional profile field,
-one question at a time, to personalize both learning skills. `guided-learning onboard`
-remains an alias. [Concept Learning](../concept-learning/SKILL.md) teaches one concept
+one question at a time, to personalize both learning skills. [Concept Learning](../concept-learning/SKILL.md) teaches one concept
 and saves notes, mentor feedback, and practice under `concept-sessions/` without
 selecting a course. [Topic intake](references/topic-intake.md) sets a useful outcome and
 starting point for each course. [Research rationale](../learner-profile/references/onboarding-evidence.md)
@@ -311,7 +310,6 @@ recall, and journals stay in `topics/`; focused lessons stay in `concept-session
 Adding a focused lesson to a course requires your explicit request.
 
 Run **$learner-profile** or **/learner-profile** to update preferences.
-**$guided-learning onboard** and **/guided-learning onboard** remain compatibility aliases.
 """,
         "README.md": f"""# Empty Learning Vault
 
@@ -350,7 +348,6 @@ It saves `learner-profile.json` and `Learner Profile.md`, shared by both teachin
 skills. No topic or concept session is created during onboarding. Full onboarding
 is optional; lessons can begin with the preferences and context already available.
 Run Learner Profile again for a targeted change or to fill unanswered fields.
-`guided-learning onboard` remains a compatibility alias and uses the same data.
 
 Concept Learning guides one concept through explanation, a worked example,
 practice with gradually reduced help, and an independent check. It adapts to your

@@ -95,7 +95,11 @@ class CreateVaultTests(unittest.TestCase):
             "SKILLS/guided-learning/references/topic-intake.md",
         ]:
             self.assertTrue((destination / reference).is_file())
-        self.assertIn("$guided-learning onboard", (destination / "Home.md").read_text())
+        for relative in ["Home.md", "README.md", "AGENTS.md", "Learner Profile.md",
+                         "SKILLS/guided-learning/README.md"]:
+            guidance = (destination / relative).read_text()
+            self.assertIn("learner-profile", guidance, relative)
+            self.assertNotIn("guided-learning onboard", guidance, relative)
         self.assertEqual(self.session_helper(destination, "list"), {"sessions": []})
 
     def test_focused_sessions_preserve_courses_and_shared_preferences(self):
@@ -156,7 +160,7 @@ class CreateVaultTests(unittest.TestCase):
     def test_skill_versions_and_release_history_survive_installation(self):
         vault = self.base / "versioned"
         setup.create_vault(ROOT, vault, "Versioned")
-        versions = {"guided-learning": "3.6.3", "concept-learning": "1.0.1", "learner-profile": "1.0.1"}
+        versions = {"guided-learning": "3.6.4", "concept-learning": "1.0.1", "learner-profile": "1.0.2"}
         for name, version in versions.items():
             source = ROOT / "SKILLS" / name
             installed = vault / "SKILLS" / name

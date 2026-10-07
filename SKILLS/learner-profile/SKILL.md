@@ -1,7 +1,7 @@
 ---
 name: learner-profile
 metadata:
-  version: "1.0.1"
+  version: "1.0.2"
 description: >
   Set up or update shared teaching preferences for guided-learning courses and
   concept-learning sessions in an installed learning vault. Use for learner
@@ -11,59 +11,36 @@ description: >
 
 # Shared Learner Profile
 
-Guide setup or a targeted preference update in chat. Save reusable preferences
-in the existing vault-level `learner-profile.json` and `Learner Profile.md`.
-Both learning skills read the same schema; existing answers remain valid and
-never require repeat onboarding just because the skills have been separated.
+Set up or update general preferences shared by both teaching skills. Save only
+`learner-profile.json` and `Learner Profile.md` in an installed vault.
 
-## Choose the flow
+## Choose one flow
 
-- For `$learner-profile`, `/learner-profile`, or a general setup request, read
-  [onboarding.md](references/onboarding.md). Offer each unanswered editable field
-  one question at a time, wait for the answer, accept skips and early finishing,
-  and save only supplied answers merged into the existing profile. Unconfigured
-  defaults are not answers. The legacy `$guided-learning onboard` and
-  `/guided-learning onboard` commands forward to this same flow before any topic
-  selection.
-- For a targeted update, read [profile schema and saving](references/profile-schema.md),
-  read the current profile, change only the requested fields, validate and save.
-  Do not run a full questionnaire or ask again for
-  permission the learner's scoped instruction already provides. Preserve
-  unrelated answers and compatible older preferences.
-- For an adjustment inferred from feedback, read
-  [personalization.md](references/personalization.md). Repair the immediate
-  explanation, then propose wording and scope before persisting a future rule.
-  Ordinary adaptive tutoring does not require a saved preference or approval.
+| Request | Read and follow |
+| --- | --- |
+| `$learner-profile`, `/learner-profile`, or general setup | [Onboarding](references/onboarding.md): offer all unanswered fields, accepting skips and early finish. |
+| Targeted update | [Schema and saving](references/profile-schema.md): merge only requested changes; no questionnaire or redundant approval. |
+| Ongoing preference inferred from feedback | [Personalization](references/personalization.md): repair the current explanation, then obtain wording/scope approval before saving. |
 
-For every profile write, use [profile schema and saving](references/profile-schema.md)
-for the complete field contract, helper commands, and verification. Reuse references
-already available in context. The former guided-learning profile helper remains
-compatible.
+Read only the selected flow and its required references. Reuse guidance already
+in context. Onboarding reads the schema when validating or saving; the schema
+never starts another workflow. Examples and evidence are optional: read
+[example wording](references/onboarding-example.md) only when requested or needed
+to clarify a question, and [research rationale](references/onboarding-evidence.md)
+only to explain the evidence or its limits. Ordinary setup needs neither.
 
-## Shared boundaries
+## Boundaries
 
-- A course's goal, prerequisite evidence, and progress belong to its registered
-  topic. A focused lesson's objective, attempts, and feedback belong to its
-  `concept-sessions/<session-id>/` documents. Save only general preferences here.
-- Current requests take priority, followed by approved preferences for the
-  selected course or current concept session, followed by vault defaults.
-  Keep course overrides active even when the global profile is unconfigured.
-  Do not import the active topic's overrides into an independent concept lesson.
-- Apply language, budget, interests, and functional needs to actual teaching.
-  Background and stated preferences do not establish mastery or fixed learner
-  types. [teaching.md](references/teaching.md) describes the common tutoring
-  principles used by both learning skills.
-- Full setup is optional. Either learning skill can begin with available
-  context and ask only for missing information relevant to the current lesson.
-  Do not turn a lesson into onboarding without a request.
-- Profile writes require an installed vault. The helper refuses other
-  destinations. Do not create course scaffolds, install a vault, or write learner
-  data in this source repository merely to save preferences. If focused learning
-  runs elsewhere, use conversation preferences until a profile destination is
-  available; report any requested save that could not be made.
+- Setup is optional; do not turn a lesson into onboarding without a request.
+- Save general preferences here. Course goals/progress belong to the selected
+  topic; focused objectives/attempts belong to its concept-session note.
+- Current requests override approved topic/session preferences, then vault
+  defaults. Topic overrides apply even with an unconfigured global profile;
+  independent concept lessons never inherit the active course's preferences.
+- Preserve existing answers, language, and access needs. Background and preferred
+  styles are context, not evidence of mastery or fixed learner types.
+- Do not install a vault, create a course/session, or write learner data in this
+  checkout to save preferences. Outside an installed vault, use conversation
+  preferences and report any requested save that cannot be made.
 
-For example wording, read [onboarding-example.md](references/onboarding-example.md).
-For the research rationale and its limits, read
-[onboarding-evidence.md](references/onboarding-evidence.md). These onboarding and
-teaching resources are adapted from guided-learning; the accompanying
-[MIT license](LICENSE) preserves the WSE Research Group attribution.
+The shared resources retain the WSE Research Group attribution in [LICENSE](LICENSE).

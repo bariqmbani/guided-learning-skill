@@ -69,7 +69,7 @@ def profile_markdown(profile):
     intro = ("Both learning skills use these preferences as defaults. Courses and focused concept sessions keep their own goals and evidence. "
              "Run $learner-profile (Codex) or /learner-profile (Claude Code) to fill optional gaps or change any preference."
              if profile["configured"] else
-             "Start shared learner setup with `$learner-profile` (Codex) or `/learner-profile` (Claude Code). The earlier `guided-learning onboard` command remains an alias. "
+             "Start shared learner setup with `$learner-profile` (Codex) or `/learner-profile` (Claude Code). "
              "Your tutor will guide each field one question at a time. Every answer is optional; skip any question or finish early. "
              "The values below are starting defaults, not answers you have given.")
     values = [

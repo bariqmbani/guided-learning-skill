@@ -13,9 +13,9 @@ curriculum and spaced recall.
 Profile setup is optional. Both teaching skills use the same saved preferences
 and can begin before the profile is configured.
 
-Current releases: [learner-profile 1.0.1](SKILLS/learner-profile/CHANGELOG.md),
+Current releases: [learner-profile 1.0.2](SKILLS/learner-profile/CHANGELOG.md),
 [concept-learning 1.0.1](SKILLS/concept-learning/CHANGELOG.md), and
-[guided-learning 3.6.3](SKILLS/guided-learning/CHANGELOG.md). Versions are recorded
+[guided-learning 3.6.4](SKILLS/guided-learning/CHANGELOG.md). Versions are recorded
 in each skill's `metadata.version`; generated vaults preserve those versions and
 the complete changelogs.
 
@@ -80,9 +80,7 @@ Code. The tutor guides you one question at a time through language, preferred
 name, background, broad goals, learning context, session time, explanation style,
 preferred activities, and other preferences. Every answer is optional: say
 **skip**, **you choose**, or **finish**. You never need to edit JSON yourself.
-The old `$guided-learning onboard` and `/guided-learning onboard` commands remain
-aliases for the same profile setup. You can also request a targeted update without
-repeating the full conversation.
+You can also request a targeted update without repeating the full conversation.
 
 When the host supports it, questions appear in its interactive question UI and
 the tutor continues after each answer. Hosts without a usable question tool use

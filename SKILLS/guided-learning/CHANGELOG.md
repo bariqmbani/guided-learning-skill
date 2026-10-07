@@ -1,5 +1,12 @@
 # Guided Learning — Changelog
 
+## [3.6.4] — 2026-10-07
+
+### Changed — Onboarding instruction overhead
+
+- Retire `$guided-learning onboard` and `/guided-learning onboard`; direct users to learner-profile without starting setup or creating a course.
+- Remove alias advertising from generated vault guidance and break the topic-routing/personalization reference loop. Preserve teaching and course behavior.
+
 ## [3.6.3] — 2026-10-07
 
 ### Changed — Instruction organization

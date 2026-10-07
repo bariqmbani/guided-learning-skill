@@ -1,14 +1,14 @@
 ---
 name: guided-learning
 metadata:
-  version: "3.6.3"
+  version: "3.6.4"
 description: >
   Guide ongoing courses with topic roadmaps, a spiral curriculum, personalized
   lessons, and spaced recall. Use to start or continue a course, work through
   its concepts or sources, or review its learning progress. Explicit
   guided-learning requests choose this course workflow. Independent focused
   concept lessons use concept-learning; shared preference setup uses
-  learner-profile. Keeps guided-learning onboard as a compatibility alias.
+  learner-profile.
 ---
 
 # Guided Learning — Spiral Curriculum Sessions
@@ -19,8 +19,10 @@ Keep the full teaching sequence below; load specialized details only when needed
 
 ## Dispatch before topic selection
 
-- **Shared preferences:** `guided-learning onboard` (Codex `$` or Claude `/`) and
-  requests to set up/update shared preferences follow
+- **Retired command:** `$guided-learning onboard` and `/guided-learning onboard`
+  are unsupported. Point to `$learner-profile` or `/learner-profile` and stop;
+  do not start setup or create an “onboard” course.
+- **Shared preferences:** Requests to set up/update shared preferences follow
   [learner-profile](../learner-profile/SKILL.md). Stop after setup unless learning
   was also requested. Do not select a topic or create/reset learning records.
 - **Courses:** Explicit `$guided-learning` or `/guided-learning` selects this

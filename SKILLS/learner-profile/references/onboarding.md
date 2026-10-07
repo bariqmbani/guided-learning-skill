@@ -1,112 +1,91 @@
 # Shared Learner Setup
 
-Handle `$learner-profile` (Codex), `/learner-profile` (Claude Code), a request to set up or update shared learning preferences, or the compatibility alias `guided-learning onboard` as a conversation in chat. This sets reusable vault preferences. It supports both guided-learning and concept-learning. It does not require a topic, select a course, create a concept session, generate a roadmap, or change learning progress.
+Conduct the full optional profile conversation. The owning skill handles targeted
+updates separately; do not restart a questionnaire for one changed preference.
 
-Act like a thoughtful one-to-one tutor getting to know a learner. **Optional means offer the question and accept a skip, not omit the question.** Guide the learner through every editable field in `learner-profile.json`, explaining how answers can shape lessons. The rationale and evidence are in [onboarding-evidence.md](onboarding-evidence.md). Detailed course goals and starting knowledge belong to [topic intake](../../guided-learning/references/topic-intake.md). A focused concept session keeps its own objective and starting-point evidence in `note.md`. Neither belongs in the global profile.
+## Read and orient
 
-## Read existing preferences
+From the installed vault root, use its saved Python runtime to run
+`python3 SKILLS/learner-profile/scripts/profile.py show`. Missing profiles return
+unconfigured defaults without writing. For invalid data, repair only the concrete
+error; never discard answers or replace an existing profile with defaults.
 
-From the vault root:
+Briefly acknowledge saved choices. Track answered, skipped, and pending fields in
+conversation only. Reuse explicitly supplied answers; unconfigured defaults are
+not answers, and `configured: true` does not prove every field was offered.
 
-```bash
-python3 SKILLS/learner-profile/scripts/profile.py show
-```
+Introduce the flow briefly: one small question at a time; every answer is optional;
+“skip,” “you choose,” and “finish” are welcome. Preferences are stored locally,
+while chat uses the chosen AI service—do not promise private or offline chat.
+The setup request authorizes starting; no initial permission question is needed.
 
-An absent profile returns unconfigured defaults without writing anything. Preserve every unanswered field, including older presentation and extras preferences. Never replace a configured profile with new defaults. If invalid, inspect the error and repair only the concrete problem; do not discard answers.
+## Conversation and question delivery
 
-For a bare `learner-profile` or legacy `onboard` request, briefly acknowledge saved choices, then guide the learner through the remaining optional fields. `configured: true` means preferences were saved; it does not prove every field was offered. If the learner requests a specific update only, make that update without restarting the full conversation. Respect requests to keep all other fields unchanged. Do not restart onboarding during ordinary lessons.
+Offer every pending field in order below unless the learner finishes early.
+Optional means invite and accept a skip, not omit. Do not stop after language/time
+or substitute one broad “anything else?” for the remaining invitations.
 
-## Guide the conversation
+Keep one question outstanding and wait; two closely related questions are allowed
+only when the learner asks for a faster flow. Acknowledge each answer in one
+sentence, optionally explain its teaching consequence, then ask the next question.
+Use natural conversation, not a JSON form, canned praise, or learner-type claims.
+If unsure, offer an example or an adaptive default without pressuring an answer.
 
-Open briefly: "Let's shape these lessons around you. I'll ask one small question at a time; every answer is optional. You can say 'skip', 'you choose', or 'finish' whenever you like. Your preferences are saved in this vault; the chat uses your chosen AI service."
+- Prefer an available, permitted native question tool; follow its actual schema.
+  With blocking tools, continue after the answer without an intervening final
+  chat question. With asynchronous tools, wait/yield with one question pending;
+  do not queue another or repeat it in a final reply.
+- Accept free text for name, background, goals, and preferences. Other fields may
+  have short choices plus custom input; use multi-select for activities if supported.
+  Follow option limits, use the built-in custom-answer control, and allow skips.
+- A UI preselection, timeout, or silence is not an answer or permission to save.
+  Ask in chat and wait if no usable tool exists in this mode or it cannot accept
+  the needed input. Do not change modes or launch a separate CLI to collect answers.
+- Put tool questions only in the question field; avoid duplicating them in
+  commentary. Use the chosen language for prompts, choices, and acknowledgments.
+  The same learner controls below apply with either delivery method.
 
-**Keep one question outstanding at a time and wait for its answer.** Two closely related questions are acceptable if the learner requests a faster flow. Use natural language, not a JSON form or a long questionnaire. A request to onboard is enough to begin; do not add an initial permission question. Briefly introduce the flow, then ask the first unanswered question using the host's interactive question tool as described below.
+## Nine optional invitations
 
-Keep a conversation checklist of fields that are answered, explicitly skipped, or still pending. Information explicitly supplied in the request or saved profile can answer a question already; acknowledge it and move on. Unconfigured defaults are placeholders, not learner answers. Do not finish after asking only language and time, or after one broad "anything else?" question. Offer each pending field below unless the learner says to finish or skip the rest. Do not persist this checklist as extra JSON fields.
+Adapt wording to prior answers while preserving each invitation:
 
-### Use the harness question UI
+| Field | Invitation and handling |
+| --- | --- |
+| `language` | “Which language would you like us to use? A bilingual mix is welcome.” Apply immediately; preserve bilingual wording. Never infer from name, location, or locale. If skipped, disclose the English starting default. |
+| `name` | “What would you like me to call you? A nickname is fine, or skip.” Address naturally without repeating the name in every reply. |
+| `background` | “What experience or interests could I draw on for examples?” Familiar examples need no employer, degree, job title, or personal history. Self-report is not proof of mastery. |
+| `goals` | “Broadly, what would you like learning to help you do? Exploring is fine.” Use for relevance and encouragement; detailed outcomes belong in a course or concept session. |
+| `learning_context` | “Personal curiosity, work, research, or a mix?” Reuse a stated purpose; map these to `self-study`, `professional`, `research`, or `auto`. Mixed/undecided uses `auto`; each lesson may differ. |
+| `session_minutes` | “How much time usually feels comfortable? Around 20 minutes if unsure.” Use the schema's range handling when saving. |
+| `explanation_style` | “Step by step, a short overview, discussion, or adapt as we go?” Visual, hands-on, and custom requests are welcome. Explain unfamiliar choices with a small example if asked; preferences stay adjustable. |
+| `preferred_extras` | “More worked examples, practice challenges, or small projects?” Offer two or three relevant aids, multiple/custom choices, or tutor selection. Code, interactives, writing, and source reading are also available; no catalog selection is required. |
+| `preferences` | “What else would help—correction style, analogies, sources, shorter chunks, or formats to avoid?” Keep free-text requests and functional needs; ask for accommodations, not diagnoses or unrelated private details. |
 
-Prefer the current agent harness's native user-question tool when it is available
-and permitted in the current mode. Depending on the host, this may be named
-`request_user_input`, `request_user_input_async`, or `AskUserQuestion`. Follow the
-actual exposed tool schema and restrictions; these names are examples, not a
-guarantee that a particular client provides them.
+## Learner controls
 
-- **Ask through the tool, then continue.** With a blocking tool, read the returned
-  answer, acknowledge it briefly, and call the tool for the next pending field in
-  the same ongoing interaction. Do not end with a final chat question between
-  tool calls. Finish with a saved-profile summary only when onboarding completes.
-- **For an asynchronous tool, keep one question pending.** Use the host's waiting
-  or yielding mechanism until the response arrives. Do not repeat the question in
-  a final reply or queue more questions while that answer is pending.
-- **Use free text for personal context.** Name, background, goals, and open-ended
-  preferences should accept the learner's own words. For language, time, context,
-  explanation style, and activities, short choice suggestions may help, but keep
-  a custom-answer path. Use multi-select for activity priorities if supported.
-- **Keep every field optional.** Offer a Skip choice or explain how to type
-  "skip", "you choose", or "finish". Follow the tool's limits on options; use its
-  built-in custom-answer control instead of adding a duplicate Other choice.
-  If a choice is initially selected by the UI, wait for the learner to submit it.
-  A preselection, timeout, or missing response is not an answer or approval to save.
-- **Fall back when needed.** If the host lacks a usable question tool, the tool
-  is restricted to another mode, or it cannot accept the needed free-text answer,
-  ask that question in chat and wait for the next learner message. Do not switch
-  modes merely to unlock a tool or launch a separate CLI to collect answers.
-  Continue with the same optional-field checklist; the delivery method does not
-  change what is saved or authorize defaults on the learner's behalf.
+- **Skip / prefer not to say:** leave unchanged, mark skipped for this conversation,
+  and continue. Never store “skip” as a personal answer.
+- **You choose:** explain a suitable default; never invent a name, background, or goal.
+- **Finish / skip the rest / start learning:** save collected answers, preserving
+  other values. Skipping everything is valid. Begin a lesson only if also requested.
+- **Pause / cancel:** stop. Cancel without saving leaves files unchanged; on pause,
+  clarify saving only if the learner's intent is unclear.
+- **No reply:** wait; silence cannot finish onboarding or authorize a write.
 
-The question belongs in the tool's question field; introductory commentary should
-be brief and should not duplicate it. Follow the learner's chosen language in
-question text, labels, and suggested answers. Pausing or cancelling remains valid
-regardless of which UI delivers the question.
+## Save and close
 
-### Optional profile questions
+Save when all pending fields are answered/skipped, or the learner finishes early.
+Do not reconfirm supplied answers. Read [schema and saving](profile-schema.md)
+for validation and persistence; preserve existing values for skipped fields.
+For first setup, retain adaptive explanations and no aid priorities unless stated.
+Metadata is never a learner question. Do not request credentials or private material.
 
-Use these prompts as a guide, adapting the wording to earlier answers:
-
-| Field | Optional invitation | How to use the answer |
-| --- | --- | --- |
-| `language` | "Which language would you like us to use? A bilingual mix is welcome, or you can skip." | Use it immediately for the remaining conversation and future lessons. Never infer it from name, location, or locale. Keep bilingual wording verbatim. If skipped, disclose the English starting default. |
-| `name` | "What would you like me to call you? A nickname is fine, and you can leave this blank." | Address the learner naturally, without repeating their name in every reply. |
-| `background` | "What experience or interests could I draw on when explaining new ideas? A little context is enough, or we can skip." | Choose familiar examples and analogies. Do not require an employer, degree, job title, or personal history, or treat self-report as proof of mastery. |
-| `goals` | "Broadly, what would you like learning to help you do? It's fine to be exploring." | Tailor encouragement and relevance. Accept broad aims; leave detailed outcomes for the course plan or focused session note. |
-| `learning_context` | "Is this mainly for personal curiosity, work, research, or a mix? We can also decide per course or concept session." | Map to `self-study`, `professional`, `research`, or `auto`. Reuse an explicitly stated purpose instead of asking twice. Mixed or undecided purposes use `auto`. |
-| `session_minutes` | "How much time usually feels comfortable for a lesson? We can start around 20 minutes if you're unsure." | Set a realistic scope. For a range, use a representative integer and keep the range in `preferences`. |
-| `explanation_style` | "What would feel helpful: a careful step-by-step explanation, a short overview, a back-and-forth discussion, or having me adapt as we go? Other suggestions are welcome." | Offer an adjustable presentation preference. Visual and hands-on requests are also valid; explain unfamiliar options with a short example if asked. |
-| `preferred_extras` | "Would you enjoy more worked examples, practice challenges, or small projects? You can choose several, suggest something else, or let me choose as we go." | Offer two or three concrete aids suited to what they shared. Code, interactive visuals, writing, and guided source reading are also available. Avoid requiring a catalog selection. |
-| `preferences` | "What else would make these lessons work better for you—for example, gentler correction, analogies, sources with explanations, shorter chunks, or tools or formats to avoid? It's fine to skip." | Save free-text requests and functional needs. Ask only for the accommodation, not a diagnosis or unrelated private information. |
-
-After an answer, acknowledge it in one sentence and, where useful, give a concrete teaching consequence: "I'll draw on your cooking experience for examples and check where each analogy stops working." Then ask the next pending question. Avoid canned praise, personality labels, and unsupported claims about how the learner learns best. If they are unsure, offer a small example or an adaptive starting choice rather than pressing for an answer.
-
-Handle learner control consistently:
-
-- **Skip / prefer not to say:** leave that field unchanged, mark it skipped for this conversation, and continue. Never store the word "skip" as their name or background.
-- **You choose:** use an appropriate default and explain it. Do not invent a name, background, or goal.
-- **Finish / skip the rest / start learning:** save the answers collected so far and preserve the remaining values. Choosing to skip everything is valid. Move to a lesson only when the learner also requests one.
-- **Pause / cancel:** respect it. On cancel without saving, leave files unchanged. On pause, ask only if it is unclear whether the learner wants the collected answers saved.
-- **No reply:** wait. Silence never completes onboarding or authorizes a write.
-
-Personalized lessons mean adapting to the learner's interests, pace, goals, and responses. Do not promise the chat is private or offline: profile files are local to the vault, while the chat uses the learner's chosen AI service. A nickname and non-identifying examples are enough.
-
-## Save the profile
-
-Save after every pending field has been answered or explicitly skipped, or when the learner chooses to finish early or requests a targeted update. Do not require a separate confirmation of answers already provided. Start from the result of `show` and update only answered fields. For first setup, use `adaptive` explanations and no aid priorities unless the learner states otherwise. Keep the existing schema and saved choices compatible with earlier vaults. `schema_version` and `configured` are system metadata; never ask the learner to fill them in. All nine learner-facing fields are optional; the complete JSON object retains valid defaults for skipped choices.
-
-Read [profile schema and saving](profile-schema.md) for field values and the
-read–merge–save–verify procedure. Keep schema details there; this conversation
-collects only the learner's answers.
-
-Read the saved result and summarize the resulting teaching plan in a few sentences, connecting answers to specific choices of examples, pace, explanation, practice, and feedback. Identify retained defaults and skipped details without presenting them as personal facts. Give an illustrative lesson approach, not a fabricated completed lesson. Explain that `$concept-learning <concept>` / `/concept-learning <concept>` starts a focused session, while `$guided-learning <topic>` / `/guided-learning <topic>` starts or continues a course, and setup can be revisited anytime. If a session is already in progress, apply the preferences while preserving its pinned topic or concept-session path and current position. Setup never edits course goals, checkboxes, recall dates, journals, or concept-session records.
-
-## Apply and refine
-
-Read the configured profile at session start. Current explicit requests take priority, then approved preferences in the selected course or current concept session, then vault defaults. A standalone concept session never inherits the active course's preferences implicitly. Choose explanations and aids by the concept, observed responses, and constraints; preferences are useful input, not evidence of mastery. Use worked examples when helpful, then reduce scaffolding as the learner succeeds independently. Provide accessible alternatives when an aid cannot be used.
-
-For a course, also read approved overrides in the selected roadmap's **Teaching preferences** section. For focused learning, read the current session note and its recorded preferences, without resolving an unrelated active topic. For an ongoing adjustment inferred from feedback, follow
-[personalization.md](personalization.md): propose the wording and scope, and wait
-for approval before changing future preferences. Explicit onboarding answers and
-direct requests to save a scoped preference already provide authorization.
-
-Briefly explain that lessons include trying an answer or task and corrective feedback. Courses also include later recall; focused sessions offer later review without enrolling the learner or scheduling recall automatically. Respect requests to pause, defer, or change the form of a check. Keep these learning activities in the method rather than presenting them as optional extras to purchase or select.
-
-If absent or unconfigured, offer learner-profile setup without blocking a course or concept request; ask about language and immediate time constraints when needed. After an early lesson, invite one actionable adjustment, such as "Should we adjust pace, difficulty, or examples next time?" Skip this if the learner has already given feedback. Infer mastery from explanations and task performance over time, including delayed recall, not from preference answers or satisfaction alone.
+After verification, briefly connect answers to examples, pace, explanation,
+practice, and feedback. Identify defaults/skips without treating them as personal
+facts; illustrate a lesson approach without inventing completed learning.
+Explain that lessons include attempts and corrective feedback; courses add later
+recall, while focused lessons do not automatically enroll or schedule it.
+Point to `$concept-learning <concept>` / `/concept-learning <concept>` for a focused
+lesson and `$guided-learning <topic>` / `/guided-learning <topic>` for a course.
+Setup can be revisited. If learning is in progress, preserve its pinned location,
+position, and records; onboarding never changes course or concept-session progress.

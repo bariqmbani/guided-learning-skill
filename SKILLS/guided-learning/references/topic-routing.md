@@ -58,8 +58,8 @@ Cross-topic links are allowed when useful. They do not mark another topic's conc
 
 Read the selected roadmap's **Teaching preferences** section before teaching.
 Approved topic overrides take priority over vault defaults, while current explicit
-requests take priority over both. Follow [personalization.md](../../learner-profile/references/personalization.md)
-to propose and get approval for new ongoing preferences. Use the pinned roadmap
+requests take priority over both. The calling skill owns approval for new ongoing
+preferences; routing only resolves their destination. Use the pinned roadmap
 path for topic preferences, including legacy courses. Vault preferences belong in
 the learner profile; learner feedback must not rewrite the shared skill source.
 
