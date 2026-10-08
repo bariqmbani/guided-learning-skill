@@ -27,7 +27,7 @@ an absolute path to a new folder.
 
 ```text
 Create an empty Obsidian learning vault at "<vault-path>" using:
-https://github.com/bariqmbani/guided-learning-skill
+https://github.com/bariqmbani/obsidian-learning-vault
 
 Get main via Git or a source ZIP. Follow INSTALLATION.md for prerequisites,
 shell-specific setup, installation, and verification. Honor AGENTS.md and

@@ -37,7 +37,7 @@ handmade substitute vault when the generator has not succeeded.
 ## No Git installed
 
 Download the public `main` source ZIP from
-[GitHub](https://github.com/bariqmbani/guided-learning-skill/archive/refs/heads/main.zip)
+[GitHub](https://github.com/bariqmbani/obsidian-learning-vault/archive/refs/heads/main.zip)
 and extract it into a fresh temporary directory. No Git installation or GitHub
 account is needed. A source ZIP is not an installed learning vault; still run
 the generator to create the separate destination.
@@ -48,18 +48,18 @@ PowerShell, including systems without Python yet:
 $vaultStage = Join-Path ([IO.Path]::GetTempPath()) ('learning-setup-' + [guid]::NewGuid())
 New-Item -ItemType Directory -Path $vaultStage -ErrorAction Stop | Out-Null
 $vaultZip = Join-Path $vaultStage 'source.zip'
-Invoke-WebRequest -Uri 'https://github.com/bariqmbani/guided-learning-skill/archive/refs/heads/main.zip' -OutFile $vaultZip -UseBasicParsing -ErrorAction Stop
+Invoke-WebRequest -Uri 'https://github.com/bariqmbani/obsidian-learning-vault/archive/refs/heads/main.zip' -OutFile $vaultZip -UseBasicParsing -ErrorAction Stop
 Expand-Archive -LiteralPath $vaultZip -DestinationPath $vaultStage -ErrorAction Stop
-Set-Location (Join-Path $vaultStage 'guided-learning-skill-main')
+Set-Location (Join-Path $vaultStage 'obsidian-learning-vault-main')
 ```
 
 POSIX shell, after verifying `python3` (substitute the verified interpreter):
 
 ```sh
 vault_stage="$(mktemp -d)" || exit 1
-curl --fail --location 'https://github.com/bariqmbani/guided-learning-skill/archive/refs/heads/main.zip' --output "$vault_stage/source.zip" || exit 1
+curl --fail --location 'https://github.com/bariqmbani/obsidian-learning-vault/archive/refs/heads/main.zip' --output "$vault_stage/source.zip" || exit 1
 python3 -m zipfile -e "$vault_stage/source.zip" "$vault_stage" || exit 1
-cd "$vault_stage/guided-learning-skill-main" || exit 1
+cd "$vault_stage/obsidian-learning-vault-main" || exit 1
 ```
 
 If `curl`, `mktemp`, or an extractor is unavailable, use the agent's download/file
